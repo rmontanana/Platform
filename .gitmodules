@@ -13,3 +13,6 @@
 [submodule "lib/mdlp"]
 	path = lib/mdlp
 	url = https://github.com/rmontanana/mdlp
+[submodule "lib/PyClassifiers"]
+	path = lib/PyClassifiers
+	url = https://github.com/rmontanana/PyClassifiers

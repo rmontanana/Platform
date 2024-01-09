@@ -70,7 +70,7 @@ int main(int argc, char** argv)
     auto valid_datasets = std::vector<std::string>();
     transform(datasets.begin(), datasets.end(), back_inserter(valid_datasets),
         [](const pair<std::string, bool>& pair) { return pair.first; });
-    argparse::ArgumentParser program("BayesNetSample");
+    argparse::ArgumentParser program("PlatformSample");
     program.add_argument("-d", "--dataset")
         .help("Dataset file name")
         .action([valid_datasets](const std::string& value) {
@@ -194,7 +194,7 @@ int main(int argc, char** argv)
         Xt.index_put_({ i, "..." }, torch::tensor(Xd[i], torch::kInt32));
     }
     float total_score = 0, total_score_train = 0, score_train, score_test;
-    platform::Fold* fold;
+    folding::Fold* fold;
     if (stratified)
         fold = new folding::StratifiedKFold(nFolds, y, seed);
     else

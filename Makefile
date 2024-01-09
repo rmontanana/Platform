@@ -56,10 +56,10 @@ dependency: ## Create a dependency graph diagram of the project (build/dependenc
 	cd $(f_debug) && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
 
 buildd: ## Build the debug targets
-	cmake --build $(f_debug) -t $(app_targets) BayesNetSample $(n_procs)
+	cmake --build $(f_debug) -t $(app_targets) PlatformSample $(n_procs)
 
 buildr: ## Build the release targets
-	cmake --build $(f_release) -t $(app_targets) BayesNetSample $(n_procs)
+	cmake --build $(f_release) -t $(app_targets) $(n_procs)
 
 clean: ## Clean the tests info
 	@echo ">>> Cleaning Debug BayesNet tests...";

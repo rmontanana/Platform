@@ -22,8 +22,10 @@ define ClearTests
 endef
 
 
-submodules: ## Update submodules
+sub-init: ## Initialize submodules
 	@git submodule update --init --recursive
+
+sub-update: ## Initialize submodules
 	@git submodule update --remote --merge
 	@git submodule foreach git pull origin master
 

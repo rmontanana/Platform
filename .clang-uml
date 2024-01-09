@@ -1,0 +1,31 @@
+compilation_database_dir: build
+output_directory: puml
+diagrams:
+  Platform:
+    type: class
+    glob:
+      - src/Platform/*.cc
+      - src/Command/*.cc
+    using_namespace: platform
+    include:
+      namespaces:
+        - bayesnet
+        - platform
+    plantuml:
+      after:
+        - "note left of {{ alias(\"MyProjectMain\") }}: Main class of myproject library."
+  sequence:
+    type: sequence
+    glob:
+      - src/Command/b_main.cc
+    combine_free_functions_into_file_participants: true
+    using_namespace:
+      - std
+      - bayesnet
+      - platform
+    include:
+      paths:
+        - src/Command
+        - src/Platform
+    start_from:
+      - function: main(int,const char **)

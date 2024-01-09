@@ -1,0 +1,130 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "sample",
+            "program": "${workspaceFolder}/build_debug/sample/BayesNetSample",
+            "args": [
+                "-d",
+                "iris",
+                "-m",
+                "TANLd",
+                "-s",
+                "271",
+                "-p",
+                "/Users/rmontanana/Code/discretizbench/datasets/",
+            ],
+            //"cwd": "${workspaceFolder}/build/sample/",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "experimentPy",
+            "program": "${workspaceFolder}/build_debug/src/Platform/b_main",
+            "args": [
+                "-m",
+                "STree",
+                "--stratified",
+                "-d",
+                "iris",
+                //"--discretize"
+                // "--hyperparameters",
+                // "{\"repeatSparent\": true, \"maxModels\": 12}"
+            ],
+            "cwd": "${workspaceFolder}/../discretizbench",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "gridsearch",
+            "program": "${workspaceFolder}/build_debug/src/Platform/b_grid",
+            "args": [
+                "-m",
+                "KDB",
+                "--discretize",
+                "--continue",
+                "glass",
+                "--only",
+                "--compute"
+            ],
+            "cwd": "${workspaceFolder}/../discretizbench",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "experimentBayes",
+            "program": "${workspaceFolder}/build_debug/src/Platform/b_main",
+            "args": [
+                "-m",
+                "TAN",
+                "--stratified",
+                "--discretize",
+                "-d",
+                "iris",
+                "--hyperparameters",
+                "{\"repeatSparent\": true, \"maxModels\": 12}"
+            ],
+            "cwd": "/home/rmontanana/Code/discretizbench",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "best",
+            "program": "${workspaceFolder}/build_debug/src/Platform/b_best",
+            "args": [
+                "-m",
+                "BoostAODE",
+                "-s",
+                "accuracy",
+                "--build",
+            ],
+            "cwd": "${workspaceFolder}/../discretizbench",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "manage",
+            "program": "${workspaceFolder}/build_debug/src/Platform/b_manage",
+            "args": [
+                "-n",
+                "20"
+            ],
+            "cwd": "${workspaceFolder}/../discretizbench",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "list",
+            "program": "${workspaceFolder}/build_debug/src/Platform/b_list",
+            "args": [],
+            //"cwd": "/Users/rmontanana/Code/discretizbench",
+            "cwd": "${workspaceFolder}/../discretizbench",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "test",
+            "program": "${workspaceFolder}/build_debug/tests/unit_tests",
+            "args": [
+                "-c=\"Metrics Test\"",
+                // "-s",
+            ],
+            "cwd": "${workspaceFolder}/build/tests",
+        },
+        {
+            "name": "Build & debug active file",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build_debug/bayesnet",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "CMake: build"
+        }
+    ]
+}

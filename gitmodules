@@ -1,0 +1,31 @@
+[submodule "lib/mdlp"]
+	path = lib/mdlp
+	url = https://github.com/rmontanana/mdlp
+	main = main
+	update = merge
+[submodule "lib/catch2"]
+	path = lib/catch2
+        main  = v2.x
+	update = merge
+	url = https://github.com/catchorg/Catch2.git
+[submodule "lib/argparse"]
+	path = lib/argparse
+	url = https://github.com/p-ranav/argparse
+	master = master
+	update = merge
+[submodule "lib/json"]
+	path = lib/json
+	url = https://github.com/nlohmann/json.git
+        master = master
+	update = merge
+[submodule "lib/libxlsxwriter"]
+	path = lib/libxlsxwriter
+	url = https://github.com/jmcnamara/libxlsxwriter.git
+        main = main
+	update = merge
+[submodule "lib/PyClassifiers"]
+	path = lib/PyClassifiers
+	url = https://github.com/rmontanana/PyClassifiers
+[submodule "lib/folding"]
+	path = lib/folding
+	url = https://github.com/rmontanana/Folding

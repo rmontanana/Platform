@@ -1,12 +1,11 @@
 if(ENABLE_TESTING)
     set(TEST_PLATFORM "unit_tests_platform")
     include_directories(
-        ${BayesNet_SOURCE_DIR}/src/BayesNet
-        ${BayesNet_SOURCE_DIR}/src/Platform
-        ${BayesNet_SOURCE_DIR}/lib/Files
-        ${BayesNet_SOURCE_DIR}/lib/mdlp
-        ${BayesNet_SOURCE_DIR}/lib/json/include
-        ${BayesNet_SOURCE_DIR}/lib/argparse/include
+        ${Platform_SOURCE_DIR}/src/Platform
+        ${Platform_SOURCE_DIR}/lib/argparse/include
+        ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/mdlp
+        ${Platform_SOURCE_DIR}/lib/Files
+        ${CMAKE_BINARY_DIR}/configured_files/include
     )
     set(TEST_SOURCES_PLATFORM TestUtils.cc)
     add_executable(${TEST_PLATFORM} ${TEST_SOURCES_PLATFORM})

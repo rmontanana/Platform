@@ -68,7 +68,7 @@ if (ENABLE_CLANG_TIDY)
   include(StaticAnalyzers) # clang-tidy
 endif (ENABLE_CLANG_TIDY)
 
-# External libraries - dependencies of BayesNet
+# External libraries - dependencies of Platform
 # ---------------------------------------------
 add_git_submodule("lib/PyClassifiers")
 add_git_submodule("lib/argparse")

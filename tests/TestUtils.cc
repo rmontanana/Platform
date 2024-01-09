@@ -1,10 +1,11 @@
 #include "TestUtils.h"
+#include "config.h"
 
 class Paths {
 public:
     static std::string datasets()
     {
-        return "../../data/";
+        return { data_path.begin(), data_path.end() };
     }
 };
 
@@ -34,7 +35,7 @@ std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, m
     return Xd;
 }
 
-bool file_exists(const std::std::string& name)
+bool file_exists(const std::string& name)
 {
     if (FILE* file = fopen(name.c_str(), "r")) {
         fclose(file);
@@ -44,7 +45,7 @@ bool file_exists(const std::std::string& name)
     }
 }
 
-tuple<torch::Tensor, torch::Tensor, std::vector<std::string>, std::string, map<std::string, std::vector<int>>> loadDataset(const std::std::string& name, bool class_last, bool discretize_dataset)
+tuple<torch::Tensor, torch::Tensor, std::vector<std::string>, std::string, map<std::string, std::vector<int>>> loadDataset(const std::string& name, bool class_last, bool discretize_dataset)
 {
     auto handler = ArffFiles();
     handler.load(Paths::datasets() + static_cast<std::string>(name) + ".arff", class_last);
@@ -78,7 +79,7 @@ tuple<torch::Tensor, torch::Tensor, std::vector<std::string>, std::string, map<s
     return { Xd, torch::tensor(y, torch::kInt32), features, className, states };
 }
 
-tuple<std::vector<std::vector<int>>, std::vector<int>, std::vector<std::string>, std::string, map<std::string, std::vector<int>>> loadFile(const std::std::string& name)
+tuple<std::vector<std::vector<int>>, std::vector<int>, std::vector<std::string>, std::string, map<std::string, std::vector<int>>> loadFile(const std::string& name)
 {
     auto handler = ArffFiles();
     handler.load(Paths::datasets() + static_cast<std::string>(name) + ".arff");

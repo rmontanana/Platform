@@ -62,7 +62,7 @@ buildr: ## Build the release targets
 	cmake --build $(f_release) -t $(app_targets) $(n_procs)
 
 clean: ## Clean the tests info
-	@echo ">>> Cleaning Debug BayesNet tests...";
+	@echo ">>> Cleaning Debug Platform tests...";
 	$(call ClearTests)
 	@echo ">>> Done";
 
@@ -70,14 +70,14 @@ clang-uml: ## Create uml class and sequence diagrams
 	clang-uml -p --add-compile-flag -I /usr/lib/gcc/x86_64-redhat-linux/8/include/
 
 debug: ## Build a debug version of the project
-	@echo ">>> Building Debug BayesNet...";
+	@echo ">>> Building Debug Platform...";
 	@if [ -d ./$(f_debug) ]; then rm -rf ./$(f_debug); fi
 	@mkdir $(f_debug); 
 	@cmake -S . -B $(f_debug) -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON
 	@echo ">>> Done";
 
 release: ## Build a Release version of the project
-	@echo ">>> Building Release BayesNet...";
+	@echo ">>> Building Release Platform...";
 	@if [ -d ./$(f_release) ]; then rm -rf ./$(f_release); fi
 	@mkdir $(f_release); 
 	@cmake -S . -B $(f_release) -D CMAKE_BUILD_TYPE=Release
@@ -85,7 +85,7 @@ release: ## Build a Release version of the project
 
 opt = ""
 test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
-	@echo ">>> Running BayesNet & Platform tests...";
+	@echo ">>> Running Platform tests...";
 	@$(MAKE) clean
 	@cmake --build $(f_debug) -t $(test_targets) $(n_procs)
 	@for t in $(test_targets); do \
@@ -105,19 +105,18 @@ testp: ## Run platform tests (opt="-s") to verbose output the tests, (opt="-c='S
 	@echo ">>> Done";
 
 opt = ""
-testb: ## Run BayesNet tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
-	@echo ">>> Running BayesNet tests...";
+testb: ## Run Platform tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
+	@echo ">>> Running Platform tests...";
 	@$(MAKE) clean
 	@cmake --build $(f_debug) --target unit_tests_bayesnet $(n_procs)
 	@if [ -f $(f_debug)/tests/unit_tests_bayesnet ]; then cd $(f_debug)/tests ; ./unit_tests_bayesnet $(opt) ; fi ; 
 	@echo ">>> Done";
 
 coverage: ## Run tests and generate coverage report (build/index.html)
-	@echo ">>> Building tests with coverage...";
+	@echo ">>> Building tests with coverage..."
 	@$(MAKE) test
-	@cd $(f_debug) ; \
-	gcovr --config ../gcovr.cfg tests ;
-	@echo ">>> Done";	
+	@gcovr $(f_debug)/tests
+	@echo ">>> Done";		
 
 
 help: ## Show help message

@@ -10,7 +10,7 @@ Platform to run Bayesian Networks and Machine Learning Classifiers experiments.
 
 ## 0. Setup
 
-Before compiling BayesNet.
+Before compiling Platform.
 
 ### Miniconda
 

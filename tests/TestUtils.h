@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <std::tuple>
+#include <tuple>
 #include "ArffFiles.h"
 #include "CPPFImdlp.h"
 
-bool file_exists(const std::std::string& name);
+bool file_exists(const std::string& name);
 std::pair<vector<mdlp::labels_t>, map<std::string, int>> discretize(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y, std::vector<string> features);
 std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y);
 std::tuple<vector<vector<int>>, std::vector<int>, std::vector<string>, std::string, map<std::string, std::vector<int>>> loadFile(const std::string& name);

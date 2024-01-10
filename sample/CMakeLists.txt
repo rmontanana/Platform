@@ -10,5 +10,5 @@ include_directories(
     ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/json/include
     ${CMAKE_BINARY_DIR}/configured_files/include
 )
-add_executable(PlatformSample sample.cc ${Platform_SOURCE_DIR}/src/Platform/Models.cc) 
+add_executable(PlatformSample sample.cc ${Platform_MODULES}/Models.cc) 
 target_link_libraries(PlatformSample PyClassifiers ArffFiles mdlp "${TORCH_LIBRARIES}")

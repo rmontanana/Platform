@@ -78,6 +78,7 @@ message("XLSXWRITER_LIB=${XLSXWRITER_LIB}")
 
 # Subdirectories
 # --------------
+set(Platform_MODULES ${Platform_SOURCE_DIR}/src/Platform/modules/)
 add_subdirectory(config)
 add_subdirectory(src/Platform)
 add_subdirectory(sample)

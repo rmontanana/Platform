@@ -7,7 +7,7 @@ if(ENABLE_TESTING)
         ${Platform_SOURCE_DIR}/lib/Files
         ${CMAKE_BINARY_DIR}/configured_files/include
     )
-    set(TEST_SOURCES_PLATFORM TestUtils.cc)
+    set(TEST_SOURCES_PLATFORM TestUtils.cc TestPlatform.cc)
     add_executable(${TEST_PLATFORM} ${TEST_SOURCES_PLATFORM})
     target_link_libraries(${TEST_PLATFORM} PUBLIC "${TORCH_LIBRARIES}" ArffFiles mdlp Catch2::Catch2WithMain)
     add_test(NAME ${TEST_PLATFORM} COMMAND ${TEST_PLATFORM})

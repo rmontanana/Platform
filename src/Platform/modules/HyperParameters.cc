@@ -27,7 +27,8 @@ namespace platform {
             throw std::runtime_error("File " + hyperparameters_file + " not found");
         }
         // Check if file is a json
-        json input_hyperparameters = json::parse(file);
+        json file_hyperparameters = json::parse(file);
+        auto input_hyperparameters = file_hyperparameters["results"];
         // Check if hyperparameters are valid
         for (const auto& dataset : datasets) {
             if (!input_hyperparameters.contains(dataset)) {

@@ -438,15 +438,4 @@ namespace platform {
         };
         file << output.dump(4);
     }
-    void GridSearch::exportResults(json& results)
-    {
-        std::ofstream file(Paths::grid_export(config.model));
-        auto output = json();
-        for (const auto& item : results["results"].items()) {
-            auto key = item.key();
-            auto value = item.value();
-            output[key] = value["hyperparameters"];
-        }
-        file << output.dump(4);
-    }
 } /* namespace platform */

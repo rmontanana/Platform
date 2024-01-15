@@ -34,10 +34,6 @@ namespace platform {
         {
             return grid() + "grid_" + model + "_output.json";
         }
-        static std::string grid_export(const std::string& model)
-        {
-            return grid() + "grid_" + model + ".json";
-        }
     };
 }
 #endif

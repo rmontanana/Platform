@@ -177,22 +177,6 @@ void report(argparse::ArgumentParser& program)
         list_results(results, config.model);
     }
 }
-void exportResults(argparse::ArgumentParser& program)
-{
-    // Generate a grid_<model_name>.json file with the results of the grid search
-    // this file can be used by b_main to run the model with the best hyperparameters
-    struct platform::ConfigGrid config;
-    config.model = program.get<std::string>("model");
-    auto grid_search = platform::GridSearch(config);
-    auto results = grid_search.loadResults();
-    auto output = json::array();
-    if (results.empty()) {
-        std::cout << "** No results found" << std::endl;
-    } else {
-        grid_search.exportResults(results);
-        std::cout << "Exported results to " << platform::Paths::grid_export(config.model) << std::endl;
-    }
-}
 void compute(argparse::ArgumentParser& program)
 {
     struct platform::ConfigGrid config;
@@ -256,15 +240,9 @@ int main(int argc, char** argv)
     assignModel(compute_command);
     add_compute_args(compute_command);
 
-    // grid export subparser
-    argparse::ArgumentParser export_command("export");
-    assignModel(export_command);
-    export_command.add_description("Export the computed hyperparameters to a file readable by b_main.");
-
     program.add_subparser(dump_command);
     program.add_subparser(report_command);
     program.add_subparser(compute_command);
-    program.add_subparser(export_command);
 
     // 
     // Process options
@@ -272,8 +250,7 @@ int main(int argc, char** argv)
     try {
         program.parse_args(argc, argv);
         bool found = false;
-        map<std::string, void(*)(argparse::ArgumentParser&)> commands =
-        { {"dump", &dump}, {"report", &report}, {"export", &exportResults}, {"compute", &compute} };
+        map<std::string, void(*)(argparse::ArgumentParser&)> commands = { {"dump", &dump}, {"report", &report}, {"compute", &compute} };
         for (const auto& command : commands) {
             if (program.is_subcommand_used(command.first)) {
                 std::invoke(command.second, program.at<argparse::ArgumentParser>(command.first));

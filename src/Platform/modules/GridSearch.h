@@ -47,7 +47,6 @@ namespace platform {
         void go(struct ConfigMPI& config_mpi);
         ~GridSearch() = default;
         json loadResults();
-        void exportResults(json& results);
         static inline std::string NO_CONTINUE() { return "NO_CONTINUE"; }
     private:
         void save(json& results);

@@ -159,9 +159,16 @@ namespace platform {
         auto num_states = torch::zeros({ nResults }, torch::kFloat64);
         Timer train_timer, test_timer;
         int item = 0;
+        bool first_seed = true;
         for (auto seed : randomSeeds) {
-            if (!quiet)
-                std::cout << "(" << seed << ") doing Fold: " << flush;
+            if (!quiet) {
+                string prefix = "";
+                if (!first_seed) {
+                    prefix = "\n" + string(36, ' ');
+                }
+                std::cout << prefix << "(" << setw(4) << seed << ") doing Fold: " << flush;
+                first_seed = false;
+            }
             folding::Fold* fold;
             if (stratified)
                 fold = new folding::StratifiedKFold(nfolds, y, seed);

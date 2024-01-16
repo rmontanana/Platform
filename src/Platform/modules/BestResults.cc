@@ -239,7 +239,13 @@ namespace platform {
             double maxValue = 0;
             // Find out the max value for this dataset
             for (const auto& model : models) {
-                double value = table[model].at(dataset).at(0).get<double>();
+                double value;
+                try {
+                    value = table[model].at(dataset).at(0).get<double>();
+                }
+                catch (nlohmann::json_abi_v3_11_3::detail::out_of_range err) {
+                    value = -1.0;
+                }
                 if (value > maxValue) {
                     maxValue = value;
                 }
@@ -247,12 +253,22 @@ namespace platform {
             // Print the row with red colors on max values
             for (const auto& model : models) {
                 std::string efectiveColor = color;
-                double value = table[model].at(dataset).at(0).get<double>();
+                double value;
+                try {
+                    value = table[model].at(dataset).at(0).get<double>();
+                }
+                catch (nlohmann::json_abi_v3_11_3::detail::out_of_range err) {
+                    value = -1.0;
+                }
                 if (value == maxValue) {
                     efectiveColor = Colors::RED();
                 }
-                totals[model] += value;
-                std::cout << efectiveColor << std::setw(maxModelName) << std::setprecision(maxModelName - 2) << std::fixed << value << " ";
+                if (value == -1) {
+                    std::cout << Colors::YELLOW() << std::setw(maxModelName) << std::right << "N/A" << " ";
+                } else {
+                    totals[model] += value;
+                    std::cout << efectiveColor << std::setw(maxModelName) << std::setprecision(maxModelName - 2) << std::fixed << value << " ";
+                }
             }
             std::cout << std::endl;
             odd = !odd;

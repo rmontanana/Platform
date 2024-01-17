@@ -26,4 +26,6 @@ static platform::Registrar registrarSvc("SVC",
     [](void) -> bayesnet::BaseClassifier* { return new pywrap::SVC();});
 static platform::Registrar registrarRaF("RandomForest",
     [](void) -> bayesnet::BaseClassifier* { return new pywrap::RandomForest();});
+static platform::Registrar registrarXGB("XGBoost",
+    [](void) -> bayesnet::BaseClassifier* { return new pywrap::XGBoost();});
 #endif

@@ -30,13 +30,15 @@ int main(int argc, char** argv)
     locale mylocale(std::cout.getloc(), new separated);
     locale::global(mylocale);
     std::cout.imbue(mylocale);
-    std::cout << Colors::GREEN() << "Dataset                        Sampl. Feat. Cls. Balance" << std::endl;
+    std::cout << Colors::GREEN() << " #  Dataset                        Sampl. Feat. Cls. Balance" << std::endl;
     std::string balanceBars = std::string(BALANCE_LENGTH, '=');
-    std::cout << "============================== ====== ===== === " << balanceBars << std::endl;
+    std::cout << "=== ============================== ====== ===== === " << balanceBars << std::endl;
     bool odd = true;
+    int num = 0;
     for (const auto& dataset : data.getNames()) {
         auto color = odd ? Colors::CYAN() : Colors::BLUE();
-        std::cout << color << setw(30) << left << dataset << " ";
+        std::cout << color << setw(3) << right << num++ << " ";
+        std::cout << setw(30) << left << dataset << " ";
         data.loadDataset(dataset);
         auto nSamples = data.getNSamples(dataset);
         std::cout << setw(6) << right << nSamples << " ";

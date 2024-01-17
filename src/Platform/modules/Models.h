@@ -14,6 +14,7 @@
 #include "STree.h"
 #include "ODTE.h"
 #include "SVC.h"
+#include "XGBoost.h"
 #include "RandomForest.h"
 namespace platform {
     class Models {

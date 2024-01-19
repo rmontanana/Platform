@@ -297,7 +297,7 @@ namespace platform {
             row++;
         }
         // set column width for the 5th and the 7th column
-        worksheet_set_column(worksheet, 4, 4, 10, NULL);
-        worksheet_set_column(worksheet, 6, 6, 10, NULL);
+        worksheet_set_column(worksheet, 4, 5, 10, NULL);
+        worksheet_set_column(worksheet, 6, 7, 10, NULL);
     }
 }

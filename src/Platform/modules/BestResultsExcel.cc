@@ -237,14 +237,14 @@ namespace platform {
         for (int i = 0; i < columns_sizes.size(); ++i) {
             worksheet_set_column(worksheet, i, i, columns_sizes.at(i), NULL);
         }
-        worksheet_merge_range(worksheet, 0, 0, 0, 1 + models.size(), "Friedman Test", styles["headerFirst"]);
+        worksheet_merge_range(worksheet, 0, 0, 0, 7, "Friedman Test", styles["headerFirst"]);
         row = 2;
         Statistics stats(models, datasets, table, significance, false);
         auto result = stats.friedmanTest();
         stats.postHocHolmTest(result);
         auto friedmanResult = stats.getFriedmanResult();
         auto holmResult = stats.getHolmResult();
-        worksheet_merge_range(worksheet, row, 0, row, 1 + models.size(), "Null hypothesis: H0 'There is no significant differences between all the classifiers.'", styles["headerSmall"]);
+        worksheet_merge_range(worksheet, row, 0, row, 7, "Null hypothesis: H0 'There is no significant differences between all the classifiers.'", styles["headerSmall"]);
         row += 2;
         writeString(row, 1, "Friedman Q", "bodyHeader");
         writeDouble(row, 2, friedmanResult.statistic, "bodyHeader");
@@ -258,9 +258,9 @@ namespace platform {
         writeDouble(row, 4, significance, "bodyHeader");
         writeString(row, 5, friedmanResult.reject ? "Reject H0" : "Accept H0", "bodyHeader");
         row += 3;
-        worksheet_merge_range(worksheet, row, 0, row, 1 + models.size(), "Holm Test", styles["headerFirst"]);
+        worksheet_merge_range(worksheet, row, 0, row, 7, "Holm Test", styles["headerFirst"]);
         row += 2;
-        worksheet_merge_range(worksheet, row, 0, row, 1 + models.size(), "Null hypothesis: H0 'There is no significant differences between the control model and the other models.'", styles["headerSmall"]);
+        worksheet_merge_range(worksheet, row, 0, row, 7, "Null hypothesis: H0 'There is no significant differences between the control model and the other models.'", styles["headerSmall"]);
         row += 2;
         std::string controlModel = "Control Model: " + holmResult.model;
         worksheet_merge_range(worksheet, row, 1, row, 7, controlModel.c_str(), styles["bodyHeader_odd"]);
@@ -296,5 +296,8 @@ namespace platform {
             }
             row++;
         }
+        // set column width for the 5th and the 7th column
+        worksheet_set_column(worksheet, 4, 4, 10, NULL);
+        worksheet_set_column(worksheet, 6, 6, 10, NULL);
     }
 }

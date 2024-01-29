@@ -96,6 +96,7 @@ namespace platform {
         std::vector<int> randomSeeds;
         HyperParameters hyperparameters;
         int nfolds{ 0 };
+        int max_name{ 7 }; // max length of dataset name for formatting (default 7)
         float duration{ 0 };
         json build_json();
     };

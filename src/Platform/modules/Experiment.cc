@@ -103,12 +103,31 @@ namespace platform {
 
     void Experiment::go(std::vector<std::string> filesToProcess, bool quiet)
     {
-        std::cout << "*** Starting experiment: " << title << " ***" << std::endl;
         for (auto fileName : filesToProcess) {
-            std::cout << "- " << setw(20) << left << fileName << " " << right << flush;
-            cross_validation(fileName, quiet);
-            std::cout << std::endl;
+            if (fileName.size() > max_name)
+                max_name = fileName.size();
         }
+        std::cout << Colors::MAGENTA() << "*** Starting experiment: " << title << " ***" << Colors::RESET() << std::endl << std::endl;
+        if (!quiet) {
+            std::cout << Colors::GREEN() << " Status Meaning" << std::endl;
+            std::cout << " ------ -----------------------------" << Colors::RESET() << std::endl;
+            std::cout << " ( " << Colors::GREEN() << "a" << Colors::RESET() << " )  Fitting model with train dataset" << std::endl;
+            std::cout << " ( " << Colors::GREEN() << "b" << Colors::RESET() << " )  Scoring train dataset" << std::endl;
+            std::cout << " ( " << Colors::GREEN() << "c" << Colors::RESET() << " )  Scoring test dataset" << std::endl << std::endl;
+            std::cout << Colors::YELLOW() << "Note: fold number in this color means fitting had issues such as not using all features in BoostAODE classifier" << std::endl << std::endl;
+            std::cout << Colors::GREEN() << left << "  #  " << setw(max_name) << "Dataset" << " #Samp #Feat Seed Status" << std::endl;
+            std::cout << " --- " << string(max_name, '-') << " ----- ----- ---- " << string(4 + 3 * nfolds, '-') << Colors::RESET() << std::endl;
+        }
+        int num = 0;
+        for (auto fileName : filesToProcess) {
+            if (!quiet)
+                std::cout << " " << setw(3) << right << num++ << " " << setw(max_name) << left << fileName << right << flush;
+            cross_validation(fileName, quiet);
+            if (!quiet)
+                std::cout << std::endl;
+        }
+        if (!quiet)
+            std::cout << std::endl;
     }
 
     std::string getColor(bayesnet::status_t status)
@@ -141,7 +160,7 @@ namespace platform {
         auto samples = datasets.getNSamples(fileName);
         auto className = datasets.getClassName(fileName);
         if (!quiet) {
-            std::cout << " (" << setw(5) << samples << "," << setw(3) << features.size() << ") " << flush;
+            std::cout << " " << setw(5) << samples << " " << setw(5) << features.size() << flush;
         }
         // Prepare Result
         auto result = Result();
@@ -162,11 +181,11 @@ namespace platform {
         bool first_seed = true;
         for (auto seed : randomSeeds) {
             if (!quiet) {
-                string prefix = "";
+                string prefix = " ";
                 if (!first_seed) {
-                    prefix = "\n" + string(36, ' ');
+                    prefix = "\n" + string(18 + max_name, ' ');
                 }
-                std::cout << prefix << "(" << setw(4) << seed << ") doing Fold: " << flush;
+                std::cout << prefix << setw(4) << right << seed << " " << flush;
                 first_seed = false;
             }
             folding::Fold* fold;

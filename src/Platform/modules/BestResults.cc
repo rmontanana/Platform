@@ -39,15 +39,12 @@ namespace platform {
             auto result = Result(path, file);
             auto data = result.load();
             for (auto const& item : data.at("results")) {
-                bool update = false;
-                // Check if results file contains only one dataset
+                bool update = true;
                 auto datasetName = item.at("dataset").get<std::string>();
                 if (bests.contains(datasetName)) {
-                    if (item.at("score").get<double>() > bests[datasetName].at(0).get<double>()) {
-                        update = true;
+                    if (item.at("score").get<double>() < bests[datasetName].at(0).get<double>()) {
+                        update = false;
                     }
-                } else {
-                    update = true;
                 }
                 if (update) {
                     bests[datasetName] = { item.at("score").get<double>(), item.at("hyperparameters"), file };

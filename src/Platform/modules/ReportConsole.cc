@@ -23,7 +23,10 @@ namespace platform {
             + " random seeds. " + data["date"].get<std::string>() + " " + data["time"].get<std::string>()
         );
         std::cout << headerLine(data["title"].get<std::string>());
-        std::cout << headerLine("Random seeds: " + fromVector("seeds") + " Stratified: " + (data["stratified"].get<bool>() ? "True" : "False"));
+        std::cout << headerLine(
+            "Random seeds: " + fromVector("seeds") + " Discretized: " + (data["discretized"].get<bool>() ? "True" : "False")
+            + " Stratified: " + (data["stratified"].get<bool>() ? "True" : "False")
+        );
         oss << "Execution took  " << std::setprecision(2) << std::fixed << data["duration"].get<float>()
             << " seconds,   " << data["duration"].get<float>() / 3600 << " hours, on " << data["platform"].get<std::string>();
         std::cout << headerLine(oss.str());

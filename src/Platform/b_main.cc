@@ -31,6 +31,7 @@ void manageArguments(argparse::ArgumentParser& program)
     );
     program.add_argument("--title").default_value("").help("Experiment title");
     program.add_argument("--discretize").help("Discretize input dataset").default_value((bool)stoi(env.get("discretize"))).implicit_value(true);
+    program.add_argument("--no-train-score").help("Don't compute train score").default_value(false).implicit_value(true);
     program.add_argument("--quiet").help("Don't display detailed progress").default_value(false).implicit_value(true);
     program.add_argument("--save").help("Save result (always save if no dataset is supplied)").default_value(false).implicit_value(true);
     program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value((bool)stoi(env.get("stratified"))).implicit_value(true);
@@ -58,7 +59,7 @@ int main(int argc, char** argv)
     manageArguments(program);
     std::string file_name, model_name, title, hyperparameters_file;
     json hyperparameters_json;
-    bool discretize_dataset, stratified, saveResults, quiet;
+    bool discretize_dataset, stratified, saveResults, quiet, no_train_score;
     std::vector<int> seeds;
     std::vector<std::string> filesToTest;
     int n_folds;
@@ -74,6 +75,7 @@ int main(int argc, char** argv)
         auto hyperparameters = program.get<std::string>("hyperparameters");
         hyperparameters_json = json::parse(hyperparameters);
         hyperparameters_file = program.get<std::string>("hyper-file");
+        no_train_score = program.get<bool>("no-train-score");
         if (hyperparameters_file != "" && hyperparameters != "{}") {
             throw runtime_error("hyperparameters and hyper_file are mutually exclusive");
         }
@@ -123,7 +125,7 @@ int main(int argc, char** argv)
     }
     platform::Timer timer;
     timer.start();
-    experiment.go(filesToTest, quiet);
+    experiment.go(filesToTest, quiet, no_train_score);
     experiment.setDuration(timer.getDuration());
     if (saveResults) {
         experiment.save(platform::Paths::results());

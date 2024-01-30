@@ -85,8 +85,8 @@ namespace platform {
         Experiment& setHyperparameters(const HyperParameters& hyperparameters_) { this->hyperparameters = hyperparameters_; return *this; }
         std::string get_file_name();
         void save(const std::string& path);
-        void cross_validation(const std::string& fileName, bool quiet);
-        void go(std::vector<std::string> filesToProcess, bool quiet);
+        void cross_validation(const std::string& fileName, bool quiet, bool no_train_score);
+        void go(std::vector<std::string> filesToProcess, bool quiet, bool no_train_score);
         void show();
         void report();
     private:

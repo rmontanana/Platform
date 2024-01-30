@@ -101,7 +101,7 @@ namespace platform {
         std::cout << data.dump(4) << std::endl;
     }
 
-    void Experiment::go(std::vector<std::string> filesToProcess, bool quiet)
+    void Experiment::go(std::vector<std::string> filesToProcess, bool quiet, bool no_train_score)
     {
         for (auto fileName : filesToProcess) {
             if (fileName.size() > max_name)
@@ -122,7 +122,7 @@ namespace platform {
         for (auto fileName : filesToProcess) {
             if (!quiet)
                 std::cout << " " << setw(3) << right << num++ << " " << setw(max_name) << left << fileName << right << flush;
-            cross_validation(fileName, quiet);
+            cross_validation(fileName, quiet, no_train_score);
             if (!quiet)
                 std::cout << std::endl;
         }
@@ -150,7 +150,7 @@ namespace platform {
         std::cout << prefix << color << fold << Colors::RESET() << "(" << color << phase << Colors::RESET() << ")" << flush;
 
     }
-    void Experiment::cross_validation(const std::string& fileName, bool quiet)
+    void Experiment::cross_validation(const std::string& fileName, bool quiet, bool no_train_score)
     {
         auto datasets = Datasets(discretized, Paths::datasets());
         // Get dataset
@@ -218,8 +218,10 @@ namespace platform {
                 edges[item] = clf->getNumberOfEdges();
                 num_states[item] = clf->getNumberOfStates();
                 train_time[item] = train_timer.getDuration();
+                double accuracy_train_value = 0.0;
                 // Score train
-                auto accuracy_train_value = clf->score(X_train, y_train);
+                if (!no_train_score)
+                    accuracy_train_value = clf->score(X_train, y_train);
                 // Test model
                 if (!quiet)
                     showProgress(nfold + 1, getColor(clf->getStatus()), "c");

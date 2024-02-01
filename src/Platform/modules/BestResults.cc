@@ -90,6 +90,7 @@ namespace platform {
                 }
             }
         }
+        std::sort(files.begin(), files.end());
         return files;
     }
     json BestResults::loadFile(const std::string& fileName)

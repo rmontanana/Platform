@@ -52,10 +52,6 @@ namespace platform {
             }
         }
         std::string bestFileName = path + bestResultFile();
-        if (FILE* fileTest = fopen(bestFileName.c_str(), "r")) {
-            fclose(fileTest);
-            std::cout << Colors::MAGENTA() << "File " << bestFileName << " already exists and it shall be overwritten." << Colors::RESET() << std::endl;
-        }
         std::ofstream file(bestFileName);
         file << bests;
         file.close();
@@ -119,6 +115,8 @@ namespace platform {
             models.insert(fileModel);
         }
         result = std::vector<std::string>(models.begin(), models.end());
+        maxModelName = (*max_element(result.begin(), result.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
+        maxModelName = std::max(12, maxModelName);
         return result;
     }
     std::vector<std::string> BestResults::getDatasets(json table)
@@ -127,16 +125,20 @@ namespace platform {
         for (const auto& dataset : table.items()) {
             datasets.push_back(dataset.key());
         }
+        maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
+        maxDatasetName = std::max(7, maxDatasetName);
         return datasets;
     }
     void BestResults::buildAll()
     {
         auto models = getModels();
+        std::cout << "Building best results for model: ";
         for (const auto& model : models) {
-            std::cout << "Building best results for model: " << model << std::endl;
             this->model = model;
+            std::cout << model << ", ";
             build();
         }
+        std::cout << "end." << std::endl << std::endl;;
         model = "any";
     }
     void BestResults::listFile()
@@ -152,7 +154,6 @@ namespace platform {
         auto date = ftime_to_string(std::filesystem::last_write_time(bestFileName));
         auto data = loadFile(bestFileName);
         auto datasets = getDatasets(data);
-        int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
         int maxFileName = 0;
         int maxHyper = 15;
         for (auto const& item : data.items()) {
@@ -181,7 +182,8 @@ namespace platform {
             odd = !odd;
         }
         std::cout << Colors::GREEN() << "=== " << std::string(maxDatasetName, '=') << " ===========" << std::endl;
-        std::cout << std::setw(5 + maxDatasetName) << "Total.................. " << std::setw(11) << std::setprecision(8) << std::fixed << total << std::endl;
+        std::cout << Colors::GREEN() << "    Total" << std::string(maxDatasetName - 5, '.') << " " << std::setw(11) << std::setprecision(8) << std::fixed << total << std::endl;
+
     }
     json BestResults::buildTableResults(std::vector<std::string> models)
     {
@@ -276,16 +278,16 @@ namespace platform {
             std::cout << std::string(maxModelName, '=') << " ";
         }
         std::cout << std::endl;
-        std::cout << Colors::GREEN() << std::setw(5 + maxDatasetName) << "    Totals...................";
-        double max = 0.0;
+        std::cout << Colors::GREEN() << "    Totals" << std::string(maxDatasetName - 6, '.') << " ";
+        double max_value = 0.0;
         for (const auto& total : totals) {
-            if (total.second > max) {
-                max = total.second;
+            if (total.second > max_value) {
+                max_value = total.second;
             }
         }
         for (const auto& model : models) {
             std::string efectiveColor = Colors::GREEN();
-            if (totals[model] == max) {
+            if (totals[model] == max_value) {
                 efectiveColor = Colors::RED();
             }
             std::cout << efectiveColor << std::right << std::setw(maxModelName) << std::setprecision(maxModelName - 4) << std::fixed << totals[model] << " ";
@@ -311,10 +313,6 @@ namespace platform {
         // Build the table of results
         json table = buildTableResults(models);
         std::vector<std::string> datasets = getDatasets(table.begin().value());
-        maxModelName = (*max_element(models.begin(), models.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
-        maxModelName = std::max(12, maxModelName);
-        maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
-        maxDatasetName = std::max(25, maxDatasetName);
         // Print the table of results
         printTableResults(models, table);
         // Compute the Friedman test

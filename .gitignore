@@ -39,3 +39,5 @@ cmake-build*/**
 puml/**
 .vscode/settings.json
 *.dot
+diagrams/html/**
+diagrams/latex/**

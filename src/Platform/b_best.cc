@@ -8,7 +8,7 @@
 void manageArguments(argparse::ArgumentParser& program, int argc, char** argv)
 {
     program.add_argument("-m", "--model").default_value("").help("Filter results of the selected model) (any for all models)");
-    program.add_argument("-s", "--score").default_value("").help("Filter results of the score name supplied");
+    program.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
     program.add_argument("--friedman").help("Friedman test").default_value(false).implicit_value(true);
     program.add_argument("--excel").help("Output to excel").default_value(false).implicit_value(true);
     program.add_argument("--level").help("significance level").default_value(0.05).scan<'g', double>().action([](const std::string& value) {

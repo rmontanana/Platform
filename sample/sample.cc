@@ -195,6 +195,7 @@ int main(int argc, char** argv)
     }
     float total_score = 0, total_score_train = 0, score_train, score_test;
     folding::Fold* fold;
+    double nodes = 0.0;
     if (stratified)
         fold = new folding::StratifiedKFold(nFolds, y, seed);
     else
@@ -217,6 +218,8 @@ int main(int argc, char** argv)
             auto [Xtrain, ytrain] = extract_indices(train, Xd, y);
             auto [Xtest, ytest] = extract_indices(test, Xd, y);
             clf->fit(Xtrain, ytrain, features, className, states);
+            std::cout << "Nodes: " << clf->getNumberOfNodes() << std::endl;
+            nodes += clf->getNumberOfNodes();
             score_train = clf->score(Xtrain, ytrain);
             score_test = clf->score(Xtest, ytest);
         }
@@ -230,6 +233,7 @@ int main(int argc, char** argv)
         std::cout << "Score Test : " << score_test << std::endl;
         std::cout << "-------------------------------------------------------------------------------" << std::endl;
     }
+    std::cout << "Nodes: " << nodes / nFolds << std::endl;
     std::cout << "**********************************************************************************" << std::endl;
     std::cout << "Average Score Train: " << total_score_train / nFolds << std::endl;
     std::cout << "Average Score Test : " << total_score / nFolds << std::endl;return 0;

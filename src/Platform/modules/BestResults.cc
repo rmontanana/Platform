@@ -2,7 +2,6 @@
 #include <set>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <algorithm>
 #include "BestResults.h"
 #include "Result.h"
@@ -64,7 +63,6 @@ namespace platform {
     std::pair<std::string, std::string> getModelScore(std::string name)
     {
         // results_accuracy_BoostAODE_MacBookpro16_2023-09-06_12:27:00_1.json
-        int i = 0;
         auto pos = name.find("_");
         auto pos2 = name.find("_", pos + 1);
         std::string score = name.substr(pos + 1, pos2 - pos - 1);
@@ -138,7 +136,7 @@ namespace platform {
             std::cout << model << ", ";
             build();
         }
-        std::cout << "end." << std::endl << std::endl;;
+        std::cout << "end." << std::endl << std::endl;
         model = "any";
     }
     void BestResults::listFile()

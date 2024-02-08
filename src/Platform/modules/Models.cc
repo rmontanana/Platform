@@ -1,7 +1,7 @@
 #include "Models.h"
 namespace platform {
     // Idea from: https://www.codeproject.com/Articles/567242/AplusC-2b-2bplusObjectplusFactory
-    Models* Models::factory = nullptr;;
+    Models* Models::factory = nullptr;
     Models* Models::instance()
     {
         //manages singleton

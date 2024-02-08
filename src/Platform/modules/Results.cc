@@ -11,7 +11,7 @@ namespace platform {
         } else {
             maxModel = 0;
         }
-    };
+    }
     void Results::load()
     {
         using std::filesystem::directory_iterator;

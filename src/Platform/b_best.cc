@@ -5,7 +5,7 @@
 #include "Colors.h"
 #include "config.h"
 
-void manageArguments(argparse::ArgumentParser& program, int argc, char** argv)
+void manageArguments(argparse::ArgumentParser& program)
 {
     program.add_argument("-m", "--model").default_value("").help("Filter results of the selected model) (any for all models)");
     program.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
@@ -30,7 +30,7 @@ void manageArguments(argparse::ArgumentParser& program, int argc, char** argv)
 int main(int argc, char** argv)
 {
     argparse::ArgumentParser program("b_best", { project_version.begin(), project_version.end() });
-    manageArguments(program, argc, argv);
+    manageArguments(program);
     std::string model, score;
     bool build, report, friedman, excel;
     double level;

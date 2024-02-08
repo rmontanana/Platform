@@ -15,7 +15,7 @@ namespace platform {
         nModels = models.size();
         nDatasets = datasets.size();
         auto temp = ConfigLocale();
-    };
+    }
 
     void Statistics::fit()
     {

@@ -21,9 +21,11 @@ namespace platform {
         double score_train{ 0 }, score_test{ 0 }, score_train_std{ 0 }, score_test_std{ 0 }, train_time{ 0 }, train_time_std{ 0 }, test_time{ 0 }, test_time_std{ 0 };
         float nodes{ 0 }, leaves{ 0 }, depth{ 0 };
         std::vector<double> scores_train, scores_test, times_train, times_test;
+        std::vector<std::string> notes;
     public:
         Result() = default;
         Result& setDataset(const std::string& dataset) { this->dataset = dataset; return *this; }
+        Result& setNotes(const std::vector<std::string>& notes) { this->notes.insert(this->notes.end(), notes.begin(), notes.end()); return *this; }
         Result& setHyperparameters(const json& hyperparameters) { this->hyperparameters = hyperparameters; return *this; }
         Result& setSamples(int samples) { this->samples = samples; return *this; }
         Result& setFeatures(int features) { this->features = features; return *this; }
@@ -61,6 +63,7 @@ namespace platform {
         const float getNodes() const { return nodes; }
         const float getLeaves() const { return leaves; }
         const float getDepth() const { return depth; }
+        const std::vector<std::string>& getNotes() const { return notes; }
         const std::vector<double>& getScoresTrain() const { return scores_train; }
         const std::vector<double>& getScoresTest() const { return scores_test; }
         const std::vector<double>& getTimesTrain() const { return times_train; }

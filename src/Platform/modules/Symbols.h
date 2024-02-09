@@ -12,6 +12,7 @@ namespace platform {
         inline static const std::string down_arrow{ "\u27B4" };
         inline static const std::string equal_best{ check_mark };
         inline static const std::string better_best{ black_star };
+        inline static const std::string notebook{ "\U0001F5C8" };
     };
 }
 #endif // !SYMBOLS_H

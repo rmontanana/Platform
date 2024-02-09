@@ -57,7 +57,11 @@ namespace platform {
             }
             auto color = odd ? Colors::CYAN() : Colors::BLUE();
             std::cout << color;
-            std::cout << std::setw(3) << std::right << index++ << " ";
+            std::string separator{ " " };
+            if (r.find("notes") != r.end()) {
+                separator = r["notes"].size() > 0 ? Colors::YELLOW() + Symbols::notebook + color : " ";
+            }
+            std::cout << std::setw(3) << std::right << index++ << separator;
             std::cout << std::setw(maxDataset) << std::left << r["dataset"].get<std::string>() << " ";
             std::cout << std::setw(6) << std::right << r["samples"].get<int>() << " ";
             std::cout << std::setw(5) << std::right << r["features"].get<int>() << " ";
@@ -78,6 +82,14 @@ namespace platform {
         }
         if (data["results"].size() == 1 || selectedIndex != -1) {
             std::cout << std::string(MAXL, '*') << std::endl;
+            if (lastResult.find("notes") != lastResult.end()) {
+                if (lastResult["notes"].size() > 0) {
+                    std::cout << headerLine("Notes: ");
+                    for (const auto& note : lastResult["notes"]) {
+                        std::cout << headerLine(note.get<std::string>());
+                    }
+                }
+            }
             std::cout << headerLine(fVector("Train scores: ", lastResult["scores_train"], 14, 12));
             std::cout << headerLine(fVector("Test  scores: ", lastResult["scores_test"], 14, 12));
             std::cout << headerLine(fVector("Train  times: ", lastResult["times_train"], 10, 3));

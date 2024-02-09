@@ -133,6 +133,16 @@ namespace platform {
         worksheet_set_column(worksheet, 12, 12, hypSize + 5, NULL);
         // Show totals if only one dataset is present in the result
         if (data["results"].size() == 1) {
+            row++;
+            if (lastResult.find("notes") != lastResult.end()) {
+                if (lastResult["notes"].size() > 0) {
+                    writeString(row++, 1, "Notes: ", "bodyHeader");
+                    for (const auto& note : lastResult["notes"]) {
+                        worksheet_merge_range(worksheet, row, 2, row, 5, note.get<std::string>().c_str(), efectiveStyle("text"));
+                        row++;
+                    }
+                }
+            }
             for (const std::string& group : { "scores_train", "scores_test", "times_train", "times_test" }) {
                 row++;
                 col = 1;

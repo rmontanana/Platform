@@ -76,6 +76,7 @@ namespace platform {
             j["nodes"] = r.getNodes();
             j["leaves"] = r.getLeaves();
             j["depth"] = r.getDepth();
+            j["notes"] = r.getNotes();
             result["results"].push_back(j);
         }
         return result;
@@ -162,7 +163,7 @@ namespace platform {
         if (!quiet) {
             std::cout << " " << setw(5) << samples << " " << setw(5) << features.size() << flush;
         }
-        // Prepare Result
+        // Prepare Resu lt
         auto result = Result();
         auto [values, counts] = at::_unique(y);
         result.setSamples(X.size(1)).setFeatures(X.size(0)).setClasses(values.size(0));
@@ -176,6 +177,7 @@ namespace platform {
         auto nodes = torch::zeros({ nResults }, torch::kFloat64);
         auto edges = torch::zeros({ nResults }, torch::kFloat64);
         auto num_states = torch::zeros({ nResults }, torch::kFloat64);
+        std::vector<std::string> notes;
         Timer train_timer, test_timer;
         int item = 0;
         bool first_seed = true;
@@ -214,6 +216,8 @@ namespace platform {
                 clf->fit(X_train, y_train, features, className, states);
                 if (!quiet)
                     showProgress(nfold + 1, getColor(clf->getStatus()), "b");
+                auto clf_notes = clf->getNotes();
+                notes.insert(notes.end(), clf_notes.begin(), clf_notes.end());
                 nodes[item] = clf->getNumberOfNodes();
                 edges[item] = clf->getNumberOfEdges();
                 num_states[item] = clf->getNumberOfStates();
@@ -248,7 +252,7 @@ namespace platform {
         result.setTrainTime(torch::mean(train_time).item<double>()).setTestTime(torch::mean(test_time).item<double>());
         result.setTestTimeStd(torch::std(test_time).item<double>()).setTrainTimeStd(torch::std(train_time).item<double>());
         result.setNodes(torch::mean(nodes).item<double>()).setLeaves(torch::mean(edges).item<double>()).setDepth(torch::mean(num_states).item<double>());
-        result.setDataset(fileName);
+        result.setDataset(fileName).setNotes(notes);
         addResult(result);
     }
 }

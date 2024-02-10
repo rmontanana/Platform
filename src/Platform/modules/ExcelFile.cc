@@ -86,6 +86,7 @@ namespace platform {
         } else if (name == "text") {
             format_set_font_size(style, normalSize);
             format_set_border(style, LXW_BORDER_THIN);
+            format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
         } else if (name == "bodyHeader") {
             format_set_bold(style);
             format_set_font_size(style, normalSize);
@@ -118,7 +119,6 @@ namespace platform {
         lxw_format* style;
         for (std::string name : styleNames) {
             lxw_format* style = workbook_add_format(workbook);
-            style = workbook_add_format(workbook);
             createStyle(name, style, true);
             styles[name + "_odd"] = style;
             style = workbook_add_format(workbook);

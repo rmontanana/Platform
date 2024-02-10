@@ -103,11 +103,17 @@ namespace platform {
         }
         lxw_format* style = NULL;
         style = styles.at("text" + suffix);
-        worksheet_merge_range(notes_worksheet, row, 0, row, 1, r["dataset"].get<std::string>().c_str(), style);
+        if (row == 1) {
+            // Add header
+            worksheet_merge_range(notes_worksheet, 0, 0, 0, 1, "Dataset", styles["bodyHeader_even"]);
+            worksheet_merge_range(notes_worksheet, 0, 2, 0, 9, "Note", styles["bodyHeader_even"]);
+        }
+        auto initial_row = row;
         for (const auto& note : r["notes"]) {
-            worksheet_merge_range(notes_worksheet, row, 2, row, 8, note.get<std::string>().c_str(), style);
+            worksheet_merge_range(notes_worksheet, row, 2, row, 9, note.get<std::string>().c_str(), style);
             row++;
         }
+        worksheet_merge_range(notes_worksheet, initial_row, 0, row - 1, 1, r["dataset"].get<std::string>().c_str(), style);
     }
 
     void ReportExcel::body()
@@ -128,7 +134,7 @@ namespace platform {
         bool only_one_result = data["results"].size() == 1;
         bool first_note = true;
         lxw_worksheet* notes_worksheet;
-        int notes_row = 0;
+        int notes_row = 1;
         for (const auto& r : data["results"]) {
             writeString(row, col, r["dataset"].get<std::string>(), "text");
             writeInt(row, col + 1, r["samples"].get<int>(), "ints");

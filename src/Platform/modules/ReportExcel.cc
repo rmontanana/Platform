@@ -90,6 +90,25 @@ namespace platform {
         oss << "Discretized: " << (data["discretized"].get<bool>() ? "True" : "False");
         worksheet_write_string(worksheet, 3, 12, oss.str().c_str(), styles["headerSmall"]);
     }
+    void ReportExcel::append_notes(lxw_worksheet* notes_worksheet, const json& r, int row)
+    {
+        static bool even_note = true;
+        std::string suffix;
+        if (even_note) {
+            even_note = false;
+            suffix = "_even";
+        } else {
+            even_note = true;
+            suffix = "_odd";
+        }
+        lxw_format* style = NULL;
+        style = styles.at("text" + suffix);
+        worksheet_merge_range(notes_worksheet, row, 0, row, 1, r["dataset"].get<std::string>().c_str(), style);
+        for (const auto& note : r["notes"]) {
+            worksheet_merge_range(notes_worksheet, row, 2, row, 8, note.get<std::string>().c_str(), style);
+            row++;
+        }
+    }
 
     void ReportExcel::body()
     {
@@ -106,6 +125,10 @@ namespace platform {
         json lastResult;
         double totalScore = 0.0;
         std::string hyperparameters;
+        bool only_one_result = data["results"].size() == 1;
+        bool first_note = true;
+        lxw_worksheet* notes_worksheet;
+        int notes_row = 0;
         for (const auto& r : data["results"]) {
             writeString(row, col, r["dataset"].get<std::string>(), "text");
             writeInt(row, col + 1, r["samples"].get<int>(), "ints");
@@ -128,11 +151,24 @@ namespace platform {
             lastResult = r;
             totalScore += r["score"].get<double>();
             row++;
+            if (!only_one_result) {
+                // take care of the possible notes
+                if (r.find("notes") != r.end()) {
+                    if (r["notes"].size() > 0) {
+                        if (first_note) {
+                            first_note = false;
+                            notes_worksheet = workbook_add_worksheet(workbook, "Notes");
+                        }
+                        append_notes(notes_worksheet, r, notes_row);
+                        notes_row += r["notes"].size();
+                    }
+                }
+            }
         }
         // Set the right column width of hyperparameters with the maximum length
         worksheet_set_column(worksheet, 12, 12, hypSize + 5, NULL);
         // Show totals if only one dataset is present in the result
-        if (data["results"].size() == 1) {
+        if (only_one_result) {
             row++;
             if (lastResult.find("notes") != lastResult.end()) {
                 if (lastResult["notes"].size() > 0) {

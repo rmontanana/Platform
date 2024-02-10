@@ -217,7 +217,8 @@ namespace platform {
                 if (!quiet)
                     showProgress(nfold + 1, getColor(clf->getStatus()), "b");
                 auto clf_notes = clf->getNotes();
-                notes.insert(notes.end(), clf_notes.begin(), clf_notes.end());
+                std::transform(clf_notes.begin(), clf_notes.end(), std::back_inserter(notes), [nfold](const std::string& note)
+                    { return "Fold " + std::to_string(nfold) + ": " + note; });
                 nodes[item] = clf->getNumberOfNodes();
                 edges[item] = clf->getNumberOfEdges();
                 num_states[item] = clf->getNumberOfStates();

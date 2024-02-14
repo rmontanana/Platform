@@ -2,6 +2,7 @@
 #include <set>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <algorithm>
 #include "BestResults.h"
 #include "Result.h"

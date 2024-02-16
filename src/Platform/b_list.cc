@@ -30,7 +30,7 @@ int main(int argc, char** argv)
     locale mylocale(std::cout.getloc(), new separated);
     locale::global(mylocale);
     std::cout.imbue(mylocale);
-    std::cout << Colors::GREEN() << " #  Dataset                        Sampl. Feat. Cls. Balance" << std::endl;
+    std::cout << Colors::GREEN() << " #  Dataset                        Sampl. Feat. Cls Balance" << std::endl;
     std::string balanceBars = std::string(BALANCE_LENGTH, '=');
     std::cout << "=== ============================== ====== ===== === " << balanceBars << std::endl;
     bool odd = true;

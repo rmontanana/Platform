@@ -90,7 +90,12 @@ namespace platform {
         oss << "Discretized: " << (data["discretized"].get<bool>() ? "True" : "False");
         worksheet_write_string(worksheet, 3, 12, oss.str().c_str(), styles["headerSmall"]);
     }
-    void ReportExcel::append_notes(lxw_worksheet* notes_worksheet, const json& r, int row)
+    void ReportExcel::header_notes(int row)
+    {
+        writeString(row, 0, "Dataset", "bodyHeader");
+        worksheet_merge_range(worksheet, row, 1, row, 6, "Note", styles["bodyHeader_even"]);
+    }
+    void ReportExcel::append_notes(const json& r, int row)
     {
         static bool even_note = true;
         std::string suffix;
@@ -103,17 +108,16 @@ namespace platform {
         }
         lxw_format* style = NULL;
         style = styles.at("text" + suffix);
-        if (row == 1) {
-            // Add header
-            worksheet_merge_range(notes_worksheet, 0, 0, 0, 1, "Dataset", styles["bodyHeader_even"]);
-            worksheet_merge_range(notes_worksheet, 0, 2, 0, 9, "Note", styles["bodyHeader_even"]);
-        }
         auto initial_row = row;
         for (const auto& note : r["notes"]) {
-            worksheet_merge_range(notes_worksheet, row, 2, row, 9, note.get<std::string>().c_str(), style);
+            worksheet_merge_range(worksheet, row, 1, row, 6, note.get<std::string>().c_str(), style);
             row++;
         }
-        worksheet_merge_range(notes_worksheet, initial_row, 0, row - 1, 1, r["dataset"].get<std::string>().c_str(), style);
+        if (row - 1 == initial_row) {
+            writeString(initial_row, 0, r["dataset"].get<std::string>(), "text");
+        } else {
+            worksheet_merge_range(worksheet, initial_row, 0, row - 1, 0, r["dataset"].get<std::string>().c_str(), style);
+        }
     }
 
     void ReportExcel::body()
@@ -133,8 +137,7 @@ namespace platform {
         std::string hyperparameters;
         bool only_one_result = data["results"].size() == 1;
         bool first_note = true;
-        lxw_worksheet* notes_worksheet;
-        int notes_row = 1;
+        int notes_row = 15 + data["results"].size();
         for (const auto& r : data["results"]) {
             writeString(row, col, r["dataset"].get<std::string>(), "text");
             writeInt(row, col + 1, r["samples"].get<int>(), "ints");
@@ -163,9 +166,9 @@ namespace platform {
                     if (r["notes"].size() > 0) {
                         if (first_note) {
                             first_note = false;
-                            notes_worksheet = workbook_add_worksheet(workbook, "Notes");
+                            header_notes(notes_row++);
                         }
-                        append_notes(notes_worksheet, r, notes_row);
+                        append_notes(r, notes_row);
                         notes_row += r["notes"].size();
                     }
                 }

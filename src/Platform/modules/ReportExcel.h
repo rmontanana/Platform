@@ -18,7 +18,8 @@ namespace platform {
         void body() override;
         void showSummary() override;
         void footer(double totalScore, int row);
-        void append_notes(lxw_worksheet* notes_worksheet, const json& r, int row);
+        void append_notes(const json& r, int row);
+        void header_notes(int row);
     };
 };
 #endif // !REPORTEXCEL_H

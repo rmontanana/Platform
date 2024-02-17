@@ -10,7 +10,8 @@ TEST_CASE("Result class tests", "[Result]")
 
     SECTION("Constructor and load method")
     {
-        platform::Result result(testPath, testFile);
+        platform::Result result;
+        result.load(testPath, testFile);
         REQUIRE(result.date != "");
         REQUIRE(result.score >= 0);
         REQUIRE(result.scoreName != "");
@@ -22,6 +23,7 @@ TEST_CASE("Result class tests", "[Result]")
     SECTION("to_string method")
     {
         platform::Result result(testPath, testFile);
+        result.load();
         std::string resultStr = result.to_string(1);
         REQUIRE(resultStr != "");
     }
@@ -29,6 +31,7 @@ TEST_CASE("Result class tests", "[Result]")
     SECTION("Exception handling in load method")
     {
         std::string invalidFile = "invalid.json";
-        REQUIRE_THROWS_AS(platform::Result(testPath, invalidFile), std::invalid_argument);
+        auto result = platform::Result();
+        REQUIRE_THROWS_AS(platform::result.load(testPath, invalidFile), std::invalid_argument);
     }
 }

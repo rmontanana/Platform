@@ -87,7 +87,7 @@ namespace platform {
     void ManageResults::report(const int index, const bool excelReport)
     {
         std::cout << Colors::YELLOW() << "Reporting " << results.at(index).getFilename() << std::endl;
-        auto data = results.at(index).load();
+        auto data = results.at(index).getJson();
         if (excelReport) {
             ReportExcel reporter(data, compare, workbook);
             reporter.show();
@@ -102,7 +102,7 @@ namespace platform {
     void ManageResults::showIndex(const int index, const int idx)
     {
         // Show a dataset result inside a report
-        auto data = results.at(index).load();
+        auto data = results.at(index).getJson();
         std::cout << Colors::YELLOW() << "Showing " << results.at(index).getFilename() << std::endl;
         ReportConsole reporter(data, compare, idx);
         reporter.show();
@@ -151,7 +151,8 @@ namespace platform {
             {"hide", 'h', true},
             {"sort", 's', false},
             {"report", 'r', true},
-            {"excel", 'e', true}
+            {"excel", 'e', true},
+            {"title", 't', true}
         };
         std::vector<std::tuple<std::string, char, bool>> listOptions = {
             {"report", 'r', true},
@@ -163,7 +164,7 @@ namespace platform {
             if (indexList) {
                 std::tie(option, index) = parser.parse(Colors::GREEN(), mainOptions, 'r', numFiles - 1);
             } else {
-                std::tie(option, subIndex) = parser.parse(Colors::MAGENTA(), listOptions, 'r', results.at(index).load()["results"].size() - 1);
+                std::tie(option, subIndex) = parser.parse(Colors::MAGENTA(), listOptions, 'r', results.at(index).getJson()["results"].size() - 1);
             }
             switch (option) {
                 case 'q':
@@ -206,6 +207,17 @@ namespace platform {
                     break;
                 case 'e':
                     report(index, true);
+                    break;
+                case 't':
+                    std::cout << "Title: " << results.at(index).getTitle() << std::endl;
+                    std::cout << "New title: ";
+                    std::string newTitle;
+                    getline(std::cin, newTitle);
+                    if (!newTitle.empty()) {
+                        results.at(index).setTitle(newTitle);
+                        results.at(index).save();
+                        std::cout << "Title changed to " << newTitle << std::endl;
+                    }
                     break;
             }
         }

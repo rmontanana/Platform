@@ -22,7 +22,7 @@ set(grid_sources GridSearch.cc GridData.cc HyperParameters.cc Datasets.cc Datase
 list(TRANSFORM grid_sources PREPEND ${Platform_MODULES})
 add_executable(b_grid b_grid.cc ${grid_sources})
 add_executable(b_list b_list.cc ${Platform_MODULES}Datasets.cc ${Platform_MODULES}Dataset.cc)
-set(main_sources Experiment.cc Datasets.cc Dataset.cc Models.cc HyperParameters.cc ReportConsole.cc ReportBase.cc)
+set(main_sources Experiment.cc Datasets.cc Dataset.cc Models.cc HyperParameters.cc ReportConsole.cc ReportBase.cc Result.cc)
 list(TRANSFORM main_sources PREPEND ${Platform_MODULES})
 add_executable(b_main b_main.cc ${main_sources})
 set(manage_sources Results.cc ManageResults.cc CommandParser.cc Result.cc ReportConsole.cc ReportExcel.cc ReportBase.cc Datasets.cc Dataset.cc ExcelFile.cc)

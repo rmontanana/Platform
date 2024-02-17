@@ -128,7 +128,7 @@ int main(int argc, char** argv)
     experiment.go(filesToTest, quiet, no_train_score);
     experiment.setDuration(timer.getDuration());
     if (saveResults) {
-        experiment.save(platform::Paths::results());
+        experiment.saveResult();
     }
     if (!quiet)
         experiment.report();

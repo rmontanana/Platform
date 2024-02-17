@@ -1,4 +1,3 @@
-#include <fstream>
 #include "Experiment.h"
 #include "Datasets.h"
 #include "Models.h"
@@ -6,109 +5,27 @@
 #include "Paths.h"
 namespace platform {
     using json = nlohmann::json;
-    std::string get_date()
-    {
-        time_t rawtime;
-        tm* timeinfo;
-        time(&rawtime);
-        timeinfo = std::localtime(&rawtime);
-        std::ostringstream oss;
-        oss << std::put_time(timeinfo, "%Y-%m-%d");
-        return oss.str();
-    }
-    std::string get_time()
-    {
-        time_t rawtime;
-        tm* timeinfo;
-        time(&rawtime);
-        timeinfo = std::localtime(&rawtime);
-        std::ostringstream oss;
-        oss << std::put_time(timeinfo, "%H:%M:%S");
-        return oss.str();
-    }
-    std::string Experiment::get_file_name()
-    {
-        std::string result = "results_" + score_name + "_" + model + "_" + platform + "_" + get_date() + "_" + get_time() + "_" + (stratified ? "1" : "0") + ".json";
-        return result;
-    }
 
-    json Experiment::build_json()
+    void Experiment::saveResult()
     {
-        json result;
-        result["title"] = title;
-        result["date"] = get_date();
-        result["time"] = get_time();
-        result["model"] = model;
-        result["version"] = model_version;
-        result["platform"] = platform;
-        result["score_name"] = score_name;
-        result["language"] = language;
-        result["language_version"] = language_version;
-        result["discretized"] = discretized;
-        result["stratified"] = stratified;
-        result["folds"] = nfolds;
-        result["seeds"] = randomSeeds;
-        result["duration"] = duration;
-        result["results"] = json::array();
-        for (const auto& r : results) {
-            json j;
-            j["dataset"] = r.getDataset();
-            j["hyperparameters"] = r.getHyperparameters();
-            j["samples"] = r.getSamples();
-            j["features"] = r.getFeatures();
-            j["classes"] = r.getClasses();
-            j["score_train"] = r.getScoreTrain();
-            j["score_test"] = r.getScoreTest();
-            j["score"] = r.getScoreTest();
-            j["score_std"] = r.getScoreTestStd();
-            j["score_train_std"] = r.getScoreTrainStd();
-            j["score_test_std"] = r.getScoreTestStd();
-            j["train_time"] = r.getTrainTime();
-            j["train_time_std"] = r.getTrainTimeStd();
-            j["test_time"] = r.getTestTime();
-            j["test_time_std"] = r.getTestTimeStd();
-            j["time"] = r.getTestTime() + r.getTrainTime();
-            j["time_std"] = r.getTestTimeStd() + r.getTrainTimeStd();
-            j["scores_train"] = r.getScoresTrain();
-            j["scores_test"] = r.getScoresTest();
-            j["times_train"] = r.getTimesTrain();
-            j["times_test"] = r.getTimesTest();
-            j["nodes"] = r.getNodes();
-            j["leaves"] = r.getLeaves();
-            j["depth"] = r.getDepth();
-            j["notes"] = r.getNotes();
-            result["results"].push_back(j);
-        }
-        return result;
+        result.save();
     }
-    void Experiment::save(const std::string& path)
-    {
-        json data = build_json();
-        ofstream file(path + "/" + get_file_name());
-        file << data;
-        file.close();
-    }
-
     void Experiment::report()
     {
-        json data = build_json();
-        ReportConsole report(data);
+        ReportConsole report(result.getJson());
         report.show();
     }
-
     void Experiment::show()
     {
-        json data = build_json();
-        std::cout << data.dump(4) << std::endl;
+        std::cout << result.getJson().dump(4) << std::endl;
     }
-
     void Experiment::go(std::vector<std::string> filesToProcess, bool quiet, bool no_train_score)
     {
         for (auto fileName : filesToProcess) {
             if (fileName.size() > max_name)
                 max_name = fileName.size();
         }
-        std::cout << Colors::MAGENTA() << "*** Starting experiment: " << title << " ***" << Colors::RESET() << std::endl << std::endl;
+        std::cout << Colors::MAGENTA() << "*** Starting experiment: " << result.getTitle() << " ***" << Colors::RESET() << std::endl << std::endl;
         if (!quiet) {
             std::cout << Colors::GREEN() << " Status Meaning" << std::endl;
             std::cout << " ------ -----------------------------" << Colors::RESET() << std::endl;
@@ -130,7 +47,6 @@ namespace platform {
         if (!quiet)
             std::cout << std::endl;
     }
-
     std::string getColor(bayesnet::status_t status)
     {
         switch (status) {
@@ -163,11 +79,11 @@ namespace platform {
         if (!quiet) {
             std::cout << " " << setw(5) << samples << " " << setw(5) << features.size() << flush;
         }
-        // Prepare Resu lt
-        auto result = Result();
+        // Prepare Result
+        auto partial_result = PartialResult();
         auto [values, counts] = at::_unique(y);
-        result.setSamples(X.size(1)).setFeatures(X.size(0)).setClasses(values.size(0));
-        result.setHyperparameters(hyperparameters.get(fileName));
+        partial_result.setSamples(X.size(1)).setFeatures(X.size(0)).setClasses(values.size(0));
+        partial_result.setHyperparameters(hyperparameters.get(fileName));
         // Initialize results std::vectors
         int nResults = nfolds * static_cast<int>(randomSeeds.size());
         auto accuracy_test = torch::zeros({ nResults }, torch::kFloat64);
@@ -196,7 +112,7 @@ namespace platform {
             else
                 fold = new folding::KFold(nfolds, y.size(0), seed);
             for (int nfold = 0; nfold < nfolds; nfold++) {
-                auto clf = Models::instance()->create(model);
+                auto clf = Models::instance()->create(result.getModel());
                 setModelVersion(clf->getVersion());
                 auto valid = clf->getValidHyperparameters();
                 hyperparameters.check(valid, fileName);
@@ -238,22 +154,22 @@ namespace platform {
                 if (!quiet)
                     std::cout << "\b\b\b, " << flush;
                 // Store results and times in std::vector
-                result.addScoreTrain(accuracy_train_value);
-                result.addScoreTest(accuracy_test_value);
-                result.addTimeTrain(train_time[item].item<double>());
-                result.addTimeTest(test_time[item].item<double>());
+                partial_result.addScoreTrain(accuracy_train_value);
+                partial_result.addScoreTest(accuracy_test_value);
+                partial_result.addTimeTrain(train_time[item].item<double>());
+                partial_result.addTimeTest(test_time[item].item<double>());
                 item++;
             }
             if (!quiet)
                 std::cout << "end. " << flush;
             delete fold;
         }
-        result.setScoreTest(torch::mean(accuracy_test).item<double>()).setScoreTrain(torch::mean(accuracy_train).item<double>());
-        result.setScoreTestStd(torch::std(accuracy_test).item<double>()).setScoreTrainStd(torch::std(accuracy_train).item<double>());
-        result.setTrainTime(torch::mean(train_time).item<double>()).setTestTime(torch::mean(test_time).item<double>());
-        result.setTestTimeStd(torch::std(test_time).item<double>()).setTrainTimeStd(torch::std(train_time).item<double>());
-        result.setNodes(torch::mean(nodes).item<double>()).setLeaves(torch::mean(edges).item<double>()).setDepth(torch::mean(num_states).item<double>());
-        result.setDataset(fileName).setNotes(notes);
-        addResult(result);
+        partial_result.setScoreTest(torch::mean(accuracy_test).item<double>()).setScoreTrain(torch::mean(accuracy_train).item<double>());
+        partial_result.setScoreTestStd(torch::std(accuracy_test).item<double>()).setScoreTrainStd(torch::std(accuracy_train).item<double>());
+        partial_result.setTrainTime(torch::mean(train_time).item<double>()).setTestTime(torch::mean(test_time).item<double>());
+        partial_result.setTestTimeStd(torch::std(test_time).item<double>()).setTrainTimeStd(torch::std(train_time).item<double>());
+        partial_result.setNodes(torch::mean(nodes).item<double>()).setLeaves(torch::mean(edges).item<double>()).setDepth(torch::mean(num_states).item<double>());
+        partial_result.setDataset(fileName).setNotes(notes);
+        addResult(partial_result);
     }
 }

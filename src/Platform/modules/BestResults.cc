@@ -36,8 +36,9 @@ namespace platform {
         }
         json bests;
         for (const auto& file : files) {
-            auto result = Result(path, file);
-            auto data = result.load();
+            auto result = Result();
+            result.load(path, file);
+            auto data = result.getJson();
             for (auto const& item : data.at("results")) {
                 bool update = true;
                 auto datasetName = item.at("dataset").get<std::string>();

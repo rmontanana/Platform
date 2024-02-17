@@ -27,7 +27,7 @@ namespace platform {
         if (instance != nullptr)
             return unique_ptr<bayesnet::BaseClassifier>(instance);
         else
-            return nullptr;
+            throw std::runtime_error("Model not found: " + name);
     }
     std::vector<std::string> Models::getNames()
     {

@@ -18,7 +18,7 @@ void outputBalance(const std::string& balance)
     while (temp.size() > BALANCE_LENGTH - 1) {
         auto part = temp.substr(0, BALANCE_LENGTH);
         std::cout << part << std::endl;
-        std::cout << setw(48) << " ";
+        std::cout << setw(52) << " ";
         temp = temp.substr(BALANCE_LENGTH);
     }
     std::cout << temp << std::endl;
@@ -33,10 +33,9 @@ int main(int argc, char** argv)
     std::cout << Colors::GREEN() << " #  Dataset                        Sampl. Feat. Cls Balance" << std::endl;
     std::string balanceBars = std::string(BALANCE_LENGTH, '=');
     std::cout << "=== ============================== ====== ===== === " << balanceBars << std::endl;
-    bool odd = true;
     int num = 0;
     for (const auto& dataset : data.getNames()) {
-        auto color = odd ? Colors::CYAN() : Colors::BLUE();
+        auto color = num % 2 ? Colors::CYAN() : Colors::BLUE();
         std::cout << color << setw(3) << right << num++ << " ";
         std::cout << setw(30) << left << dataset << " ";
         data.loadDataset(dataset);
@@ -51,7 +50,6 @@ int main(int argc, char** argv)
             sep = " / ";
         }
         outputBalance(oss.str());
-        odd = !odd;
     }
     std::cout << Colors::RESET() << std::endl;
     return 0;

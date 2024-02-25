@@ -28,7 +28,7 @@ namespace platform {
         std::cout << Colors::MAGENTA() << "*** Starting experiment: " << result.getTitle() << " ***" << Colors::RESET() << std::endl << std::endl;
         if (!quiet) {
             std::cout << Colors::GREEN() << " Status Meaning" << std::endl;
-            std::cout << " ------ -----------------------------" << Colors::RESET() << std::endl;
+            std::cout << " ------ --------------------------------" << Colors::RESET() << std::endl;
             std::cout << " ( " << Colors::GREEN() << "a" << Colors::RESET() << " )  Fitting model with train dataset" << std::endl;
             std::cout << " ( " << Colors::GREEN() << "b" << Colors::RESET() << " )  Scoring train dataset" << std::endl;
             std::cout << " ( " << Colors::GREEN() << "c" << Colors::RESET() << " )  Scoring test dataset" << std::endl << std::endl;

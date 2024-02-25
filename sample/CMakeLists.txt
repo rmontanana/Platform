@@ -1,10 +1,10 @@
 include_directories(
-    ${Platform_SOURCE_DIR}/src/Platform/modules
-    ${Platform_SOURCE_DIR}/lib/PyClassifiers/src/PyClassifiers
+    ${Platform_SOURCE_DIR}/src/modules
+    ${Platform_SOURCE_DIR}/lib/PyClassifiers/src
     ${Python3_INCLUDE_DIRS}
     ${Platform_SOURCE_DIR}/lib/Files
     ${Platform_SOURCE_DIR}/lib/argparse/include
-    ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/src/BayesNet
+    ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/src
     ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/folding
     ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/mdlp
     ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/json/include

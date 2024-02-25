@@ -4,7 +4,7 @@ diagrams:
   Platform:
     type: class
     glob:
-      - src/Platform/*.cc
+      - src/*.cc
       - src/Command/*.cc
     using_namespace: platform
     include:
@@ -25,7 +25,6 @@ diagrams:
       - platform
     include:
       paths:
-        - src/Command
-        - src/Platform
+        - src
     start_from:
       - function: main(int,const char **)

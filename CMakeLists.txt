@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(Platform
-  VERSION 1.0.1
+  VERSION 1.0.2
   DESCRIPTION "Platform to run Experiments with classifiers."
   HOMEPAGE_URL "https://github.com/rmontanana/platform"
   LANGUAGES CXX
@@ -78,11 +78,11 @@ message("XLSXWRITER_LIB=${XLSXWRITER_LIB}")
 
 # Subdirectories
 # --------------
-set(Platform_MODULES ${Platform_SOURCE_DIR}/src/Platform/modules/)
+set(Platform_MODULES ${Platform_SOURCE_DIR}/src/modules/)
 add_subdirectory(config)
-add_subdirectory(src/Platform)
+add_subdirectory(src)
 add_subdirectory(sample)
-file(GLOB Platform_SOURCES CONFIGURE_DEPENDS ${Platform_SOURCE_DIR}/src/Platform/*.cc)
+file(GLOB Platform_SOURCES CONFIGURE_DEPENDS ${Platform_SOURCE_DIR}/src/*.cc)
 
 # Testing
 # -------

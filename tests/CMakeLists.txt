@@ -1,7 +1,7 @@
 if(ENABLE_TESTING)
     set(TEST_PLATFORM "unit_tests_platform")
     include_directories(
-        ${Platform_SOURCE_DIR}/src/Platform
+        ${Platform_SOURCE_DIR}/src
         ${Platform_SOURCE_DIR}/lib/argparse/include
         ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/mdlp
         ${Platform_SOURCE_DIR}/lib/Files

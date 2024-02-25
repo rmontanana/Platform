@@ -22,7 +22,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "experimentPy",
-            "program": "${workspaceFolder}/build_debug/src/Platform/b_main",
+            "program": "${workspaceFolder}/build_debug/src/b_main",
             "args": [
                 "-m",
                 "STree",
@@ -39,7 +39,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "gridsearch",
-            "program": "${workspaceFolder}/build_debug/src/Platform/b_grid",
+            "program": "${workspaceFolder}/build_debug/src/b_grid",
             "args": [
                 "-m",
                 "KDB",
@@ -55,7 +55,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "experimentBayes",
-            "program": "${workspaceFolder}/build_debug/src/Platform/b_main",
+            "program": "${workspaceFolder}/build_debug/src/b_main",
             "args": [
                 "-m",
                 "TAN",
@@ -72,7 +72,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "best",
-            "program": "${workspaceFolder}/build_debug/src/Platform/b_best",
+            "program": "${workspaceFolder}/build_debug/src/b_best",
             "args": [
                 "-m",
                 "BoostAODE",
@@ -86,7 +86,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "manage",
-            "program": "${workspaceFolder}/build_debug/src/Platform/b_manage",
+            "program": "${workspaceFolder}/build_debug/src/b_manage",
             "args": [
                 "-n",
                 "20"
@@ -97,7 +97,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "list",
-            "program": "${workspaceFolder}/build_debug/src/Platform/b_list",
+            "program": "${workspaceFolder}/build_debug/src/b_list",
             "args": [],
             //"cwd": "/Users/rmontanana/Code/discretizbench",
             "cwd": "${workspaceFolder}/../discretizbench",

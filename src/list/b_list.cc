@@ -72,8 +72,8 @@ int main(int argc, char** argv)
     }
     std::cout << Colors::RESET() << std::endl;
     if (excel) {
-        auto report = platform::DatasetsExcel(data);
-        report.report();
+        auto report = platform::DatasetsExcel();
+        report.report(data);
         std::cout << "Output saved in " << report.getFileName() << std::endl;
     }
     return 0;

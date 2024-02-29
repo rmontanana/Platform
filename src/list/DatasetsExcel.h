@@ -11,13 +11,9 @@ namespace platform {
 
     class DatasetsExcel : public ExcelFile {
     public:
-        explicit DatasetsExcel(json& data);
+        DatasetsExcel();
         ~DatasetsExcel();
-        void report();
-    private:
-        void formatColumns(int dataset, int balance);
-        json data;
-
+        void report(json& data);
     };
 }
 #endif //DATASETS_EXCEL_H

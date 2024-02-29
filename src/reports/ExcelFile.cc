@@ -87,11 +87,13 @@ namespace platform {
         if (name == "textCentered") {
             format_set_align(style, LXW_ALIGN_CENTER);
             format_set_font_size(style, normalSize);
+            format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
             format_set_border(style, LXW_BORDER_THIN);
         } else if (name == "text") {
             format_set_font_size(style, normalSize);
             format_set_border(style, LXW_BORDER_THIN);
             format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
+            format_set_text_wrap(style);
         } else if (name == "bodyHeader") {
             format_set_bold(style);
             format_set_font_size(style, normalSize);
@@ -101,18 +103,22 @@ namespace platform {
             format_set_bg_color(style, lxw_color_t(colorTitle));
         } else if (name == "result") {
             format_set_font_size(style, normalSize);
+            format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
             format_set_border(style, LXW_BORDER_THIN);
             format_set_num_format(style, "0.0000000");
         } else if (name == "time") {
             format_set_font_size(style, normalSize);
             format_set_border(style, LXW_BORDER_THIN);
+            format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
             format_set_num_format(style, "#,##0.000000");
         } else if (name == "ints") {
             format_set_font_size(style, normalSize);
             format_set_num_format(style, "###,##0");
+            format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
             format_set_border(style, LXW_BORDER_THIN);
         } else if (name == "floats") {
             format_set_border(style, LXW_BORDER_THIN);
+            format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
             format_set_font_size(style, normalSize);
             format_set_num_format(style, "#,##0.00");
         }

@@ -11,12 +11,13 @@ namespace platform {
 
     class DatasetsExcel : public ExcelFile {
     public:
-        DatasetsExcel();
+        explicit DatasetsExcel(json& data);
         ~DatasetsExcel();
         void report();
     private:
-        void formatColumns();
-        int datasetNameSize = 25; // Min size of the column
+        void formatColumns(int dataset, int balance);
+        json data;
+
     };
 }
 #endif //DATASETS_EXCEL_H

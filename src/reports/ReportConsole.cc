@@ -94,10 +94,10 @@ namespace platform {
             std::cout << headerLine(fVector("Test  scores: ", lastResult["scores_test"], 14, 12));
             std::cout << headerLine(fVector("Train  times: ", lastResult["times_train"], 10, 3));
             std::cout << headerLine(fVector("Test   times: ", lastResult["times_test"], 10, 3));
-            std::cout << std::string(MAXL, '*') << std::endl;
         } else {
             footer(totalScore);
         }
+        std::cout << std::string(MAXL, '*') << Colors::RESET() << std::endl;
     }
     void ReportConsole::showSummary()
     {
@@ -124,6 +124,5 @@ namespace platform {
         if (!getExistBestFile() && compare) {
             std::cout << headerLine("*** Best Results File not found. Couldn't compare any result!");
         }
-        std::cout << std::string(MAXL, '*') << std::endl << Colors::RESET();
     }
 }

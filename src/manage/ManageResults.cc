@@ -164,7 +164,7 @@ namespace platform {
             if (indexList) {
                 std::tie(option, index) = parser.parse(Colors::GREEN(), mainOptions, 'r', numFiles - 1);
             } else {
-                std::tie(option, subIndex) = parser.parse(Colors::MAGENTA(), listOptions, 'r', results.at(index).getJson()["results"].size() - 1);
+                std::tie(option, subIndex) = parser.parse(Colors::CYAN(), listOptions, 'r', results.at(index).getJson()["results"].size() - 1);
             }
             switch (option) {
                 case 'q':

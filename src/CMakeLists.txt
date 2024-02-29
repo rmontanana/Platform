@@ -1,10 +1,10 @@
 include_directories(
+    ## Libs
     ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/src
     ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/folding
     ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/mdlp
     ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/json/include
     ${Platform_SOURCE_DIR}/lib/PyClassifiers/src
-    ${Platform_MODULES}
     ${Platform_SOURCE_DIR}/lib/Files
     ${Platform_SOURCE_DIR}/lib/mdlp
     ${Platform_SOURCE_DIR}/lib/argparse/include
@@ -13,24 +13,41 @@ include_directories(
     ${Python3_INCLUDE_DIRS}
     ${MPI_CXX_INCLUDE_DIRS}
     ${CMAKE_BINARY_DIR}/configured_files/include
+    ## Platform
+    ${Platform_SOURCE_DIR}/src/common
+    ${Platform_SOURCE_DIR}/src/best
+    ${Platform_SOURCE_DIR}/src/grid
+    ${Platform_SOURCE_DIR}/src/main
+    ${Platform_SOURCE_DIR}/src/manage
+    ${Platform_SOURCE_DIR}/src/reports
 )
 
-set(best_sources BestResults.cc Result.cc Statistics.cc BestResultsExcel.cc ReportExcel.cc ReportBase.cc Datasets.cc Dataset.cc ExcelFile.cc)
-list(TRANSFORM best_sources PREPEND ${Platform_MODULES})
-add_executable(b_best b_best.cc ${best_sources})
-set(grid_sources GridSearch.cc GridData.cc HyperParameters.cc Datasets.cc Dataset.cc Models.cc)
-list(TRANSFORM grid_sources PREPEND ${Platform_MODULES})
-add_executable(b_grid b_grid.cc ${grid_sources})
-add_executable(b_list b_list.cc ${Platform_MODULES}Datasets.cc ${Platform_MODULES}Dataset.cc)
-set(main_sources Experiment.cc Datasets.cc Dataset.cc Models.cc HyperParameters.cc ReportConsole.cc ReportBase.cc Result.cc)
-list(TRANSFORM main_sources PREPEND ${Platform_MODULES})
-add_executable(b_main b_main.cc ${main_sources})
-set(manage_sources Results.cc ManageResults.cc CommandParser.cc Result.cc ReportConsole.cc ReportExcel.cc ReportBase.cc Datasets.cc Dataset.cc ExcelFile.cc)
-list(TRANSFORM manage_sources PREPEND ${Platform_MODULES})
-add_executable(b_manage b_manage.cc ${manage_sources})
+# b_best
+set(best_sources b_best.cc BestResults.cc  Statistics.cc BestResultsExcel.cc)
+list(TRANSFORM best_sources PREPEND best/)
+add_executable(b_best ${best_sources} main/Result.cc reports/ReportExcel.cc reports/ReportBase.cc reports/ExcelFile.cc common/Datasets.cc common/Dataset.cc)
+target_link_libraries(b_best Boost::boost "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)
 
-target_link_libraries(b_best Boost::boost "${XLSXWRITER_LIB}" "${TORCH_LIBRARIES}" ArffFiles mdlp)
+# b_grid
+set(grid_sources b_grid.cc GridSearch.cc GridData.cc)
+list(TRANSFORM grid_sources PREPEND grid/)
+add_executable(b_grid ${grid_sources} main/HyperParameters.cc main/Models.cc common/Datasets.cc common/Dataset.cc)
 target_link_libraries(b_grid PyClassifiers ${MPI_CXX_LIBRARIES} ArffFiles)
-target_link_libraries(b_list ArffFiles mdlp "${TORCH_LIBRARIES}")
-target_link_libraries(b_main PyClassifiers BayesNet ArffFiles mdlp "${TORCH_LIBRARIES}")
+
+# b_list
+set(list_sources b_list.cc DatasetsExcel.cc)
+list(TRANSFORM list_sources PREPEND list/)
+add_executable(b_list ${list_sources} common/Datasets.cc common/Dataset.cc reports/ReportExcel.cc reports/ExcelFile.cc reports/ReportBase.cc)
+target_link_libraries(b_list "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)
+
+# b_main
+set(main_sources b_main.cc Experiment.cc Models.cc HyperParameters.cc)
+list(TRANSFORM main_sources PREPEND main/)
+add_executable(b_main ${main_sources} common/Datasets.cc common/Dataset.cc reports/ReportConsole.cc reports/ReportBase.cc main/Result.cc)
+target_link_libraries(b_main PyClassifiers BayesNet ArffFiles mdlp)
+
+# b_manage
+set(manage_sources b_manage.cc ManageResults.cc CommandParser.cc Results.cc)
+list(TRANSFORM manage_sources PREPEND manage/)
+add_executable(b_manage ${manage_sources} main/Result.cc reports/ReportConsole.cc reports/ReportExcel.cc reports/ReportBase.cc reports/ExcelFile.cc common/Datasets.cc common/Dataset.cc)
 target_link_libraries(b_manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)

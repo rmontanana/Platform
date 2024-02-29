@@ -46,7 +46,7 @@ namespace platform {
     }
     void DatasetsExcel::formatColumns(int dataset, int balance)
     {
-        worksheet_freeze_panes(worksheet, 4, 2);
+        worksheet_freeze_panes(worksheet, 3, 2);
         std::vector<int> columns_sizes = { 5, dataset, 10, 10, 10, balance };
         for (int i = 0; i < columns_sizes.size(); ++i) {
             worksheet_set_column(worksheet, i, i, columns_sizes.at(i), NULL);

@@ -96,22 +96,6 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 	done
 	@echo ">>> Done";
 
-opt = ""
-testp: ## Run platform tests (opt="-s") to verbose output the tests, (opt="-c='Stratified Fold Test'") to run only that section
-	@echo ">>> Running Platform tests...";
-	@$(MAKE) clean
-	@cmake --build $(f_debug) --target unit_tests_platform $(n_procs)
-	@if [ -f $(f_debug)/tests/unit_tests_platform ]; then cd $(f_debug)/tests ; ./unit_tests_platform $(opt) ; fi ; 
-	@echo ">>> Done";
-
-opt = ""
-testb: ## Run Platform tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
-	@echo ">>> Running Platform tests...";
-	@$(MAKE) clean
-	@cmake --build $(f_debug) --target unit_tests_bayesnet $(n_procs)
-	@if [ -f $(f_debug)/tests/unit_tests_bayesnet ]; then cd $(f_debug)/tests ; ./unit_tests_bayesnet $(opt) ; fi ; 
-	@echo ">>> Done";
-
 coverage: ## Run tests and generate coverage report (build/index.html)
 	@echo ">>> Building tests with coverage..."
 	@$(MAKE) test

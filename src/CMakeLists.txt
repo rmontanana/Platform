@@ -26,7 +26,7 @@ include_directories(
 set(best_sources b_best.cc BestResults.cc  Statistics.cc BestResultsExcel.cc)
 list(TRANSFORM best_sources PREPEND best/)
 add_executable(b_best ${best_sources} main/Result.cc reports/ReportExcel.cc reports/ReportBase.cc reports/ExcelFile.cc common/Datasets.cc common/Dataset.cc)
-target_link_libraries(b_best Boost::boost "${XLSXWRITER_LIB}" "${TORCH_LIBRARIES}" ArffFiles mdlp)
+target_link_libraries(b_best Boost::boost "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)
 
 # b_grid
 set(grid_sources b_grid.cc GridSearch.cc GridData.cc)
@@ -38,13 +38,13 @@ target_link_libraries(b_grid PyClassifiers ${MPI_CXX_LIBRARIES} ArffFiles)
 set(list_sources b_list.cc DatasetsExcel.cc)
 list(TRANSFORM list_sources PREPEND list/)
 add_executable(b_list ${list_sources} common/Datasets.cc common/Dataset.cc reports/ReportExcel.cc reports/ExcelFile.cc reports/ReportBase.cc)
-target_link_libraries(b_list ArffFiles mdlp "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}")
+target_link_libraries(b_list "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)
 
 # b_main
 set(main_sources b_main.cc Experiment.cc Models.cc HyperParameters.cc)
 list(TRANSFORM main_sources PREPEND main/)
 add_executable(b_main ${main_sources} common/Datasets.cc common/Dataset.cc reports/ReportConsole.cc reports/ReportBase.cc main/Result.cc)
-target_link_libraries(b_main PyClassifiers BayesNet ArffFiles mdlp "${TORCH_LIBRARIES}")
+target_link_libraries(b_main PyClassifiers BayesNet ArffFiles mdlp)
 
 # b_manage
 set(manage_sources b_manage.cc ManageResults.cc CommandParser.cc Results.cc)

@@ -37,6 +37,7 @@ namespace platform {
         setProperties("Best Results");
         int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
         datasetNameSize = std::max(datasetNameSize, maxDatasetName);
+        createFormats();
     }
     void BestResultsExcel::reportAll(const std::vector<std::string>& models, const json& table, const std::map<std::string, std::map<std::string, float>>& ranks, bool friedman, double significance)
     {

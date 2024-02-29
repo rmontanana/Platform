@@ -3,7 +3,6 @@
 #include <locale>
 #include <string>
 #include <map>
-#include "Paths.h"
 #include "xlsxwriter.h"
 
 namespace platform {

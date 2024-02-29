@@ -1,20 +1,18 @@
 #include "ExcelFile.h"
+#include "Paths.h"
 
 namespace platform {
     ExcelFile::ExcelFile()
     {
         setDefault();
-        createFormats();
     }
     ExcelFile::ExcelFile(lxw_workbook* workbook) : workbook(workbook)
     {
         setDefault();
-        createFormats();
     }
     ExcelFile::ExcelFile(lxw_workbook* workbook, lxw_worksheet* worksheet) : workbook(workbook), worksheet(worksheet)
     {
         setDefault();
-        createFormats();
     }
     void ExcelFile::setDefault()
     {

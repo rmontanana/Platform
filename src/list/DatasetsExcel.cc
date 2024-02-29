@@ -8,6 +8,7 @@ namespace platform {
     {
         file_name = "datasets.xlsx";
         workbook = workbook_new(getFileName().c_str());
+        createFormats();
         setProperties("Datasets");
     }
     DatasetsExcel::~DatasetsExcel()

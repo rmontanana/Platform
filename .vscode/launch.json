@@ -2,9 +2,9 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "sample",
             "type": "lldb",
             "request": "launch",
-            "name": "sample",
             "program": "${workspaceFolder}/build_debug/sample/BayesNetSample",
             "args": [
                 "-d",
@@ -14,14 +14,14 @@
                 "-s",
                 "271",
                 "-p",
-                "/Users/rmontanana/Code/discretizbench/datasets/",
+                "${workspaceFolder}/../discretizbench/datasets/",
             ],
             //"cwd": "${workspaceFolder}/build/sample/",
         },
         {
+            "name": "experimentPy",
             "type": "lldb",
             "request": "launch",
-            "name": "experimentPy",
             "program": "${workspaceFolder}/build_debug/src/b_main",
             "args": [
                 "-m",
@@ -36,9 +36,9 @@
             "cwd": "${workspaceFolder}/../discretizbench",
         },
         {
+            "name": "gridsearch",
             "type": "lldb",
             "request": "launch",
-            "name": "gridsearch",
             "program": "${workspaceFolder}/build_debug/src/b_grid",
             "args": [
                 "-m",
@@ -52,9 +52,9 @@
             "cwd": "${workspaceFolder}/../discretizbench",
         },
         {
+            "name": "experimentBayes",
             "type": "lldb",
             "request": "launch",
-            "name": "experimentBayes",
             "program": "${workspaceFolder}/build_debug/src/b_main",
             "args": [
                 "-m",
@@ -69,23 +69,23 @@
             "cwd": "/home/rmontanana/Code/discretizbench",
         },
         {
+            "name": "best",
             "type": "lldb",
             "request": "launch",
-            "name": "best",
             "program": "${workspaceFolder}/build_debug/src/b_best",
             "args": [
                 "-m",
                 "BoostAODE",
                 "-s",
                 "accuracy",
-                "--build",
+                "--excel"
             ],
             "cwd": "${workspaceFolder}/../discretizbench",
         },
         {
+            "name": "manage",
             "type": "lldb",
             "request": "launch",
-            "name": "manage",
             "program": "${workspaceFolder}/build_debug/src/b_manage",
             "args": [
                 "-n",
@@ -94,18 +94,20 @@
             "cwd": "${workspaceFolder}/../discretizbench",
         },
         {
+            "name": "list",
             "type": "lldb",
             "request": "launch",
-            "name": "list",
             "program": "${workspaceFolder}/build_debug/src/b_list",
-            "args": [],
+            "args": [
+                "--excel"
+            ],
             //"cwd": "/Users/rmontanana/Code/discretizbench",
             "cwd": "${workspaceFolder}/../discretizbench",
         },
         {
+            "name": "test",
             "type": "lldb",
             "request": "launch",
-            "name": "test",
             "program": "${workspaceFolder}/build_debug/tests/unit_tests",
             "args": [
                 "-c=\"Metrics Test\"",

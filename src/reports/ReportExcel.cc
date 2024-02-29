@@ -49,7 +49,6 @@ namespace platform {
             createWorksheet();
         }
         setProperties(data["title"].get<std::string>());
-        createFormats();
         formatColumns();
     }
 

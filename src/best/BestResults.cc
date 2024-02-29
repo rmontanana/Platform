@@ -302,9 +302,9 @@ namespace platform {
             // Build the table of results
             json table = buildTableResults(models);
             std::vector<std::string> datasets = getDatasets(table.begin().value());
-            BestResultsExcel excel(score, datasets);
-            excel.reportSingle(model, path + bestResultFile());
-            messageExcelFile(excel.getFileName());
+            BestResultsExcel excel_report(score, datasets);
+            excel_report.reportSingle(model, path + bestResultFile());
+            messageExcelFile(excel_report.getFileName());
         }
     }
     void BestResults::reportAll(bool excel)

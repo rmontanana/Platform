@@ -1,8 +1,11 @@
 #include <iostream>
 #include <locale>
+#include <argparse/argparse.hpp>
 #include "Paths.h"
 #include "Colors.h"
 #include "Datasets.h"
+#include "DatasetsExcel.h"
+#include "config.h"
 
 const int BALANCE_LENGTH = 75;
 
@@ -27,6 +30,13 @@ void outputBalance(const std::string& balance)
 int main(int argc, char** argv)
 {
     auto data = platform::Datasets(false, platform::Paths::datasets());
+    argparse::ArgumentParser program("b_list", { project_version.begin(), project_version.end() });
+    program.add_argument("--excel")
+        .help("Output in Excel format")
+        .default_value(false)
+        .implicit_value(true);
+    program.parse_args(argc, argv);
+    auto excel = program.get<bool>("--excel");
     locale mylocale(std::cout.getloc(), new separated);
     locale::global(mylocale);
     std::cout.imbue(mylocale);
@@ -52,5 +62,10 @@ int main(int argc, char** argv)
         outputBalance(oss.str());
     }
     std::cout << Colors::RESET() << std::endl;
+    if (excel) {
+        auto report = platform::DatasetsExcel();
+        report.report();
+        std::cout << "Output saved in " << report.getFileName() << std::endl;
+    }
     return 0;
 }

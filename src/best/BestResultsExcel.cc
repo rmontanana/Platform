@@ -32,11 +32,11 @@ namespace platform {
     }
     BestResultsExcel::BestResultsExcel(const std::string& score, const std::vector<std::string>& datasets) : score(score), datasets(datasets)
     {
-        workbook = workbook_new((Paths::excel() + fileName).c_str());
+        file_name = "BestResults.xlsx";
+        workbook = workbook_new(getFileName().c_str());
         setProperties("Best Results");
         int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
         datasetNameSize = std::max(datasetNameSize, maxDatasetName);
-        createFormats();
     }
     void BestResultsExcel::reportAll(const std::vector<std::string>& models, const json& table, const std::map<std::string, std::map<std::string, float>>& ranks, bool friedman, double significance)
     {
@@ -170,10 +170,7 @@ namespace platform {
             doFriedman();
         }
     }
-    std::string BestResultsExcel::getFileName()
-    {
-        return Paths::excel() + fileName;
-    }
+
     void BestResultsExcel::header(bool ranks)
     {
         row = 0;

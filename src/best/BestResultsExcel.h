@@ -9,13 +9,12 @@ using json = nlohmann::json;
 
 namespace platform {
 
-    class BestResultsExcel : ExcelFile {
+    class BestResultsExcel : public ExcelFile {
     public:
         BestResultsExcel(const std::string& score, const std::vector<std::string>& datasets);
         ~BestResultsExcel();
         void reportAll(const std::vector<std::string>& models, const json& table, const std::map<std::string, std::map<std::string, float>>& ranks, bool friedman, double significance);
         void reportSingle(const std::string& model, const std::string& fileName);
-        std::string getFileName();
     private:
         void build();
         void header(bool ranks);
@@ -24,7 +23,6 @@ namespace platform {
         void formatColumns();
         void doFriedman();
         void addConditionalFormat(std::string formula);
-        const std::string fileName = "BestResults.xlsx";
         std::string score;
         std::vector<std::string> models;
         std::vector<std::string> datasets;

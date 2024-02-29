@@ -65,5 +65,6 @@ int main(int argc, char** argv)
         std::cout << Colors::GREEN() << fileName << " created!" << Colors::RESET() << std::endl;
         results.reportSingle(excel);
     }
+    std::cout << Colors::RESET();
     return 0;
 }

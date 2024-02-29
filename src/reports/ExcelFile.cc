@@ -4,14 +4,17 @@ namespace platform {
     ExcelFile::ExcelFile()
     {
         setDefault();
+        createFormats();
     }
     ExcelFile::ExcelFile(lxw_workbook* workbook) : workbook(workbook)
     {
         setDefault();
+        createFormats();
     }
     ExcelFile::ExcelFile(lxw_workbook* workbook, lxw_worksheet* worksheet) : workbook(workbook), worksheet(worksheet)
     {
         setDefault();
+        createFormats();
     }
     void ExcelFile::setDefault()
     {
@@ -25,6 +28,10 @@ namespace platform {
     lxw_workbook* ExcelFile::getWorkbook()
     {
         return workbook;
+    }
+    std::string ExcelFile::getFileName()
+    {
+        return Paths::excel() + file_name;
     }
     void ExcelFile::setProperties(std::string title)
     {

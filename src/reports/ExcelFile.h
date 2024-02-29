@@ -3,6 +3,7 @@
 #include <locale>
 #include <string>
 #include <map>
+#include "Paths.h"
 #include "xlsxwriter.h"
 
 namespace platform {
@@ -19,6 +20,7 @@ namespace platform {
         ExcelFile(lxw_workbook* workbook);
         ExcelFile(lxw_workbook* workbook, lxw_worksheet* worksheet);
         lxw_workbook* getWorkbook();
+        std::string getFileName();
     protected:
         void setProperties(std::string title);
         void writeString(int row, int col, const std::string& text, const std::string& style = "");
@@ -36,6 +38,7 @@ namespace platform {
         uint32_t colorTitle;
         uint32_t colorOdd;
         uint32_t colorEven;
+        std::string file_name;
     private:
         void setDefault();
     };

@@ -154,9 +154,11 @@ namespace platform {
             {"excel", 'e', true},
             {"title", 't', true}
         };
+        // tuple<Option, digit, requires value>
         std::vector<std::tuple<std::string, char, bool>> listOptions = {
             {"report", 'r', true},
             {"list", 'l', false},
+            {"back", 'b', false},
             {"quit", 'q', false}
         };
         auto parser = CommandParser();
@@ -169,6 +171,11 @@ namespace platform {
             switch (option) {
                 case 'q':
                     finished = true;
+                    break;
+                case 'b':
+                    // back to show the report
+                    report(index, false);
+                    indexList = false;
                     break;
                 case 'l':
                     list();

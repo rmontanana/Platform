@@ -86,4 +86,70 @@ make release
 make debug
 ```
 
-## 1. Introduction
+### Configuration
+
+The configuration file is named .env and it should be located in the folder where the experiments should be run. In the root folder of the project there is a file named .env.example that can be used as a template.
+
+## 1. Commands
+
+### b_list
+
+List all the datasets and its properties. The datasets are located in the _datasets_ folder under the experiments root folder. A special file called all.txt with the names of the datasets has to be created. This all file is built wih lines of the form:
+<name>,<class_name>,<real_features>
+
+where <real_features> can be either the word _all_ or a list of numbers separated by commas, i.e. [0,3,6,7]
+
+![b_list](img/blist.gif)
+
+### b_grid
+
+Run a grid search over the parameters of the classifiers. The parameters are defined in the file _grid.txt_ located in the grid folder of the experiments. The file has to be created with the following format:
+
+```json
+{
+    "all": [
+        <set of hyperparams>, ...
+    ],
+    "<dataset_name>": [
+        <specific set of hyperparams for <dataset_name>>, ...
+    ],
+}
+```
+
+The file has to be named _grid_<model_name>_input.json_
+
+As a result it builds a file named _grid_<model_name>_output.json_ with the results of the grid search.
+
+The computation is done in parallel using MPI.
+
+![b_grid](img/bgrid.gif)
+
+### b_main
+
+Run the main experiment. There are several hyperparameters that can set in command line:
+
+- -d, -\-dataset <dataset_name> : Name of the dataset to run the experiment with. If no dataset is specificied the experiment will run with all the datasets in the all.txt file.
+- -m, -\-model <classifier_name> : Name of the classifier to run the experiment with (i.e. BoostAODE, TAN, Odte, etc.).
+- -\-discretize: Discretize the dataset before running the experiment.
+- -\-stratified: Use stratified cross validation.
+- -\-folds <folds>: Number of folds for cross validation (optional, default value is in .env file).
+- -s, -\-seeds <seed>: Seeds for the random number generator (optional, default values are in .env file).
+- -\-no-train-score: Do not calculate the train score (optional), this is useful when the dataset is big and the training score is not needed.
+- -\-hyperparameters <hyperparameters>: Hyperparameters for the experiment in json format.
+- -\-hyper-file <hyperparameters_file>: File with the hyperparameters for the experiment in json format. This file uses the output format of the b_grid command.
+- -\-title <title_text>: Title of the experiment (optional if only one dataset is specificied).
+- -\-quiet: Don't display detailed progress and result of the experiment.
+
+![b_main](img/bmain.gif)
+
+### b_manage
+
+Manage the results of the experiments.
+
+![b_manage](img/bmanage.gif)
+
+### b_best
+
+Get and optionally compare the best results of the experiments. The results can be stored in an MS Excel file.
+
+![b_best](img/bbest.gif)

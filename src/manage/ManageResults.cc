@@ -7,6 +7,7 @@
 #include "Paths.h"
 #include "ReportConsole.h"
 #include "ReportExcel.h"
+#include "ReportExcelCompared.h"
 
 namespace platform {
 
@@ -84,6 +85,14 @@ namespace platform {
         std::cout << "Not done!" << std::endl;
         return false;
     }
+    void ManageResults::report_compared(const int index_A, const int index_B)
+    {
+        std::cout << "Comparing " << results.at(index_A).getFilename() << " with " << results.at(index_B).getFilename() << std::endl;
+        auto data_A = results.at(index_A).getJson();
+        auto data_B = results.at(index_B).getJson();
+        ReportExcelCompared reporter(data_A, data_B);
+        reporter.report();
+    }
     void ManageResults::report(const int index, const bool excelReport)
     {
         std::cout << Colors::YELLOW() << "Reporting " << results.at(index).getFilename() << std::endl;
@@ -140,7 +149,7 @@ namespace platform {
     void ManageResults::menu()
     {
         char option;
-        int index, subIndex;
+        int index, subIndex, index_A = -1, index_B = -1;
         bool finished = false;
         std::string filename;
         // tuple<Option, digit, requires value>
@@ -152,7 +161,10 @@ namespace platform {
             {"sort", 's', false},
             {"report", 'r', true},
             {"excel", 'e', true},
-            {"title", 't', true}
+            {"title", 't', true},
+            {"set A", 'a', true},
+            {"set B", 'b', true},
+            {"compare A~B", 'c', false}
         };
         // tuple<Option, digit, requires value>
         std::vector<std::tuple<std::string, char, bool>> listOptions = {
@@ -172,9 +184,31 @@ namespace platform {
                 case 'q':
                     finished = true;
                     break;
+                case 'a':
+                    if (index == index_B) {
+                        std::cout << Colors::RED() << "A and B cannot be the same!" << Colors::RESET() << std::endl;
+                        break;
+                    }
+                    index_A = index;
+                    break;
                 case 'b':
-                    // back to show the report
-                    report(index, false);
+                    if (indexList) {
+                        if (index == index_A) {
+                            std::cout << Colors::RED() << "A and B cannot be the same!" << Colors::RESET() << std::endl;
+                            break;
+                        }
+                        index_B = index;
+                    } else {
+                        // back to show the report
+                        report(index, false);
+                    }
+                    break;
+                case 'c':
+                    if (index_A == -1 || index_B == -1) {
+                        std::cout << Colors::RED() << "Need to set A and B first!" << Colors::RESET() << std::endl;
+                        break;
+                    }
+                    report_compared(index_A, index_B);
                     break;
                 case 'l':
                     list();

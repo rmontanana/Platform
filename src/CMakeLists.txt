@@ -49,5 +49,8 @@ target_link_libraries(b_main PyClassifiers BayesNet ArffFiles mdlp)
 # b_manage
 set(manage_sources b_manage.cc ManageResults.cc CommandParser.cc Results.cc)
 list(TRANSFORM manage_sources PREPEND manage/)
-add_executable(b_manage ${manage_sources} main/Result.cc reports/ReportConsole.cc reports/ReportExcel.cc reports/ReportBase.cc reports/ExcelFile.cc common/Datasets.cc common/Dataset.cc)
+add_executable(b_manage ${manage_sources} main/Result.cc 
+    reports/ReportConsole.cc reports/ReportExcel.cc reports/ReportExcelCompared.cc reports/ReportBase.cc reports/ExcelFile.cc 
+    common/Datasets.cc common/Dataset.cc
+)
 target_link_libraries(b_manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)

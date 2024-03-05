@@ -9,11 +9,11 @@ namespace platform {
     class ReportExcel : public ReportBase, public ExcelFile {
     public:
         explicit ReportExcel(json data_, bool compare, lxw_workbook* workbook, lxw_worksheet* worksheet = NULL);
+        void closeFile();
     private:
         void formatColumns();
         void createFile();
         void createWorksheet();
-        void closeFile();
         void header() override;
         void body() override;
         void showSummary() override;

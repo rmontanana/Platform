@@ -23,7 +23,7 @@ namespace platform {
         report = ReportExcel(data_B, false, workbook, worksheet);
         report.show();
         // Add the comparison worksheet
-        worksheet = workbook_add_worksheet(workbook, "Comparison");
+        worksheet = workbook_add_worksheet(workbook, "Δ");
         header();
         body();
     }
@@ -31,6 +31,7 @@ namespace platform {
     {
         worksheet_merge_range(worksheet, 0, 0, 0, 20, "Compare Results A vs B", styles["headerFirst"]);
         worksheet_merge_range(worksheet, 1, 0, 1, 20, "Δ = (A - B) / B", styles["headerRest"]);
+        worksheet_freeze_panes(worksheet, 5, 1);
     }
     double diff(double a, double b)
     {
@@ -60,7 +61,8 @@ namespace platform {
         writeString(headerRow + 1, hypCol + 1, "B", "bodyHeader");
         col = 0;
         for (const auto size : sizes) {
-            worksheet_set_column(worksheet, col, col++, size, NULL);
+            worksheet_set_column(worksheet, col, col, size, NULL);
+            col++;
         }
         // Body Data
         row = headerRow + 2;

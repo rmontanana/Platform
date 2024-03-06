@@ -121,12 +121,17 @@ namespace platform {
             format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
             format_set_font_size(style, normalSize);
             format_set_num_format(style, "#,##0.00");
+        } else if (name == "percentage") {
+            format_set_border(style, LXW_BORDER_THIN);
+            format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
+            format_set_font_size(style, normalSize);
+            format_set_num_format(style, "0.00%");
         }
     }
 
     void ExcelFile::createFormats()
     {
-        auto styleNames = { "text", "textCentered", "bodyHeader", "result", "time", "ints", "floats" };
+        auto styleNames = { "text", "textCentered", "bodyHeader", "result", "time", "ints", "floats", "percentage" };
         lxw_format* style;
         for (std::string name : styleNames) {
             lxw_format* style = workbook_add_format(workbook);

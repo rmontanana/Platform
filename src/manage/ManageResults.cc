@@ -189,12 +189,20 @@ namespace platform {
                         std::cout << Colors::RED() << "A and B cannot be the same!" << Colors::RESET() << std::endl;
                         break;
                     }
+                    if (!results.at(index).isComplete()) {
+                        std::cout << Colors::RED() << "A must be a complete result!" << Colors::RESET() << std::endl;
+                        break;
+                    }
                     index_A = index;
                     break;
                 case 'b':
                     if (indexList) {
                         if (index == index_A) {
                             std::cout << Colors::RED() << "A and B cannot be the same!" << Colors::RESET() << std::endl;
+                            break;
+                        }
+                        if (!results.at(index).isComplete()) {
+                            std::cout << Colors::RED() << "B must be a complete result!" << Colors::RESET() << std::endl;
                             break;
                         }
                         index_B = index;

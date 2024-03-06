@@ -29,7 +29,8 @@ namespace platform {
     }
     void ReportExcelCompared::header()
     {
-        worksheet_merge_range(worksheet, 0, 0, 0, 20, "Compare Results A & B", styles["headerFirst"]);
+        worksheet_merge_range(worksheet, 0, 0, 0, 20, "Compare Results A vs B", styles["headerFirst"]);
+        worksheet_merge_range(worksheet, 1, 0, 1, 20, "Δ = (A - B) / B", styles["headerRest"]);
     }
     double diff(double a, double b)
     {
@@ -49,10 +50,9 @@ namespace platform {
         }
         for (const auto& item : head_b) {
             worksheet_merge_range(worksheet, headerRow, col, headerRow, col + 2, item.c_str(), styles["bodyHeader_even"]);
-            writeString(headerRow + 1, col, "A", "bodyHeader");
-            writeString(headerRow + 1, col + 1, "B", "bodyHeader");
-            writeString(headerRow + 1, col + 2, "Δ", "bodyHeader");
-            col += 3;
+            writeString(headerRow + 1, col++, "A", "bodyHeader");
+            writeString(headerRow + 1, col++, "B", "bodyHeader");
+            writeString(headerRow + 1, col++, "Δ", "bodyHeader");
         }
         worksheet_merge_range(worksheet, headerRow, col, headerRow, col + 1, "Hyperparameters", styles["bodyHeader_even"]);
         int hypCol = col;
@@ -60,12 +60,10 @@ namespace platform {
         writeString(headerRow + 1, hypCol + 1, "B", "bodyHeader");
         col = 0;
         for (const auto size : sizes) {
-            worksheet_set_column(worksheet, col, col, size, NULL);
-            col++;
+            worksheet_set_column(worksheet, col, col++, size, NULL);
         }
         // Body Data
         row = headerRow + 2;
-        col = 0;
         int hypSize_A = 15;
         int hypSize_B = 15;
         auto compared = std::vector<std::string>({ "nodes", "leaves", "depth", "score", "time" });
@@ -74,6 +72,7 @@ namespace platform {
         auto totals_B = std::vector<double>(compared.size(), 0.0);
         std::string hyperparameters;
         for (int i = 0; i < data_A["results"].size(); i++) {
+            col = 0;
             const auto& r_A = data_A["results"][i];
             const auto& r_B = data_B["results"][i];
             for (int j = 0; j < compared.size(); j++) {
@@ -82,28 +81,25 @@ namespace platform {
                 totals_A[j] += r_A[key].get<double>();
                 totals_B[j] += r_B[key].get<double>();
             }
-            // transform(compared.begin(), compared.end(), compared_data.begin(), [&](const std::string& key) {
-            //     return diff(r_A[key].get<double>(), r_B[key].get<double>());
-            //     });
-            writeString(row, col, r_A["dataset"].get<std::string>(), "text");
-            writeInt(row, col + 1, r_A["samples"].get<int>(), "ints");
-            writeInt(row, col + 2, r_A["features"].get<int>(), "ints");
-            writeInt(row, col + 3, r_A["classes"].get<int>(), "ints");
-            writeDouble(row, col + 4, r_A["nodes"].get<float>(), "floats");
-            writeDouble(row, col + 5, r_B["nodes"].get<float>(), "floats");
-            writeDouble(row, col + 6, compared_data[0], "percentage");
-            writeDouble(row, col + 7, r_A["leaves"].get<float>(), "floats");
-            writeDouble(row, col + 8, r_B["leaves"].get<float>(), "floats");
-            writeDouble(row, col + 9, compared_data[1], "percentage");
-            writeDouble(row, col + 10, r_A["depth"].get<double>(), "floats");
-            writeDouble(row, col + 11, r_B["depth"].get<double>(), "floats");
-            writeDouble(row, col + 12, compared_data[2], "percentage");
-            writeDouble(row, col + 13, r_A["score"].get<double>(), "result");
-            writeDouble(row, col + 14, r_B["score"].get<double>(), "result");
-            writeDouble(row, col + 15, compared_data[3], "percentage");
-            writeDouble(row, col + 16, r_A["time"].get<double>(), "time");
-            writeDouble(row, col + 17, r_B["time"].get<double>(), "time");
-            writeDouble(row, col + 18, compared_data[4], "percentage");
+            writeString(row, col++, r_A["dataset"].get<std::string>(), "text");
+            writeInt(row, col++, r_A["samples"].get<int>(), "ints");
+            writeInt(row, col++, r_A["features"].get<int>(), "ints");
+            writeInt(row, col++, r_A["classes"].get<int>(), "ints");
+            writeDouble(row, col++, r_A["nodes"].get<float>(), "floats");
+            writeDouble(row, col++, r_B["nodes"].get<float>(), "floats");
+            writeDouble(row, col++, compared_data[0], "percentage");
+            writeDouble(row, col++, r_A["leaves"].get<float>(), "floats");
+            writeDouble(row, col++, r_B["leaves"].get<float>(), "floats");
+            writeDouble(row, col++, compared_data[1], "percentage");
+            writeDouble(row, col++, r_A["depth"].get<double>(), "floats");
+            writeDouble(row, col++, r_B["depth"].get<double>(), "floats");
+            writeDouble(row, col++, compared_data[2], "percentage");
+            writeDouble(row, col++, r_A["score"].get<double>(), "result");
+            writeDouble(row, col++, r_B["score"].get<double>(), "result");
+            writeDouble(row, col++, compared_data[3], "percentage");
+            writeDouble(row, col++, r_A["time"].get<double>(), "time");
+            writeDouble(row, col++, r_B["time"].get<double>(), "time");
+            writeDouble(row, col++, compared_data[4], "percentage");
             hyperparameters = r_A["hyperparameters"].dump();
             if (hyperparameters.size() > hypSize_A) {
                 hypSize_A = hyperparameters.size();
@@ -128,10 +124,9 @@ namespace platform {
         auto formats = std::vector<std::string>({ "floats", "floats", "floats", "result", "result" });
         int col = 4;
         for (int i = 0; i < totals_A.size(); i++) {
-            writeDouble(row, col, totals_A[i], formats[i]);
-            writeDouble(row, col + 1, totals_B[i], formats[i]);
-            writeDouble(row, col + 2, diff(totals_A[i], totals_B[i]), "percentage");
-            col += 3;
+            writeDouble(row, col++, totals_A[i], formats[i]);
+            writeDouble(row, col++, totals_B[i], formats[i]);
+            writeDouble(row, col++, diff(totals_A[i], totals_B[i]), "percentage");
         }
     }
 }

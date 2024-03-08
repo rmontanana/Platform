@@ -2,11 +2,11 @@
 #include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>
 #include "Experiment.h"
-#include "Datasets.h"
-#include "DotEnv.h"
+#include "common/Datasets.h"
+#include "common/DotEnv.h"
+#include "common/Paths.h"
 #include "Models.h"
 #include "modelRegister.h"
-#include "Paths.h"
 #include "config.h"
 
 
@@ -55,7 +55,7 @@ void manageArguments(argparse::ArgumentParser& program)
 
 int main(int argc, char** argv)
 {
-    argparse::ArgumentParser program("b_main", { project_version.begin(), project_version.end() });
+    argparse::ArgumentParser program("b_main", { platform_project_version.begin(), platform_project_version.end() });
     manageArguments(program);
     std::string file_name, model_name, title, hyperparameters_file;
     json hyperparameters_json;

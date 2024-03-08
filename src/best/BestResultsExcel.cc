@@ -1,10 +1,10 @@
 #include <sstream>
-#include "BestResultsExcel.h"
-#include "Paths.h"
 #include <map>
 #include <nlohmann/json.hpp>
+#include "common/Paths.h"
+#include "reports/ReportExcel.h"
 #include "Statistics.h"
-#include "ReportExcel.h"
+#include "BestResultsExcel.h"
 
 namespace platform {
     json loadResultData(const std::string& fileName)

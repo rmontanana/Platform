@@ -3,8 +3,8 @@
 #include <torch/torch.h>
 #include <nlohmann/json.hpp>
 #include <string>
-#include "folding.hpp"
-#include "BaseClassifier.h"
+#include <folding.hpp>
+#include "bayesnet/BaseClassifier.h"
 #include "HyperParameters.h"
 #include "Result.h"
 

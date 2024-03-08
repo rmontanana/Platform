@@ -1,19 +1,19 @@
 #include <iostream>
-#include <torch/torch.h>
 #include <string>
 #include <map>
 #include <fstream>
+#include <torch/torch.h>
 #include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>
 #include <ArffFiles.h>
-#include <utils/BayesMetrics.h>
 #include <CPPFImdlp.h>
 #include <folding.hpp>
+#include <bayesnet/utils/BayesMetrics.h>
 #include "Models.h"
 #include "modelRegister.h"
 #include "config.h"
 
-const std::string PATH = { data_path.begin(), data_path.end() };
+const std::string PATH = { platform_data_path.begin(), platform_data_path.end() };
 
 pair<std::vector<mdlp::labels_t>, map<std::string, int>> discretize(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y, std::vector<std::string> features)
 {

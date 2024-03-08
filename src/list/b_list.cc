@@ -2,9 +2,9 @@
 #include <locale>
 #include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>
-#include "Paths.h"
-#include "Colors.h"
-#include "Datasets.h"
+#include "common/Paths.h"
+#include "common/Colors.h"
+#include "common/Datasets.h"
 #include "DatasetsExcel.h"
 #include "config.h"
 
@@ -31,7 +31,7 @@ std::string outputBalance(const std::string& balance)
 int main(int argc, char** argv)
 {
     auto datasets = platform::Datasets(false, platform::Paths::datasets());
-    argparse::ArgumentParser program("b_list", { project_version.begin(), project_version.end() });
+    argparse::ArgumentParser program("b_list", { platform_project_version.begin(), platform_project_version.end() });
     program.add_argument("--excel")
         .help("Output in Excel format")
         .default_value(false)

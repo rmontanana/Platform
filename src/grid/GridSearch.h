@@ -4,10 +4,10 @@
 #include <map>
 #include <mpi.h>
 #include <nlohmann/json.hpp>
-#include "Datasets.h"
-#include "HyperParameters.h"
+#include "common/Datasets.h"
+#include "common/Timer.h"
+#include "main/HyperParameters.h"
 #include "GridData.h"
-#include "Timer.h"
 
 namespace platform {
     using json = nlohmann::json;

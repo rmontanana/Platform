@@ -1,5 +1,5 @@
-#include "GridData.h"
 #include <fstream>
+#include "GridData.h"
 
 namespace platform {
     GridData::GridData(const std::string& fileName)

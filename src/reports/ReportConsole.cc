@@ -1,9 +1,9 @@
 #include <iostream>
 #include <sstream>
 #include <locale>
+#include "best/BestScore.h"
+#include "common/CLocale.h"
 #include "ReportConsole.h"
-#include "BestScore.h"
-#include "CLocale.h"
 
 namespace platform {
     std::string ReportConsole::headerLine(const std::string& text, int utf = 0)

@@ -4,12 +4,12 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include "BestResults.h"
-#include "Result.h"
-#include "Colors.h"
-#include "Statistics.h"
+#include "common/Colors.h"
+#include "common/CLocale.h"
+#include "main/Result.h"
 #include "BestResultsExcel.h"
-#include "CLocale.h"
+#include "Statistics.h"
+#include "BestResults.h"
 
 
 namespace fs = std::filesystem;

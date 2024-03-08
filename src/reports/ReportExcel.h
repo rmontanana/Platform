@@ -1,10 +1,10 @@
 #ifndef REPORTEXCEL_H
 #define REPORTEXCEL_H
-#include<map>
-#include "xlsxwriter.h"
+#include <map>
+#include <xlsxwriter.h>
+#include "common/Colors.h"
 #include "ReportBase.h"
 #include "ExcelFile.h"
-#include "Colors.h"
 namespace platform {
     class ReportExcel : public ReportBase, public ExcelFile {
     public:

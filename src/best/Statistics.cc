@@ -1,10 +1,10 @@
 #include <sstream>
-#include "Statistics.h"
-#include "Colors.h"
-#include "Symbols.h"
 #include <boost/math/distributions/chi_squared.hpp>
 #include <boost/math/distributions/normal.hpp>
-#include "CLocale.h"
+#include "common/Colors.h"
+#include "common/Symbols.h"
+#include "common/CLocale.h"
+#include "Statistics.h"
 
 
 namespace platform {

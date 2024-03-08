@@ -1,7 +1,7 @@
 #include <sstream>
 #include <locale>
+#include "best/BestScore.h"
 #include "ReportExcel.h"
-#include "BestScore.h"
 
 
 namespace platform {

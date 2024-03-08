@@ -1,8 +1,8 @@
-#include "Experiment.h"
-#include "Datasets.h"
+#include "common/Datasets.h"
+#include "reports/ReportConsole.h"
+#include "common/Paths.h"
 #include "Models.h"
-#include "ReportConsole.h"
-#include "Paths.h"
+#include "Experiment.h"
 namespace platform {
     using json = nlohmann::json;
 

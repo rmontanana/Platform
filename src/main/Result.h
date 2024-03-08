@@ -4,9 +4,9 @@
 #include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
-#include "HyperParameters.h"
-#include "PartialResult.h"
-#include "Timer.h"
+#include "common/Timer.h"
+#include "main/HyperParameters.h"
+#include "main/PartialResult.h"
 
 namespace platform {
     using json = nlohmann::json;

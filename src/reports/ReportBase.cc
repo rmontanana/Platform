@@ -1,8 +1,8 @@
 #include <sstream>
 #include <locale>
-#include "Datasets.h"
+#include "common/Datasets.h"
+#include "common/DotEnv.h"
 #include "ReportBase.h"
-#include "DotEnv.h"
 
 namespace platform {
     ReportBase::ReportBase(json data_, bool compare) : data(data_), compare(compare), margin(0.1)

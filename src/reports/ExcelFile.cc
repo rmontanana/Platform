@@ -1,5 +1,5 @@
+#include "common/Paths.h"
 #include "ExcelFile.h"
-#include "Paths.h"
 
 namespace platform {
     ExcelFile::ExcelFile()

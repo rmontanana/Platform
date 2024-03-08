@@ -1,8 +1,8 @@
 #include <iostream>
 #include <argparse/argparse.hpp>
-#include "Paths.h"
+#include "common/Paths.h"
+#include "common/Colors.h"
 #include "BestResults.h"
-#include "Colors.h"
 #include "config.h"
 
 void manageArguments(argparse::ArgumentParser& program)
@@ -29,7 +29,7 @@ void manageArguments(argparse::ArgumentParser& program)
 
 int main(int argc, char** argv)
 {
-    argparse::ArgumentParser program("b_best", { project_version.begin(), project_version.end() });
+    argparse::ArgumentParser program("b_best", { platform_project_version.begin(), platform_project_version.end() });
     manageArguments(program);
     std::string model, score;
     bool build, report, friedman, excel;

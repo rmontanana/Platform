@@ -1,7 +1,7 @@
-#include "HyperParameters.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include "HyperParameters.h"
 
 namespace platform {
     HyperParameters::HyperParameters(const std::vector<std::string>& datasets, const json& hyperparameters_)

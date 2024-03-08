@@ -1,5 +1,5 @@
-#include "Results.h"
 #include <algorithm>
+#include "Results.h"
 
 namespace platform {
     Results::Results(const std::string& path, const std::string& model, const std::string& score, bool complete, bool partial) :

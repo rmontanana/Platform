@@ -1,11 +1,11 @@
 #include <iostream>
 #include <cstddef>
 #include <torch/torch.h>
+#include <folding.hpp>
+#include "main/Models.h"
+#include "common/Paths.h"
+#include "common/Colors.h"
 #include "GridSearch.h"
-#include "Models.h"
-#include "Paths.h"
-#include "folding.hpp"
-#include "Colors.h"
 
 namespace platform {
     std::string get_date()

@@ -1,9 +1,9 @@
 #ifndef BESTRESULTS_EXCEL_H
 #define BESTRESULTS_EXCEL_H
-#include "ExcelFile.h"
 #include <vector>
 #include <map>
 #include <nlohmann/json.hpp>
+#include "reports/ExcelFile.h"
 
 using json = nlohmann::json;
 

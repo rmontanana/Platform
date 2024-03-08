@@ -5,7 +5,7 @@ class Paths {
 public:
     static std::string datasets()
     {
-        return { data_path.begin(), data_path.end() };
+        return { platform_data_path.begin(), platform_data_path.end() };
     }
 };
 

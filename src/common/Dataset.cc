@@ -1,6 +1,6 @@
-#include "Dataset.h"
-#include "ArffFiles.h"
+#include <ArffFiles.h>
 #include <fstream>
+#include "Dataset.h"
 namespace platform {
     Dataset::Dataset(const Dataset& dataset) : path(dataset.path), name(dataset.name), className(dataset.className), n_samples(dataset.n_samples), n_features(dataset.n_features), features(dataset.features), states(dataset.states), loaded(dataset.loaded), discretize(dataset.discretize), X(dataset.X), y(dataset.y), Xv(dataset.Xv), Xd(dataset.Xd), yv(dataset.yv), fileType(dataset.fileType)
     {

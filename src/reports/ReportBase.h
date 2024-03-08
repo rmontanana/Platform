@@ -2,9 +2,9 @@
 #define REPORTBASE_H
 #include <string>
 #include <iostream>
-#include "Paths.h"
-#include "Symbols.h"
 #include <nlohmann/json.hpp>
+#include "common/Paths.h"
+#include "common/Symbols.h"
 
 using json = nlohmann::json;
 namespace platform {

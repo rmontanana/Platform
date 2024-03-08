@@ -1,12 +1,12 @@
-#include "Result.h"
 #include <filesystem>
 #include <fstream>
 #include <sstream>
-#include "BestScore.h"
-#include "Colors.h"
-#include "DotEnv.h"
-#include "CLocale.h"
-#include "Paths.h"
+#include "best/BestScore.h"
+#include "common/Colors.h"
+#include "common/DotEnv.h"
+#include "common/CLocale.h"
+#include "common/Paths.h"
+#include "Result.h"
 
 namespace platform {
     std::string get_actual_date()

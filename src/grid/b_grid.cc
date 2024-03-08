@@ -4,13 +4,13 @@
 #include <tuple>
 #include <nlohmann/json.hpp>
 #include <mpi.h>
-#include "DotEnv.h"
-#include "Models.h"
-#include "modelRegister.h"
+#include "main/Models.h"
+#include "main/modelRegister.h"
+#include "common/Paths.h"
+#include "common/Timer.h"
+#include "common/Colors.h"
+#include "common/DotEnv.h"
 #include "GridSearch.h"
-#include "Paths.h"
-#include "Timer.h"
-#include "Colors.h"
 #include "config.h"
 
 using json = nlohmann::json;
@@ -223,7 +223,7 @@ int main(int argc, char** argv)
     //
     // Manage arguments
     //
-    argparse::ArgumentParser program("b_grid", { project_version.begin(), project_version.end() });
+    argparse::ArgumentParser program("b_grid", { platform_project_version.begin(), platform_project_version.end() });
     // grid dump subparser
     argparse::ArgumentParser dump_command("dump");
     dump_command.add_description("Dump the combinations of hyperparameters of a model.");

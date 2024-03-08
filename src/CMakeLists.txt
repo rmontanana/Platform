@@ -10,15 +10,9 @@ include_directories(
     ${MPI_CXX_INCLUDE_DIRS}
     ${TORCH_INCLUDE_DIRS}
     ${CMAKE_BINARY_DIR}/configured_files/include
-    /usr/local/include/bayesnet
-    /usr/local/include/pyclassifiers
+    /usr/local/include
     ## Platform
-    ${Platform_SOURCE_DIR}/src/common
-    ${Platform_SOURCE_DIR}/src/best
-    ${Platform_SOURCE_DIR}/src/grid
-    ${Platform_SOURCE_DIR}/src/main
-    ${Platform_SOURCE_DIR}/src/manage
-    ${Platform_SOURCE_DIR}/src/reports
+    ${Platform_SOURCE_DIR}/src
 )
 
 # b_best

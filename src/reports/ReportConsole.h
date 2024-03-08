@@ -1,8 +1,8 @@
 #ifndef REPORTCONSOLE_H
 #define REPORTCONSOLE_H
 #include <string>
+#include "common/Colors.h"
 #include "ReportBase.h"
-#include "Colors.h"
 
 namespace platform {
     const int MAXL = 133;

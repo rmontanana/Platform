@@ -1,5 +1,6 @@
 #ifndef COLORS_H
 #define COLORS_H
+#include <string>
 class Colors {
 public:
     static std::string MAGENTA() { return "\033[1;35m"; }

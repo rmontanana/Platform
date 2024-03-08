@@ -2,8 +2,8 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include "Colors.h"
-#include "Utils.h"
+#include "common/Colors.h"
+#include "common/Utils.h"
 
 namespace platform {
     void CommandParser::messageError(const std::string& message)

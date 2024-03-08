@@ -1,13 +1,13 @@
-#include "ManageResults.h"
-#include "CommandParser.h"
 #include <filesystem>
 #include <tuple>
-#include "Colors.h"
-#include "CLocale.h"
-#include "Paths.h"
-#include "ReportConsole.h"
-#include "ReportExcel.h"
-#include "ReportExcelCompared.h"
+#include "common/Colors.h"
+#include "common/CLocale.h"
+#include "common/Paths.h"
+#include "reports/ReportConsole.h"
+#include "reports/ReportExcel.h"
+#include "reports/ReportExcelCompared.h"
+#include "CommandParser.h"
+#include "ManageResults.h"
 
 namespace platform {
 

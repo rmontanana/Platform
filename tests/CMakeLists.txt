@@ -5,8 +5,8 @@ if(ENABLE_TESTING)
         ${Platform_SOURCE_DIR}/lib/argparse/include
         ${Platform_SOURCE_DIR}/lib/mdlp
         ${Platform_SOURCE_DIR}/lib/Files
-        /usr/local/include/bayesnet
-        /usr/local/include/pyclassifiers
+        ${CMAKE_BINARY_DIR}/configured_files/include
+        /usr/local/include
     )
     set(TEST_SOURCES_PLATFORM TestUtils.cc TestPlatform.cc)
     add_executable(${TEST_PLATFORM} ${TEST_SOURCES_PLATFORM})

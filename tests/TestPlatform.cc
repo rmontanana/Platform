@@ -11,6 +11,6 @@
 
 TEST_CASE("Test Python Classifiers score", "[PyClassifiers]")
 {
-    std::string version = { project_version.begin(), project_version.end() };
+    std::string version = { platform_project_version.begin(), platform_project_version.end() };
     REQUIRE(version == "1.0.4");
 }

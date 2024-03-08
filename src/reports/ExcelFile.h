@@ -3,7 +3,7 @@
 #include <locale>
 #include <string>
 #include <map>
-#include "xlsxwriter.h"
+#include <xlsxwriter.h>
 
 namespace platform {
     struct separated : std::numpunct<char> {

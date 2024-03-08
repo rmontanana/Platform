@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
-#include "Result.h"
+#include "main/Result.h"
 namespace platform {
     using json = nlohmann::json;
     class Results {

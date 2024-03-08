@@ -1,7 +1,7 @@
 #ifndef MANAGE_RESULTS_H
 #define MANAGE_RESULTS_H
+#include <xlsxwriter.h>
 #include "Results.h"
-#include "xlsxwriter.h"
 
 namespace platform {
     class ManageResults {

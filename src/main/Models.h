@@ -1,21 +1,21 @@
 #ifndef MODELS_H
 #define MODELS_H
 #include <map>
-#include "BaseClassifier.h"
-#include "ensembles/AODE.h"
-#include "ensembles/AODELd.h"
-#include "ensembles/BoostAODE.h"
-#include "classifiers/TAN.h"
-#include "classifiers/KDB.h"
-#include "classifiers/SPODE.h"
-#include "classifiers/TANLd.h"
-#include "classifiers/KDBLd.h"
-#include "classifiers/SPODELd.h"
-#include "STree.h"
-#include "ODTE.h"
-#include "SVC.h"
-#include "XGBoost.h"
-#include "RandomForest.h"
+#include <bayesnet/BaseClassifier.h>
+#include <bayesnet/ensembles/AODE.h>
+#include <bayesnet/ensembles/AODELd.h>
+#include <bayesnet/ensembles/BoostAODE.h>
+#include <bayesnet/classifiers/TAN.h>
+#include <bayesnet/classifiers/KDB.h>
+#include <bayesnet/classifiers/SPODE.h>
+#include <bayesnet/classifiers/TANLd.h>
+#include <bayesnet/classifiers/KDBLd.h>
+#include <bayesnet/classifiers/SPODELd.h>
+#include <pyclassifiers/STree.h>
+#include <pyclassifiers/ODTE.h>
+#include <pyclassifiers/SVC.h>
+#include <pyclassifiers/XGBoost.h>
+#include <pyclassifiers/RandomForest.h>
 namespace platform {
     class Models {
     private:

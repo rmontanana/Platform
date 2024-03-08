@@ -1,15 +1,15 @@
 include_directories(
     ${Platform_SOURCE_DIR}/src/common
     ${Platform_SOURCE_DIR}/src/main
-    ${Platform_SOURCE_DIR}/lib/PyClassifiers/src
     ${Python3_INCLUDE_DIRS}
     ${Platform_SOURCE_DIR}/lib/Files
+    ${Platform_SOURCE_DIR}/lib/mdlp
     ${Platform_SOURCE_DIR}/lib/argparse/include
     ${Platform_SOURCE_DIR}/lib/folding
-    ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/src
-    ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/mdlp
-    ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/json/include
-    ${CMAKE_BINARY_DIR}/configured_files/include
+    ${Platform_SOURCE_DIR}/lib/json/include
+    /usr/local/include/bayesnet
+    /usr/local/include/pyclassifiers
 )
 add_executable(PlatformSample sample.cc ${Platform_SOURCE_DIR}/src/main/Models.cc) 
-target_link_libraries(PlatformSample PyClassifiers ArffFiles mdlp "${TORCH_LIBRARIES}")
+# target_link_libraries(PlatformSample "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp "${TORCH_LIBRARIES}")
+target_link_libraries(PlatformSample "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)

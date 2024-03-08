@@ -2,15 +2,15 @@
 #include <torch/torch.h>
 #include <string>
 #include <map>
+#include <fstream>
 #include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>
-#include "ArffFiles.h"
-#include "BayesMetrics.h"
-#include "CPPFImdlp.h"
-#include "folding.hpp"
+#include <ArffFiles.h>
+#include <utils/BayesMetrics.h>
+#include <CPPFImdlp.h>
+#include <folding.hpp>
 #include "Models.h"
 #include "modelRegister.h"
-#include <fstream>
 #include "config.h"
 
 const std::string PATH = { data_path.begin(), data_path.end() };

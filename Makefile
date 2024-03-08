@@ -5,7 +5,7 @@ SHELL := /bin/bash
 f_release = build_release
 f_debug = build_debug
 app_targets = b_best b_list b_main b_manage b_grid
-test_targets = unit_tests_bayesnet unit_tests_platform
+test_targets = unit_tests_platform
 n_procs = -j 16
 
 define ClearTests

@@ -5,8 +5,8 @@ include_directories(
     ${Python3_INCLUDE_DIRS}
     ${Platform_SOURCE_DIR}/lib/Files
     ${Platform_SOURCE_DIR}/lib/argparse/include
+    ${Platform_SOURCE_DIR}/lib/folding
     ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/src
-    ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/folding
     ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/mdlp
     ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/json/include
     ${CMAKE_BINARY_DIR}/configured_files/include

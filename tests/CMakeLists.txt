@@ -3,9 +3,10 @@ if(ENABLE_TESTING)
     include_directories(
         ${Platform_SOURCE_DIR}/src
         ${Platform_SOURCE_DIR}/lib/argparse/include
-        ${Platform_SOURCE_DIR}/lib/PyClassifiers/lib/BayesNet/lib/mdlp
+        ${Platform_SOURCE_DIR}/lib/mdlp
         ${Platform_SOURCE_DIR}/lib/Files
-        ${CMAKE_BINARY_DIR}/configured_files/include
+        /usr/local/include/bayesnet
+        /usr/local/include/pyclassifiers
     )
     set(TEST_SOURCES_PLATFORM TestUtils.cc TestPlatform.cc)
     add_executable(${TEST_PLATFORM} ${TEST_SOURCES_PLATFORM})

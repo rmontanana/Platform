@@ -70,14 +70,18 @@ endif (ENABLE_CLANG_TIDY)
 
 # External libraries - dependencies of Platform
 # ---------------------------------------------
-add_git_submodule("lib/PyClassifiers")
 add_git_submodule("lib/argparse")
+add_git_submodule("lib/mdlp")
 
 find_library(XLSXWRITER_LIB NAMES libxlsxwriter.dylib libxlsxwriter.so PATHS ${Platform_SOURCE_DIR}/lib/libxlsxwriter/lib)
 message("XLSXWRITER_LIB=${XLSXWRITER_LIB}")
 
+find_library(PyClassifiers NAMES libPyClassifiers PyClassifiers)
+find_library(BayesNet NAMES libBayesNet BayesNet)
+
 # Subdirectories
 # --------------
+add_subdirectory(lib/Files)
 add_subdirectory(config)
 add_subdirectory(src)
 add_subdirectory(sample)

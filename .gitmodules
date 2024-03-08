@@ -14,6 +14,6 @@
 	path = lib/mdlp
 	url = https://github.com/rmontanana/mdlp
         update = merge
-[submodule "lib/PyClassifiers"]
-	path = lib/PyClassifiers
-	url = git@github.com:rmontanana/PyClassifiers
+[submodule "lib/folding"]
+	path = lib/folding
+	url = https://github.com/rmontanana/folding

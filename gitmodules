@@ -23,9 +23,6 @@
 	url = https://github.com/jmcnamara/libxlsxwriter.git
         main = main
 	update = merge
-[submodule "lib/PyClassifiers"]
-	path = lib/PyClassifiers
-	url = https://github.com/rmontanana/PyClassifiers
 [submodule "lib/folding"]
 	path = lib/folding
 	url = https://github.com/rmontanana/Folding

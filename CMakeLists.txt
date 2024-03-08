@@ -76,8 +76,8 @@ add_git_submodule("lib/mdlp")
 find_library(XLSXWRITER_LIB NAMES libxlsxwriter.dylib libxlsxwriter.so PATHS ${Platform_SOURCE_DIR}/lib/libxlsxwriter/lib)
 message("XLSXWRITER_LIB=${XLSXWRITER_LIB}")
 
-find_library(PyClassifiers NAMES libPyClassifiers PyClassifiers)
-find_library(BayesNet NAMES libBayesNet BayesNet)
+find_library(PyClassifiers NAMES libPyClassifiers PyClassifiers libPyClassifiers.a)
+find_library(BayesNet NAMES libBayesNet BayesNet libBayesNet.a)
 
 # Subdirectories
 # --------------

@@ -42,6 +42,9 @@ namespace platform {
             for (auto const& item : data.at("results")) {
                 bool update = true;
                 auto datasetName = item.at("dataset").get<std::string>();
+                if (dataset != "any" && dataset != datasetName) {
+                    continue;
+                }
                 if (bests.contains(datasetName)) {
                     if (item.at("score").get<double>() < bests[datasetName].at(0).get<double>()) {
                         update = false;
@@ -122,8 +125,8 @@ namespace platform {
     std::vector<std::string> BestResults::getDatasets(json table)
     {
         std::vector<std::string> datasets;
-        for (const auto& dataset : table.items()) {
-            datasets.push_back(dataset.key());
+        for (const auto& dataset_ : table.items()) {
+            datasets.push_back(dataset_.key());
         }
         maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
         maxDatasetName = std::max(7, maxDatasetName);
@@ -232,16 +235,16 @@ namespace platform {
             totals[model] = 0.0;
         }
         auto datasets = getDatasets(table.begin().value());
-        for (auto const& dataset : datasets) {
+        for (auto const& dataset_ : datasets) {
             auto color = odd ? Colors::BLUE() : Colors::CYAN();
             std::cout << color << std::setw(3) << std::fixed << std::right << i++ << " ";
-            std::cout << std::setw(maxDatasetName) << std::left << dataset << " ";
+            std::cout << std::setw(maxDatasetName) << std::left << dataset_ << " ";
             double maxValue = 0;
             // Find out the max value for this dataset
             for (const auto& model : models) {
                 double value;
                 try {
-                    value = table[model].at(dataset).at(0).get<double>();
+                    value = table[model].at(dataset_).at(0).get<double>();
                 }
                 catch (nlohmann::json_abi_v3_11_3::detail::out_of_range err) {
                     value = -1.0;
@@ -255,7 +258,7 @@ namespace platform {
                 std::string efectiveColor = color;
                 double value;
                 try {
-                    value = table[model].at(dataset).at(0).get<double>();
+                    value = table[model].at(dataset_).at(0).get<double>();
                 }
                 catch (nlohmann::json_abi_v3_11_3::detail::out_of_range err) {
                     value = -1.0;
@@ -331,9 +334,9 @@ namespace platform {
                 double min = 2000;
                 // Find out the control model
                 auto totals = std::vector<double>(models.size(), 0.0);
-                for (const auto& dataset : datasets) {
+                for (const auto& dataset_ : datasets) {
                     for (int i = 0; i < models.size(); ++i) {
-                        totals[i] += ranksModels[dataset][models[i]];
+                        totals[i] += ranksModels[dataset_][models[i]];
                     }
                 }
                 for (int i = 0; i < models.size(); ++i) {

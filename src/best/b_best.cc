@@ -8,6 +8,7 @@
 void manageArguments(argparse::ArgumentParser& program)
 {
     program.add_argument("-m", "--model").default_value("").help("Filter results of the selected model) (any for all models)");
+    program.add_argument("-d", "--dataset").default_value("any").help("Filter results of the selected model) (any for all datasets)");
     program.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
     program.add_argument("--friedman").help("Friedman test").default_value(false).implicit_value(true);
     program.add_argument("--excel").help("Output to excel").default_value(false).implicit_value(true);
@@ -31,12 +32,13 @@ int main(int argc, char** argv)
 {
     argparse::ArgumentParser program("b_best", { platform_project_version.begin(), platform_project_version.end() });
     manageArguments(program);
-    std::string model, score;
+    std::string model, dataset, score;
     bool build, report, friedman, excel;
     double level;
     try {
         program.parse_args(argc, argv);
         model = program.get<std::string>("model");
+        dataset = program.get<std::string>("dataset");
         score = program.get<std::string>("score");
         friedman = program.get<bool>("friedman");
         excel = program.get<bool>("excel");
@@ -44,8 +46,8 @@ int main(int argc, char** argv)
         if (model == "" || score == "") {
             throw std::runtime_error("Model and score name must be supplied");
         }
-        if (friedman && model != "any") {
-            std::cerr << "Friedman test can only be used with all models" << std::endl;
+        if (friedman && (model != "any" || dataset != "any")) {
+            std::cerr << "Friedman test can only be used with all models and all the datasets" << std::endl;
             std::cerr << program;
             exit(1);
         }
@@ -56,7 +58,7 @@ int main(int argc, char** argv)
         exit(1);
     }
     // Generate report
-    auto results = platform::BestResults(platform::Paths::results(), score, model, friedman, level);
+    auto results = platform::BestResults(platform::Paths::results(), score, model, dataset, friedman, level);
     if (model == "any") {
         results.buildAll();
         results.reportAll(excel);

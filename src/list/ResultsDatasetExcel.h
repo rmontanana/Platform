@@ -7,10 +7,10 @@ using json = nlohmann::json;
 
 namespace platform {
 
-    class DatasetsExcel : public ExcelFile {
+    class ResultsDatasetExcel : public ExcelFile {
     public:
-        DatasetsExcel();
-        ~DatasetsExcel();
+        ResultsDatasetExcel();
+        ~ResultsDatasetExcel();
         void report(json& data);
     };
 }

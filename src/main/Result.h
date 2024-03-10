@@ -21,6 +21,7 @@ namespace platform {
         std::string to_string(int maxModel) const;
         std::string getFilename() const;
         std::string getDate() const { return data["date"].get<std::string>(); };
+        std::string getTime() const { return data["time"].get<std::string>(); };
         double getScore() const { return score; };
         std::string getTitle() const { return data["title"].get<std::string>(); };
         double getDuration() const { return data["duration"]; };

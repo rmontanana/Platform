@@ -10,6 +10,7 @@
 #include "common/Datasets.h"
 #include "DatasetsExcel.h"
 #include "ResultsDataset.h"
+#include "ResultsDatasetExcel.h"
 #include "config.h"
 
 const int BALANCE_LENGTH = 75;
@@ -80,6 +81,7 @@ void list_results(argparse::ArgumentParser& program)
     auto dataset = program.get<string>("dataset");
     auto score = program.get<string>("score");
     auto model = program.get<string>("model");
+    auto excel = program.get<bool>("excel");
     auto results = platform::ResultsDataset(dataset, model, score);
     results.load();
     results.sortModel();
@@ -91,29 +93,49 @@ void list_results(argparse::ArgumentParser& program)
     // List data
     //
     int maxModel = results.maxModelSize();
-    int maxFileName = results.maxFileSize();
     int maxHyper = results.maxHyperSize();
     double maxResult = results.maxResultScore();
-    std::cout << Colors::GREEN() << "Results for dataset " << dataset << std::endl;
+    std::cout << Colors::GREEN() << "Results of dataset " << dataset << " - for " << model << " model" << std::endl;
     std::cout << "There are " << results.size() << " results" << std::endl;
-    std::cout << Colors::GREEN() << " #  " << std::setw(maxModel + 1) << std::left << "Model" << "Date       Score       " << std::setw(maxFileName) << "File" << " Hyperparameters" << std::endl;
-    std::cout << "=== " << std::string(maxModel, '=') << " ========== =========== " << std::string(maxFileName, '=') << " " << std::string(maxHyper, '=') << std::endl;
+    std::cout << Colors::GREEN() << " #  " << std::setw(maxModel + 1) << std::left << "Model" << "Date       Time     Score       Hyperparameters" << std::endl;
+    std::cout << "=== " << std::string(maxModel, '=') << " ========== ======== =========== " << std::string(maxHyper, '=') << std::endl;
     auto i = 0;
+    json data = json::object();
+    data["results"] = json::array();
     for (const auto& result : results) {
-        auto data = result.getData();
-        for (const auto& item : data["results"]) {
+        auto results = result.getData();
+        for (const auto& item : results["results"]) {
             if (item["dataset"] == dataset) {
                 auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
                 color = item["score"].get<double>() == maxResult ? Colors::RED() : color;
                 std::cout << color << std::setw(3) << std::fixed << std::right << i++ << " ";
                 std::cout << std::setw(maxModel) << std::left << result.getModel() << " ";
                 std::cout << color << result.getDate() << " ";
+                std::cout << color << result.getTime() << " ";
                 std::cout << std::setw(11) << std::setprecision(9) << std::fixed << item["score"].get<double>() << " ";
-                std::cout << std::setw(maxFileName) << result.getFilename() << " ";
                 std::cout << item["hyperparameters"].dump() << std::endl;
+                // Store data for Excel report
+                json res = json::object();
+                res["date"] = result.getDate();
+                res["time"] = result.getTime();
+                res["model"] = result.getModel();
+                res["score"] = item["score"].get<double>();
+                res["hyperparameters"] = item["hyperparameters"].dump();
+                data["results"].push_back(res);
                 break;
             }
         }
+    }
+    if (excel) {
+        data["dataset"] = dataset;
+        data["score"] = score;
+        data["model"] = model;
+        data["maxModel"] = maxModel;
+        data["maxHyper"] = maxHyper;
+        data["maxResult"] = maxResult;
+        auto report = platform::ResultsDatasetExcel();
+        report.report(data);
+        std::cout << std::endl << Colors::GREEN() << "Output saved in " << report.getFileName() << std::endl;
     }
 }
 
@@ -125,10 +147,7 @@ int main(int argc, char** argv)
     //
     argparse::ArgumentParser datasets_command("datasets");
     datasets_command.add_description("List datasets available in the platform.");
-    datasets_command.add_argument("--excel")
-        .help("Output in Excel format")
-        .default_value(false)
-        .implicit_value(true);
+    datasets_command.add_argument("--excel").help("Output in Excel format").default_value(false).implicit_value(true);
     //
     // results subparser
     //
@@ -160,7 +179,9 @@ int main(int argc, char** argv)
         throw std::runtime_error("Model must be one of " + platform::Models::instance()->toString() + " or any");
             }
     );
+    results_command.add_argument("--excel").help("Output in Excel format").default_value(false).implicit_value(true);
     results_command.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
+
     // Add subparsers
     program.add_subparser(datasets_command);
     program.add_subparser(results_command);

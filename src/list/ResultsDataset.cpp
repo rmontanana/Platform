@@ -42,6 +42,9 @@ namespace platform {
     {
         sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
             if (a.getModel() == b.getModel()) {
+                if (a.getDate() == b.getDate()) {
+                    return a.getTime() > b.getTime();
+                }
                 return a.getDate() > b.getDate();
             }
             return a.getModel() < b.getModel();

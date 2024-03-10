@@ -1,5 +1,5 @@
-#ifndef RESULT_H
-#define RESULT_H
+#pragma once
+
 #include <map>
 #include <vector>
 #include <string>
@@ -48,4 +48,3 @@ namespace platform {
         double score = 0.0;
     };
 };
-#endif

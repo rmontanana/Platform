@@ -1,5 +1,5 @@
-#ifndef MODEL_REGISTER_H
-#define MODEL_REGISTER_H
+#pragma once
+
 static platform::Registrar registrarT("TAN",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::TAN();});
 static platform::Registrar registrarTLD("TANLd",
@@ -28,4 +28,3 @@ static platform::Registrar registrarRaF("RandomForest",
     [](void) -> bayesnet::BaseClassifier* { return new pywrap::RandomForest();});
 static platform::Registrar registrarXGB("XGBoost",
     [](void) -> bayesnet::BaseClassifier* { return new pywrap::XGBoost();});
-#endif

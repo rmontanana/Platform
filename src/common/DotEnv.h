@@ -1,5 +1,5 @@
-#ifndef DOTENV_H
-#define DOTENV_H
+#pragma once
+
 #include <string>
 #include <map>
 #include <fstream>
@@ -52,4 +52,3 @@ namespace platform {
         }
     };
 }
-#endif

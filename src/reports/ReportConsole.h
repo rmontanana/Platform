@@ -1,5 +1,5 @@
-#ifndef REPORTCONSOLE_H
-#define REPORTCONSOLE_H
+#pragma once
+
 #include <string>
 #include "common/Colors.h"
 #include "ReportBase.h"
@@ -19,4 +19,3 @@ namespace platform {
         void showSummary() override;
     };
 };
-#endif

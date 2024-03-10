@@ -42,7 +42,7 @@ add_executable(b_main ${main_sources} common/Datasets.cc common/Dataset.cc repor
 target_link_libraries(b_main "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 
 # b_manage
-set(manage_sources b_manage.cc ManageResults.cc CommandParser.cc Results.cc)
+set(manage_sources b_manage.cc ManageResults.cc CommandParser.cc ResultsManager.cc)
 list(TRANSFORM manage_sources PREPEND manage/)
 add_executable(
     b_manage ${manage_sources} main/Result.cc 

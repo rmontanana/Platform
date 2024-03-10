@@ -75,6 +75,9 @@ void list_datasets(argparse::ArgumentParser& program)
 void list_results(argparse::ArgumentParser& program)
 {
     std::cout << "Results" << std::endl;
+    auto dataset = program.get<string>("--dataset");
+    auto score = program.get<string>("--score");
+
 }
 
 int main(int argc, char** argv)
@@ -107,6 +110,7 @@ int main(int argc, char** argv)
         throw std::runtime_error("Dataset must be one of " + datasets.toString());
             }
     );
+    program.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
     // Add subparsers
     program.add_subparser(datasets_command);
     program.add_subparser(results_command);

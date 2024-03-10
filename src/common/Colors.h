@@ -1,5 +1,5 @@
-#ifndef COLORS_H
-#define COLORS_H
+#pragma once
+
 #include <string>
 class Colors {
 public:
@@ -13,4 +13,3 @@ public:
     static std::string IBLUE() { return "\033[0;94m"; }
     static std::string RESET() { return "\033[0m"; }
 };
-#endif // COLORS_H

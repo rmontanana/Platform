@@ -1,5 +1,5 @@
-#ifndef DATASETS_H
-#define DATASETS_H
+#pragma once
+
 #include "Dataset.h"
 namespace platform {
     class Datasets {
@@ -27,5 +27,3 @@ namespace platform {
         std::string toString() const;
     };
 };
-
-#endif

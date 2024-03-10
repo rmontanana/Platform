@@ -12,7 +12,7 @@
 namespace platform {
 
     ManageResults::ManageResults(int numFiles, const std::string& model, const std::string& score, bool complete, bool partial, bool compare) :
-        numFiles{ numFiles }, complete{ complete }, partial{ partial }, compare{ compare }, results(Results(Paths::results(), model, score, complete, partial))
+        numFiles{ numFiles }, complete{ complete }, partial{ partial }, compare{ compare }, results(ResultsManager(model, score, complete, partial))
     {
         indexList = true;
         openExcel = false;

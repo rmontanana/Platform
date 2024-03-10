@@ -1,5 +1,5 @@
-#ifndef REPORTEXCEL_H
-#define REPORTEXCEL_H
+#pragma once
+
 #include <map>
 #include <xlsxwriter.h>
 #include "common/Colors.h"
@@ -22,4 +22,3 @@ namespace platform {
         void header_notes(int row);
     };
 };
-#endif // !REPORTEXCEL_H

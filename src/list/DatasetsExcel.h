@@ -1,5 +1,5 @@
-#ifndef DATASETS_EXCEL_H
-#define DATASETS_EXCEL_H
+#pragma once
+
 #include <vector>
 #include <map>
 #include <nlohmann/json.hpp>
@@ -16,4 +16,3 @@ namespace platform {
         void report(json& data);
     };
 }
-#endif //DATASETS_EXCEL_H

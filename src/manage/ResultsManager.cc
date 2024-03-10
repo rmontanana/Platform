@@ -1,9 +1,10 @@
 #include <algorithm>
-#include "Results.h"
+#include "common/Paths.h"
+#include "ResultsManager.h"
 
 namespace platform {
-    Results::Results(const std::string& path, const std::string& model, const std::string& score, bool complete, bool partial) :
-        path(path), model(model), scoreName(score), complete(complete), partial(partial)
+    ResultsManager::ResultsManager(const std::string& model, const std::string& score, bool complete, bool partial) :
+        path(Paths::results()), model(model), scoreName(score), complete(complete), partial(partial)
     {
         load();
         if (!files.empty()) {
@@ -12,7 +13,7 @@ namespace platform {
             maxModel = 0;
         }
     }
-    void Results::load()
+    void ResultsManager::load()
     {
         using std::filesystem::directory_iterator;
         for (const auto& file : directory_iterator(path)) {
@@ -28,47 +29,47 @@ namespace platform {
             }
         }
     }
-    void Results::hideResult(int index, const std::string& pathHidden)
+    void ResultsManager::hideResult(int index, const std::string& pathHidden)
     {
         auto filename = files.at(index).getFilename();
         rename((path + "/" + filename).c_str(), (pathHidden + "/" + filename).c_str());
         files.erase(files.begin() + index);
     }
-    void Results::deleteResult(int index)
+    void ResultsManager::deleteResult(int index)
     {
         auto filename = files.at(index).getFilename();
         remove((path + "/" + filename).c_str());
         files.erase(files.begin() + index);
     }
-    int Results::size() const
+    int ResultsManager::size() const
     {
         return files.size();
     }
-    void Results::sortDate()
+    void ResultsManager::sortDate()
     {
         sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
             return a.getDate() > b.getDate();
             });
     }
-    void Results::sortModel()
+    void ResultsManager::sortModel()
     {
         sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
             return a.getModel() > b.getModel();
             });
     }
-    void Results::sortDuration()
+    void ResultsManager::sortDuration()
     {
         sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
             return a.getDuration() > b.getDuration();
             });
     }
-    void Results::sortScore()
+    void ResultsManager::sortScore()
     {
         sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
             return a.getScore() > b.getScore();
             });
     }
-    bool Results::empty() const
+    bool ResultsManager::empty() const
     {
         return files.empty();
     }

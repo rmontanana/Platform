@@ -1,7 +1,7 @@
-#ifndef MANAGE_RESULTS_H
-#define MANAGE_RESULTS_H
+#pragma once
+
 #include <xlsxwriter.h>
-#include "Results.h"
+#include "ResultsManager.h"
 
 namespace platform {
     class ManageResults {
@@ -23,9 +23,7 @@ namespace platform {
         bool complete;
         bool partial;
         bool compare;
-        Results results;
+        ResultsManager results;
         lxw_workbook* workbook;
     };
 }
-
-#endif /* MANAGE_RESULTS_H */

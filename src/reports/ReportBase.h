@@ -1,5 +1,5 @@
-#ifndef REPORTBASE_H
-#define REPORTBASE_H
+#pragma once
+
 #include <string>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -33,4 +33,3 @@ namespace platform {
         bool existBestFile = true;
     };
 };
-#endif

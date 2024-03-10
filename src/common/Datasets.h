@@ -24,6 +24,7 @@ namespace platform {
         std::pair<torch::Tensor&, torch::Tensor&> getTensors(const std::string& name);
         bool isDataset(const std::string& name) const;
         void loadDataset(const std::string& name) const;
+        std::string toString() const;
     };
 };
 

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <locale>
+#include <map>
 #include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>
 #include "common/Paths.h"
@@ -28,15 +29,9 @@ std::string outputBalance(const std::string& balance)
     return temp;
 }
 
-int main(int argc, char** argv)
+void list_datasets(argparse::ArgumentParser& program)
 {
     auto datasets = platform::Datasets(false, platform::Paths::datasets());
-    argparse::ArgumentParser program("b_list", { platform_project_version.begin(), platform_project_version.end() });
-    program.add_argument("--excel")
-        .help("Output in Excel format")
-        .default_value(false)
-        .implicit_value(true);
-    program.parse_args(argc, argv);
     auto excel = program.get<bool>("--excel");
     locale mylocale(std::cout.getloc(), new separated);
     locale::global(mylocale);
@@ -70,11 +65,72 @@ int main(int argc, char** argv)
         data[dataset]["classes"] = datasets.getNClasses(dataset);
         data[dataset]["balance"] = oss.str();
     }
-    std::cout << Colors::RESET() << std::endl;
     if (excel) {
         auto report = platform::DatasetsExcel();
         report.report(data);
-        std::cout << "Output saved in " << report.getFileName() << std::endl;
+        std::cout << std::endl << Colors::GREEN() << "Output saved in " << report.getFileName() << std::endl;
     }
+}
+
+void list_results(argparse::ArgumentParser& program)
+{
+    std::cout << "Results" << std::endl;
+}
+
+int main(int argc, char** argv)
+{
+    argparse::ArgumentParser program("b_list", { platform_project_version.begin(), platform_project_version.end() });
+    //
+    // datasets subparser
+    //
+    argparse::ArgumentParser datasets_command("datasets");
+    datasets_command.add_description("List datasets available in the platform.");
+    datasets_command.add_argument("--excel")
+        .help("Output in Excel format")
+        .default_value(false)
+        .implicit_value(true);
+    //
+    // results subparser
+    //
+    argparse::ArgumentParser results_command("results");
+    results_command.add_description("List the results of a given dataset.");
+    auto datasets = platform::Datasets(false, platform::Paths::datasets());
+    results_command.add_argument("-d", "--dataset")
+        .help("Dataset to use " + datasets.toString())
+        .required()
+        .action([](const std::string& value) {
+        auto datasets = platform::Datasets(false, platform::Paths::datasets());
+        static const std::vector<std::string> choices = datasets.getNames();
+        if (find(choices.begin(), choices.end(), value) != choices.end()) {
+            return value;
+        }
+        throw std::runtime_error("Dataset must be one of " + datasets.toString());
+            }
+    );
+    // Add subparsers
+    program.add_subparser(datasets_command);
+    program.add_subparser(results_command);
+    // Parse command line and execute
+    try {
+        program.parse_args(argc, argv);
+        bool found = false;
+        map<std::string, void(*)(argparse::ArgumentParser&)> commands = { {"datasets", &list_datasets}, {"results", &list_results} };
+        for (const auto& command : commands) {
+            if (program.is_subcommand_used(command.first)) {
+                std::invoke(command.second, program.at<argparse::ArgumentParser>(command.first));
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            throw std::runtime_error("You must specify one of the following commands: datasets, results\n");
+        }
+    }
+    catch (const exception& err) {
+        cerr << err.what() << std::endl;
+        cerr << program;
+        exit(1);
+    }
+    std::cout << Colors::RESET() << std::endl;
     return 0;
 }

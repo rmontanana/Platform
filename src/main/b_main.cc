@@ -15,18 +15,29 @@ using json = nlohmann::json;
 void manageArguments(argparse::ArgumentParser& program)
 {
     auto env = platform::DotEnv();
-    program.add_argument("-d", "--dataset").default_value("").help("Dataset file name");
+    auto datasets = platform::Datasets(false, platform::Paths::datasets());
+    program.add_argument("-d", "--dataset")
+        .help("Dataset file name: " + datasets.toString())
+        .action([](const std::string& value) {
+        auto datasets = platform::Datasets(false, platform::Paths::datasets());
+        static const std::vector<std::string> choices_datasets(datasets.getNames());
+        if (find(choices_datasets.begin(), choices_datasets.end(), value) != choices_datasets.end()) {
+            return value;
+        }
+        throw std::runtime_error("Dataset must be one of: " + datasets.toString());
+            }
+    );
     program.add_argument("--hyperparameters").default_value("{}").help("Hyperparameters passed to the model in Experiment");
     program.add_argument("--hyper-file").default_value("").help("Hyperparameters file name." \
         "Mutually exclusive with hyperparameters. This file should contain hyperparameters for each dataset in json format.");
     program.add_argument("-m", "--model")
-        .help("Model to use " + platform::Models::instance()->tostring())
+        .help("Model to use: " + platform::Models::instance()->toString())
         .action([](const std::string& value) {
         static const std::vector<std::string> choices = platform::Models::instance()->getNames();
         if (find(choices.begin(), choices.end(), value) != choices.end()) {
             return value;
         }
-        throw std::runtime_error("Model must be one of " + platform::Models::instance()->tostring());
+        throw std::runtime_error("Model must be one of " + platform::Models::instance()->toString());
             }
     );
     program.add_argument("--title").default_value("").help("Experiment title");

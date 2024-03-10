@@ -85,13 +85,13 @@ int main(int argc, char** argv)
         .default_value(std::string{ PATH }
     );
     program.add_argument("-m", "--model")
-        .help("Model to use " + platform::Models::instance()->tostring())
+        .help("Model to use " + platform::Models::instance()->toString())
         .action([](const std::string& value) {
         static const std::vector<std::string> choices = platform::Models::instance()->getNames();
         if (find(choices.begin(), choices.end(), value) != choices.end()) {
             return value;
         }
-        throw runtime_error("Model must be one of " + platform::Models::instance()->tostring());
+        throw runtime_error("Model must be one of " + platform::Models::instance()->toString());
             }
     );
     program.add_argument("--discretize").help("Discretize input dataset").default_value(false).implicit_value(true);

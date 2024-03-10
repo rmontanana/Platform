@@ -36,13 +36,15 @@ namespace platform {
             [](const pair<std::string, function<bayesnet::BaseClassifier* (void)>>& pair) { return pair.first; });
         return names;
     }
-    std::string Models::tostring()
+    std::string Models::toString()
     {
         std::string result = "";
+        std::string sep = "";
         for (const auto& pair : functionRegistry) {
-            result += pair.first + ", ";
+            result += sep + pair.first;
+            sep = ", ";
         }
-        return "{" + result.substr(0, result.size() - 2) + "}";
+        return "{" + result + "}";
     }
     Registrar::Registrar(const std::string& name, function<bayesnet::BaseClassifier* (void)> classFactoryFunction)
     {

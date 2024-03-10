@@ -20,8 +20,8 @@ set(best_sources b_best.cc BestResults.cc  Statistics.cc BestResultsExcel.cc)
 list(TRANSFORM best_sources PREPEND best/)
 add_executable(
     b_best ${best_sources} main/Result.cc 
-    reports/ReportExcel.cc reports/ReportBase.cc reports/ExcelFile.cc common/Datasets.cc common/Dataset.cc)
-target_link_libraries(b_best Boost::boost "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)
+    reports/ReportExcel.cc reports/ReportBase.cc reports/ExcelFile.cc common/Datasets.cc common/Dataset.cc main/Models.cc)
+target_link_libraries(b_best Boost::boost "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
 # b_grid
 set(grid_sources b_grid.cc GridSearch.cc GridData.cc)

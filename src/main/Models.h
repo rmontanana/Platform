@@ -31,7 +31,7 @@ namespace platform {
         void registerFactoryFunction(const std::string& name,
             function<bayesnet::BaseClassifier* (void)> classFactoryFunction);
         std::vector<string> getNames();
-        std::string tostring();
+        std::string toString();
 
     };
     class Registrar {

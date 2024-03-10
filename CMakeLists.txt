@@ -85,7 +85,7 @@ add_subdirectory(lib/Files)
 add_subdirectory(config)
 add_subdirectory(src)
 add_subdirectory(sample)
-file(GLOB Platform_SOURCES CONFIGURE_DEPENDS ${Platform_SOURCE_DIR}/src/*.cc)
+file(GLOB Platform_SOURCES CONFIGURE_DEPENDS ${Platform_SOURCE_DIR}/src/*.cpp)
 
 # Testing
 # -------

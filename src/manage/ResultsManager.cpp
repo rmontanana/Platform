@@ -4,14 +4,8 @@
 
 namespace platform {
     ResultsManager::ResultsManager(const std::string& model, const std::string& score, bool complete, bool partial) :
-        path(Paths::results()), model(model), scoreName(score), complete(complete), partial(partial)
+        path(Paths::results()), model(model), scoreName(score), complete(complete), partial(partial), maxModel(0)
     {
-        load();
-        if (!files.empty()) {
-            maxModel = (*max_element(files.begin(), files.end(), [](const Result& a, const Result& b) { return a.getModel().size() < b.getModel().size(); })).getModel().size();
-        } else {
-            maxModel = 0;
-        }
     }
     void ResultsManager::load()
     {
@@ -28,6 +22,7 @@ namespace platform {
                     files.push_back(result);
             }
         }
+        maxModel = std::max(size_t(5), (*max_element(files.begin(), files.end(), [](const Result& a, const Result& b) { return a.getModel().size() < b.getModel().size(); })).getModel().size());
     }
     void ResultsManager::hideResult(int index, const std::string& pathHidden)
     {
@@ -48,12 +43,18 @@ namespace platform {
     void ResultsManager::sortDate()
     {
         sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
+            if (a.getDate() == b.getDate()) {
+                return a.getModel() < b.getModel();
+            }
             return a.getDate() > b.getDate();
             });
     }
     void ResultsManager::sortModel()
     {
         sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
+            if (a.getModel() == b.getModel()) {
+                return a.getDate() > b.getDate();
+            }
             return a.getModel() > b.getModel();
             });
     }
@@ -66,6 +67,9 @@ namespace platform {
     void ResultsManager::sortScore()
     {
         sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
+            if (a.getScore() == b.getScore()) {
+                return a.getDate() > b.getDate();
+            }
             return a.getScore() > b.getScore();
             });
     }

@@ -3,10 +3,13 @@
 #include <map>
 #include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>
+#include "main/Models.h"
+#include "main/modelRegister.h"
 #include "common/Paths.h"
 #include "common/Colors.h"
 #include "common/Datasets.h"
 #include "DatasetsExcel.h"
+#include "ResultsDataset.h"
 #include "config.h"
 
 const int BALANCE_LENGTH = 75;
@@ -32,7 +35,7 @@ std::string outputBalance(const std::string& balance)
 void list_datasets(argparse::ArgumentParser& program)
 {
     auto datasets = platform::Datasets(false, platform::Paths::datasets());
-    auto excel = program.get<bool>("--excel");
+    auto excel = program.get<bool>("excel");
     locale mylocale(std::cout.getloc(), new separated);
     locale::global(mylocale);
     std::cout.imbue(mylocale);
@@ -74,10 +77,44 @@ void list_datasets(argparse::ArgumentParser& program)
 
 void list_results(argparse::ArgumentParser& program)
 {
-    std::cout << "Results" << std::endl;
-    auto dataset = program.get<string>("--dataset");
-    auto score = program.get<string>("--score");
-
+    auto dataset = program.get<string>("dataset");
+    auto score = program.get<string>("score");
+    auto model = program.get<string>("model");
+    auto results = platform::ResultsDataset(dataset, model, score);
+    results.load();
+    results.sortModel();
+    if (results.empty()) {
+        std::cerr << Colors::RED() << "No results found for dataset " << dataset << " and model " << model << Colors::RESET() << std::endl;
+        exit(1);
+    }
+    //
+    // List data
+    //
+    int maxModel = results.maxModelSize();
+    int maxFileName = results.maxFileSize();
+    int maxHyper = results.maxHyperSize();
+    double maxResult = results.maxResultScore();
+    std::cout << Colors::GREEN() << "Results for dataset " << dataset << std::endl;
+    std::cout << "There are " << results.size() << " results" << std::endl;
+    std::cout << Colors::GREEN() << " #  " << std::setw(maxModel + 1) << std::left << "Model" << "Date       Score       " << std::setw(maxFileName) << "File" << " Hyperparameters" << std::endl;
+    std::cout << "=== " << std::string(maxModel, '=') << " ========== =========== " << std::string(maxFileName, '=') << " " << std::string(maxHyper, '=') << std::endl;
+    auto i = 0;
+    for (const auto& result : results) {
+        auto data = result.getData();
+        for (const auto& item : data["results"]) {
+            if (item["dataset"] == dataset) {
+                auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
+                color = item["score"].get<double>() == maxResult ? Colors::RED() : color;
+                std::cout << color << std::setw(3) << std::fixed << std::right << i++ << " ";
+                std::cout << std::setw(maxModel) << std::left << result.getModel() << " ";
+                std::cout << color << result.getDate() << " ";
+                std::cout << std::setw(11) << std::setprecision(9) << std::fixed << item["score"].get<double>() << " ";
+                std::cout << std::setw(maxFileName) << result.getFilename() << " ";
+                std::cout << item["hyperparameters"].dump() << std::endl;
+                break;
+            }
+        }
+    }
 }
 
 int main(int argc, char** argv)
@@ -110,7 +147,20 @@ int main(int argc, char** argv)
         throw std::runtime_error("Dataset must be one of " + datasets.toString());
             }
     );
-    program.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
+    results_command.add_argument("-m", "--model")
+        .help("Model to use: " + platform::Models::instance()->toString() + " or any")
+        .default_value("any")
+        .action([](const std::string& value) {
+        std::vector<std::string> valid(platform::Models::instance()->getNames());
+        valid.push_back("any");
+        static const std::vector<std::string> choices = valid;
+        if (find(choices.begin(), choices.end(), value) != choices.end()) {
+            return value;
+        }
+        throw std::runtime_error("Model must be one of " + platform::Models::instance()->toString() + " or any");
+            }
+    );
+    results_command.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
     // Add subparsers
     program.add_subparser(datasets_command);
     program.add_subparser(results_command);

@@ -27,6 +27,7 @@ namespace platform {
         std::string getModel() const { return data["model"].get<std::string>(); };
         std::string getScoreName() const { return data["score_name"].get<std::string>(); };
         bool isComplete() const { return complete; };
+        json getData() const { return data; }
         // Setters
         void setTitle(const std::string& title) { data["title"] = title; };
         void setLanguage(const std::string& language) { data["language"] = language; };

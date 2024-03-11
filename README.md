@@ -1,10 +1,7 @@
 # Platform
 
-Platform to run Bayesian Networks and Machine Learning Classifiers experiments.
-
-# Platform
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<a href="#"><img src="https://img.shields.io/badge/c++-%2300599C.svg?style=flat&logo=c%2B%2B&logoColor=white"></img></a>
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 Platform to run Bayesian Networks and Machine Learning Classifiers experiments.
 

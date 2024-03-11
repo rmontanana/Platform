@@ -16,37 +16,52 @@ include_directories(
 )
 
 # b_best
-set(best_sources b_best.cc BestResults.cc  Statistics.cc BestResultsExcel.cc)
+set(best_sources b_best.cpp BestResults.cpp  Statistics.cpp BestResultsExcel.cpp)
 list(TRANSFORM best_sources PREPEND best/)
 add_executable(
-    b_best ${best_sources} main/Result.cc 
-    reports/ReportExcel.cc reports/ReportBase.cc reports/ExcelFile.cc common/Datasets.cc common/Dataset.cc)
-target_link_libraries(b_best Boost::boost "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)
+    b_best ${best_sources} 
+    common/Datasets.cpp common/Dataset.cpp
+    main/Result.cpp main/Models.cpp
+    reports/ReportExcel.cpp reports/ReportBase.cpp reports/ExcelFile.cpp 
+)
+target_link_libraries(b_best Boost::boost "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
 # b_grid
-set(grid_sources b_grid.cc GridSearch.cc GridData.cc)
+set(grid_sources b_grid.cpp GridSearch.cpp GridData.cpp)
 list(TRANSFORM grid_sources PREPEND grid/)
-add_executable(b_grid ${grid_sources} main/HyperParameters.cc main/Models.cc common/Datasets.cc common/Dataset.cc)
+add_executable(b_grid ${grid_sources} 
+    common/Datasets.cpp common/Dataset.cpp
+    main/HyperParameters.cpp main/Models.cpp 
+)
 target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 
 # b_list
-set(list_sources b_list.cc DatasetsExcel.cc)
+set(list_sources b_list.cpp DatasetsExcel.cpp ResultsDataset.cpp ResultsDatasetExcel.cpp)
 list(TRANSFORM list_sources PREPEND list/)
-add_executable(b_list ${list_sources} common/Datasets.cc common/Dataset.cc reports/ReportExcel.cc reports/ExcelFile.cc reports/ReportBase.cc)
-target_link_libraries(b_list "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)
+add_executable(b_list ${list_sources} 
+    common/Datasets.cpp common/Dataset.cpp 
+    main/Models.cpp
+    reports/ReportExcel.cpp reports/ExcelFile.cpp reports/ReportBase.cpp main/Result.cpp
+)
+target_link_libraries(b_list "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
 # b_main
-set(main_sources b_main.cc Experiment.cc Models.cc HyperParameters.cc)
+set(main_sources b_main.cpp Experiment.cpp Models.cpp HyperParameters.cpp)
 list(TRANSFORM main_sources PREPEND main/)
-add_executable(b_main ${main_sources} common/Datasets.cc common/Dataset.cc reports/ReportConsole.cc reports/ReportBase.cc main/Result.cc)
+add_executable(b_main ${main_sources} 
+    common/Datasets.cpp common/Dataset.cpp 
+    main/Result.cpp
+    reports/ReportConsole.cpp reports/ReportBase.cpp 
+)
 target_link_libraries(b_main "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 
 # b_manage
-set(manage_sources b_manage.cc ManageResults.cc CommandParser.cc Results.cc)
+set(manage_sources b_manage.cpp ManageResults.cpp CommandParser.cpp ResultsManager.cpp)
 list(TRANSFORM manage_sources PREPEND manage/)
 add_executable(
-    b_manage ${manage_sources} main/Result.cc 
-    reports/ReportConsole.cc reports/ReportExcel.cc reports/ReportExcelCompared.cc reports/ReportBase.cc reports/ExcelFile.cc 
-    common/Datasets.cc common/Dataset.cc
+    b_manage ${manage_sources} 
+    common/Datasets.cpp common/Dataset.cpp
+    main/Result.cpp 
+    reports/ReportConsole.cpp reports/ReportExcel.cpp reports/ReportExcelCompared.cpp reports/ReportBase.cpp reports/ExcelFile.cpp 
 )
 target_link_libraries(b_manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)

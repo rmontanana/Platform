@@ -1,5 +1,5 @@
-#ifndef GRIDSEARCH_H
-#define GRIDSEARCH_H
+#pragma once
+
 #include <string>
 #include <map>
 #include <mpi.h>
@@ -57,4 +57,3 @@ namespace platform {
         Timer timer; // used to measure the time of the whole process
     };
 } /* namespace platform */
-#endif /* GRIDSEARCH_H */

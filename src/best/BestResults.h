@@ -1,5 +1,5 @@
-#ifndef BESTRESULTS_H
-#define BESTRESULTS_H
+#pragma once
+
 #include <string>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
@@ -34,4 +34,3 @@ namespace platform {
         int maxDatasetName = 0;
     };
 }
-#endif //BESTRESULTS_H

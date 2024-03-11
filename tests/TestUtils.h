@@ -1,5 +1,5 @@
-#ifndef TEST_UTILS_H
-#define TEST_UTILS_H
+#pragma once
+
 #include <torch/torch.h>
 #include <string>
 #include <vector>
@@ -40,4 +40,3 @@ public:
     double epsilon = 1e-5;
 };
 
-#endif //TEST_UTILS_H

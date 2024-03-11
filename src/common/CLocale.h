@@ -1,5 +1,5 @@
-#ifndef LOCALE_H
-#define LOCALE_H
+#pragma once
+
 #include <locale>
 #include <iostream>
 #include <string>
@@ -19,4 +19,3 @@ namespace platform {
         }
     };
 }
-#endif 

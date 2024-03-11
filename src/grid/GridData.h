@@ -1,5 +1,5 @@
-#ifndef GRIDDATA_H
-#define GRIDDATA_H
+#pragma once
+
 #include <string>
 #include <vector>
 #include <map>
@@ -23,4 +23,3 @@ namespace platform {
         std::map<std::string, json> grid;
     };
 } /* namespace platform */
-#endif /* GRIDDATA_H */

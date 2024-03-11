@@ -20,14 +20,14 @@ void assignModel(argparse::ArgumentParser& parser)
 {
     auto models = platform::Models::instance();
     parser.add_argument("-m", "--model")
-        .help("Model to use " + models->tostring())
+        .help("Model to use " + models->toString())
         .required()
         .action([models](const std::string& value) {
         static const std::vector<std::string> choices = models->getNames();
         if (find(choices.begin(), choices.end(), value) != choices.end()) {
             return value;
         }
-        throw std::runtime_error("Model must be one of " + models->tostring());
+        throw std::runtime_error("Model must be one of " + models->toString());
             }
     );
 }
@@ -259,7 +259,7 @@ int main(int argc, char** argv)
             }
         }
         if (!found) {
-            throw std::runtime_error("You must specify one of the following commands: dump, report, compute, export\n");
+            throw std::runtime_error("You must specify one of the following commands: dump, report, compute\n");
         }
     }
     catch (const exception& err) {

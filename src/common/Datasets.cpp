@@ -126,4 +126,14 @@ namespace platform {
     {
         return datasets.find(name) != datasets.end();
     }
+    std::string Datasets::toString() const
+    {
+        std::string result;
+        std::string sep = "";
+        for (const auto& d : datasets) {
+            result += sep + d.first;
+            sep = ", ";
+        }
+        return "{" + result + "}";
+    }
 }

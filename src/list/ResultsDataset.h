@@ -1,22 +1,20 @@
-#ifndef RESULTS_H
-#define RESULTS_H
-#include <map>
+#pragma once
+
 #include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
 #include "main/Result.h"
 namespace platform {
     using json = nlohmann::json;
-    class Results {
+    class ResultsDataset {
     public:
-        Results(const std::string& path, const std::string& model, const std::string& score, bool complete, bool partial);
-        void sortDate();
-        void sortScore();
+        ResultsDataset(const std::string& dataset, const std::string& model, const std::string& score);
+        void load(); // Loads the list of results
         void sortModel();
-        void sortDuration();
         int maxModelSize() const { return maxModel; };
-        void hideResult(int index, const std::string& pathHidden);
-        void deleteResult(int index);
+        int maxFileSize() const { return maxFile; };
+        int maxHyperSize() const { return maxHyper; };
+        double maxResultScore() const { return maxResult; };
         int size() const;
         bool empty() const;
         std::vector<Result>::iterator begin() { return files.begin(); };
@@ -24,13 +22,13 @@ namespace platform {
         Result& at(int index) { return files.at(index); };
     private:
         std::string path;
+        std::string dataset;
         std::string model;
         std::string scoreName;
-        bool complete;
-        bool partial;
         int maxModel;
+        int maxFile;
+        int maxHyper;
+        double maxResult;
         std::vector<Result> files;
-        void load(); // Loads the list of results
     };
 };
-#endif

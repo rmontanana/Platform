@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#pragma once
+
 #include <sstream>
 #include <string>
 #include <vector>
@@ -27,4 +27,3 @@ namespace platform {
         return result;
     }
 }
-#endif

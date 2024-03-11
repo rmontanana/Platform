@@ -1,5 +1,5 @@
-#ifndef DATASET_H
-#define DATASET_H
+#pragma once
+
 #include <torch/torch.h>
 #include <map>
 #include <vector>
@@ -75,4 +75,3 @@ namespace platform {
     };
 };
 
-#endif

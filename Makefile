@@ -96,6 +96,14 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 	done
 	@echo ">>> Done";
 
+fname = iris
+example: ## Build sample
+	@echo ">>> Building Sample...";
+	@cmake --build build_debug -t sample
+	build_debug/sample/PlatformSample --model BoostAODE --dataset $(fname) --discretize --stratified
+	@echo ">>> Done";
+
+
 coverage: ## Run tests and generate coverage report (build/index.html)
 	@echo ">>> Building tests with coverage..."
 	@$(MAKE) test
@@ -105,7 +113,7 @@ coverage: ## Run tests and generate coverage report (build/index.html)
 
 help: ## Show help message
 	@IFS=$$'\n' ; \
-	help_lines=(`fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##/:/'`); \
+	help_lines=(`grep -Fh "##" $(MAKEFILE_LIST) | grep -Fv fgrep | sed -e 's/\\$$//' | sed -e 's/##/:/'`); \
 	printf "%s\n\n" "Usage: make [task]"; \
 	printf "%-20s %s\n" "task" "help" ; \
 	printf "%-20s %s\n" "------" "----" ; \

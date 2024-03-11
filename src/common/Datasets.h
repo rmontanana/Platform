@@ -1,5 +1,5 @@
-#ifndef DATASETS_H
-#define DATASETS_H
+#pragma once
+
 #include "Dataset.h"
 namespace platform {
     class Datasets {
@@ -24,7 +24,6 @@ namespace platform {
         std::pair<torch::Tensor&, torch::Tensor&> getTensors(const std::string& name);
         bool isDataset(const std::string& name) const;
         void loadDataset(const std::string& name) const;
+        std::string toString() const;
     };
 };
-
-#endif

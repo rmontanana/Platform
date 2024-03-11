@@ -1,5 +1,5 @@
-#ifndef SYMBOLS_H
-#define SYMBOLS_H
+#pragma once
+
 #include <string>
 namespace platform {
     class Symbols {
@@ -15,4 +15,3 @@ namespace platform {
         inline static const std::string notebook{ "\U0001F5C8" };
     };
 }
-#endif // !SYMBOLS_H

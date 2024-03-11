@@ -84,6 +84,7 @@ namespace platform {
     void ExcelFile::createStyle(const std::string& name, lxw_format* style, bool odd)
     {
         addColor(style, odd);
+        auto color_bold = 0xFF0000;
         if (name == "textCentered") {
             format_set_align(style, LXW_ALIGN_CENTER);
             format_set_font_size(style, normalSize);
@@ -93,6 +94,13 @@ namespace platform {
             format_set_font_size(style, normalSize);
             format_set_border(style, LXW_BORDER_THIN);
             format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
+            format_set_text_wrap(style);
+        } else if (name == "text_bold") {
+            format_set_font_size(style, normalSize);
+            format_set_border(style, LXW_BORDER_THIN);
+            format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
+            format_set_font_color(style, lxw_color_t(color_bold));
+            format_set_bold(style);
             format_set_text_wrap(style);
         } else if (name == "bodyHeader") {
             format_set_bold(style);
@@ -106,6 +114,13 @@ namespace platform {
             format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
             format_set_border(style, LXW_BORDER_THIN);
             format_set_num_format(style, "0.0000000");
+        } else if (name == "result_bold") {
+            format_set_font_size(style, normalSize);
+            format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
+            format_set_border(style, LXW_BORDER_THIN);
+            format_set_bold(style);
+            format_set_font_color(style, lxw_color_t(color_bold));
+            format_set_num_format(style, "0.0000000");
         } else if (name == "time") {
             format_set_font_size(style, normalSize);
             format_set_border(style, LXW_BORDER_THIN);
@@ -115,6 +130,13 @@ namespace platform {
             format_set_font_size(style, normalSize);
             format_set_num_format(style, "###,##0");
             format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
+            format_set_border(style, LXW_BORDER_THIN);
+        } else if (name == "ints_bold") {
+            format_set_font_size(style, normalSize);
+            format_set_num_format(style, "###,##0");
+            format_set_align(style, LXW_ALIGN_VERTICAL_CENTER);
+            format_set_bold(style);
+            format_set_font_color(style, lxw_color_t(color_bold));
             format_set_border(style, LXW_BORDER_THIN);
         } else if (name == "floats") {
             format_set_border(style, LXW_BORDER_THIN);
@@ -131,7 +153,7 @@ namespace platform {
 
     void ExcelFile::createFormats()
     {
-        auto styleNames = { "text", "textCentered", "bodyHeader", "result", "time", "ints", "floats", "percentage" };
+        auto styleNames = { "text", "text_bold", "textCentered", "bodyHeader", "result", "result_bold", "time", "ints", "ints_bold", "floats", "percentage" };
         lxw_format* style;
         for (std::string name : styleNames) {
             lxw_format* style = workbook_add_format(workbook);

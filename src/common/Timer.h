@@ -1,5 +1,5 @@
-#ifndef TIMER_H
-#define TIMER_H
+#pragma once
+
 #include <chrono>
 #include <string>
 #include <sstream>
@@ -40,4 +40,3 @@ namespace platform {
         }
     };
 } /* namespace platform */
-#endif /* TIMER_H */

@@ -4,8 +4,8 @@ diagrams:
   Platform:
     type: class
     glob:
-      - src/*.cc
-      - src/modules/*.cc
+      - src/*.cpp
+      - src/modules/*.cpp
     using_namespace: platform
     include:
       namespaces:
@@ -17,7 +17,7 @@ diagrams:
   sequence:
     type: sequence
     glob:
-      - src/b_main.cc
+      - src/b_main.cpp
     combine_free_functions_into_file_participants: true
     using_namespace:
       - std

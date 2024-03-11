@@ -1,5 +1,5 @@
-#ifndef RESULT_H
-#define RESULT_H
+#pragma once
+
 #include <map>
 #include <vector>
 #include <string>
@@ -21,12 +21,14 @@ namespace platform {
         std::string to_string(int maxModel) const;
         std::string getFilename() const;
         std::string getDate() const { return data["date"].get<std::string>(); };
+        std::string getTime() const { return data["time"].get<std::string>(); };
         double getScore() const { return score; };
         std::string getTitle() const { return data["title"].get<std::string>(); };
         double getDuration() const { return data["duration"]; };
         std::string getModel() const { return data["model"].get<std::string>(); };
         std::string getScoreName() const { return data["score_name"].get<std::string>(); };
         bool isComplete() const { return complete; };
+        json getData() const { return data; }
         // Setters
         void setTitle(const std::string& title) { data["title"] = title; };
         void setLanguage(const std::string& language) { data["language"] = language; };
@@ -48,4 +50,3 @@ namespace platform {
         double score = 0.0;
     };
 };
-#endif

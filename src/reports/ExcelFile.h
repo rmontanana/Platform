@@ -1,5 +1,5 @@
-#ifndef EXCELFILE_H
-#define EXCELFILE_H
+#pragma once
+
 #include <locale>
 #include <string>
 #include <map>
@@ -42,4 +42,3 @@ namespace platform {
         void setDefault();
     };
 }
-#endif // !EXCELFILE_H

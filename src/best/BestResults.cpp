@@ -170,10 +170,9 @@ namespace platform {
         std::cout << Colors::GREEN() << " #  " << std::setw(maxDatasetName + 1) << std::left << "Dataset" << "Score       " << std::setw(maxFileName) << "File" << " Hyperparameters" << std::endl;
         std::cout << "=== " << std::string(maxDatasetName, '=') << " =========== " << std::string(maxFileName, '=') << " " << std::string(maxHyper, '=') << std::endl;
         auto i = 0;
-        bool odd = true;
         double total = 0;
         for (auto const& item : data.items()) {
-            auto color = odd ? Colors::BLUE() : Colors::CYAN();
+            auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
             double value = item.value().at(0).get<double>();
             std::cout << color << std::setw(3) << std::fixed << std::right << i++ << " ";
             std::cout << std::setw(maxDatasetName) << std::left << item.key() << " ";
@@ -182,7 +181,6 @@ namespace platform {
             std::cout << item.value().at(1) << " ";
             std::cout << std::endl;
             total += value;
-            odd = !odd;
         }
         std::cout << Colors::GREEN() << "=== " << std::string(maxDatasetName, '=') << " ===========" << std::endl;
         std::cout << Colors::GREEN() << "    Total" << std::string(maxDatasetName - 5, '.') << " " << std::setw(11) << std::setprecision(8) << std::fixed << total << std::endl;

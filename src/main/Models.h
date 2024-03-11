@@ -1,5 +1,5 @@
-#ifndef MODELS_H
-#define MODELS_H
+#pragma once
+
 #include <map>
 #include <bayesnet/BaseClassifier.h>
 #include <bayesnet/ensembles/AODE.h>
@@ -31,7 +31,7 @@ namespace platform {
         void registerFactoryFunction(const std::string& name,
             function<bayesnet::BaseClassifier* (void)> classFactoryFunction);
         std::vector<string> getNames();
-        std::string tostring();
+        std::string toString();
 
     };
     class Registrar {
@@ -39,4 +39,3 @@ namespace platform {
         Registrar(const std::string& className, function<bayesnet::BaseClassifier* (void)> classFactoryFunction);
     };
 }
-#endif

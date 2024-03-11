@@ -104,6 +104,9 @@ namespace platform {
                 totals_A[j] += r_A[key].get<double>();
                 totals_B[j] += r_B[key].get<double>();
             }
+            if (r_A["dataset"].get<std::string>() != r_B["dataset"].get<std::string>()) {
+                throw std::runtime_error("Datasets are not the same [" + r_A["dataset"].get<std::string>() + "] vs [" + r_B["dataset"].get<std::string>() + "]");
+            }
             writeString(row, col++, r_A["dataset"].get<std::string>(), "text");
             writeInt(row, col++, r_A["samples"].get<int>(), "ints");
             writeInt(row, col++, r_A["features"].get<int>(), "ints");

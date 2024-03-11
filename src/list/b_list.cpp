@@ -89,31 +89,21 @@ void list_results(argparse::ArgumentParser& program)
         std::cerr << Colors::RED() << "No results found for dataset " << dataset << " and model " << model << Colors::RESET() << std::endl;
         exit(1);
     }
-    //
-    // List data
-    //
     int maxModel = results.maxModelSize();
     int maxHyper = results.maxHyperSize();
     double maxResult = results.maxResultScore();
-    std::cout << Colors::GREEN() << "Results of dataset " << dataset << " - for " << model << " model" << std::endl;
-    std::cout << "There are " << results.size() << " results" << std::endl;
-    std::cout << Colors::GREEN() << " #  " << std::setw(maxModel + 1) << std::left << "Model" << "Date       Time     Score       Hyperparameters" << std::endl;
-    std::cout << "=== " << std::string(maxModel, '=') << " ========== ======== =========== " << std::string(maxHyper, '=') << std::endl;
-    auto i = 0;
+    // Build data for the Report
     json data = json::object();
     data["results"] = json::array();
+    data["max_models"] = json::object(); // Max score per model
     for (const auto& result : results) {
         auto results = result.getData();
+        if (!data["max_models"].contains(result.getModel())) {
+            data["max_models"][result.getModel()] = 0;
+        }
         for (const auto& item : results["results"]) {
             if (item["dataset"] == dataset) {
-                auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
-                color = item["score"].get<double>() == maxResult ? Colors::RED() : color;
-                std::cout << color << std::setw(3) << std::fixed << std::right << i++ << " ";
-                std::cout << std::setw(maxModel) << std::left << result.getModel() << " ";
-                std::cout << color << result.getDate() << " ";
-                std::cout << color << result.getTime() << " ";
-                std::cout << std::setw(11) << std::setprecision(9) << std::fixed << item["score"].get<double>() << " ";
-                std::cout << item["hyperparameters"].dump() << std::endl;
+
                 // Store data for Excel report
                 json res = json::object();
                 res["date"] = result.getDate();
@@ -122,16 +112,39 @@ void list_results(argparse::ArgumentParser& program)
                 res["score"] = item["score"].get<double>();
                 res["hyperparameters"] = item["hyperparameters"].dump();
                 data["results"].push_back(res);
+                if (item["score"].get<double>() > data["max_models"][result.getModel()]) {
+                    data["max_models"][result.getModel()] = item["score"].get<double>();
+                }
                 break;
             }
         }
+    }
+    //
+    // List the results
+    //
+    std::cout << Colors::GREEN() << "Results of dataset " << dataset << " - for " << model << " model" << std::endl;
+    std::cout << "There are " << results.size() << " results" << std::endl;
+    std::cout << Colors::GREEN() << " #  " << std::setw(maxModel + 1) << std::left << "Model" << "Date       Time     Score       Hyperparameters" << std::endl;
+    std::cout << "=== " << std::string(maxModel, '=') << " ========== ======== =========== " << std::string(maxHyper, '=') << std::endl;
+    auto i = 0;
+    for (const auto& item : data["results"]) {
+        auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
+        auto score = item["score"].get<double>();
+        color = score == data["max_models"][item["model"].get<std::string>()] ? Colors::YELLOW() : color;
+        color = score == maxResult ? Colors::RED() : color;
+        std::cout << color << std::setw(3) << std::fixed << std::right << i++ << " ";
+        std::cout << std::setw(maxModel) << std::left << item["model"].get<std::string>() << " ";
+        std::cout << color << item["date"].get<std::string>() << " ";
+        std::cout << color << item["time"].get<std::string>() << " ";
+        std::cout << std::setw(11) << std::setprecision(9) << std::fixed << score << " ";
+        std::cout << item["hyperparameters"].get<std::string>() << std::endl;
     }
     if (excel) {
         data["dataset"] = dataset;
         data["score"] = score;
         data["model"] = model;
-        data["maxModel"] = maxModel;
-        data["maxHyper"] = maxHyper;
+        data["lengths"]["maxModel"] = maxModel;
+        data["lengths"]["maxHyper"] = maxHyper;
         data["maxResult"] = maxResult;
         auto report = platform::ResultsDatasetExcel();
         report.report(data);

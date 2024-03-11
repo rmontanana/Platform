@@ -64,6 +64,27 @@ namespace platform {
         }
         return efectiveStyle;
     }
+    void ExcelFile::boldFontColor(const uint32_t color)
+    {
+        createFormats();
+        for (const std::string& style : { "text", "ints", "result" }) {
+            for (const std::string& suffix : { "_odd", "_even" }) {
+                format_set_font_color(styles[style + "_bold" + suffix], lxw_color_t(color));
+            }
+        }
+    }
+    void ExcelFile::boldGreen()
+    {
+        boldFontColor(0x00FF00);
+    }
+    void ExcelFile::boldRed()
+    {
+        boldFontColor(0xFF0000);
+    }
+    void ExcelFile::boldBlue()
+    {
+        boldFontColor(0x0000FF);
+    }
     void ExcelFile::writeString(int row, int col, const std::string& text, const std::string& style)
     {
         worksheet_write_string(worksheet, row, col, text.c_str(), efectiveStyle(style));

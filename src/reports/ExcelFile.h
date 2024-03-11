@@ -26,6 +26,10 @@ namespace platform {
         void writeInt(int row, int col, const int number, const std::string& style = "");
         void writeDouble(int row, int col, const double number, const std::string& style = "");
         void createFormats();
+        void boldFontColor(const uint32_t color); // the same color for bold styles
+        void boldRed(); //set red color for the bold styles
+        void boldBlue(); //set blue color for the bold styles
+        void boldGreen(); //set green color for the bold styles
         void createStyle(const std::string& name, lxw_format* style, bool odd);
         void addColor(lxw_format* style, bool odd);
         lxw_format* efectiveStyle(const std::string& name);

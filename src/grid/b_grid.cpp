@@ -100,14 +100,13 @@ void list_dump(std::string& model)
     std::cout << Colors::GREEN() << left << " #  " << left << setw(max_dataset) << "Dataset" << " #Com. "
         << setw(max_hyper) << "Hyperparameters" << std::endl;
     std::cout << "=== " << string(max_dataset, '=') << " ===== " << string(max_hyper, '=') << std::endl;
-    bool odd = true;
+    int i = 0;
     for (auto const& item : combinations) {
-        auto color = odd ? Colors::CYAN() : Colors::BLUE();
+        auto color = (i++ % 2) ? Colors::CYAN() : Colors::BLUE();
         std::cout << color;
         auto num_combinations = data.getNumCombinations(item.first);
         std::cout << setw(3) << fixed << right << ++index << left << " " << setw(max_dataset) << item.first
             << " " << setw(5) << right << num_combinations << " " << setw(max_hyper) << left << item.second.dump() << std::endl;
-        odd = !odd;
     }
     std::cout << Colors::RESET() << std::endl;
 }
@@ -141,17 +140,15 @@ void list_results(json& results, std::string& model)
         << "Duration " << setw(8) << "Score" << " " << "Hyperparameters" << std::endl;
     std::cout << "=== " << string(spaces, '=') << " " << string(19, '=') << " " << string(8, '=') << " "
         << string(8, '=') << " " << string(hyperparameters_spaces, '=') << std::endl;
-    bool odd = true;
     int index = 0;
     for (const auto& item : results["results"].items()) {
-        auto color = odd ? Colors::CYAN() : Colors::BLUE();
+        auto color = (index % 2) ? Colors::CYAN() : Colors::BLUE();
         auto value = item.value();
         std::cout << color;
         std::cout << std::setw(3) << std::right << index++ << " ";
         std::cout << left << setw(spaces) << item.key() << " " << value["date"].get<string>()
             << " " << setw(8) << right << value["duration"].get<string>() << " " << setw(8) << setprecision(6)
             << fixed << right << value["score"].get<double>() << " " << value["hyperparameters"].dump() << std::endl;
-        odd = !odd;
     }
     std::cout << Colors::RESET() << std::endl;
 }

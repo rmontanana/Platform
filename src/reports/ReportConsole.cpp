@@ -48,14 +48,13 @@ namespace platform {
         std::cout << "=== " << std::string(maxDataset, '=') << " ====== ===== === ========= ========= ========= =============== =================== " << std::string(maxHyper, '=') << std::endl;
         json lastResult;
         double totalScore = 0.0;
-        bool odd = true;
         int index = 0;
         for (const auto& r : data["results"]) {
             if (selectedIndex != -1 && index != selectedIndex) {
                 index++;
                 continue;
             }
-            auto color = odd ? Colors::CYAN() : Colors::BLUE();
+            auto color = (index % 2) ? Colors::CYAN() : Colors::BLUE();
             std::cout << color;
             std::string separator{ " " };
             if (r.find("notes") != r.end()) {
@@ -78,7 +77,6 @@ namespace platform {
             std::cout << std::flush;
             lastResult = r;
             totalScore += r["score"].get<double>();
-            odd = !odd;
         }
         if (data["results"].size() == 1 || selectedIndex != -1) {
             std::cout << std::string(MAXL, '*') << std::endl;

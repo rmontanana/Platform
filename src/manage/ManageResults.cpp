@@ -55,15 +55,13 @@ namespace platform {
         int maxTitle = results.maxTitleSize();
         std::cout << Colors::GREEN() << " #  Date       " << std::setw(maxModel) << std::left << "Model" << " Score Name  Score       C/P Duration  Title" << std::endl;
         std::cout << "=== ========== " << std::string(maxModel, '=') << " =========== =========== === ========= " << std::string(maxTitle, '=') << std::endl;
-        bool odd = true;
         for (auto& result : results) {
-            auto color = odd ? Colors::BLUE() : Colors::CYAN();
+            auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
             std::cout << color << std::setw(3) << std::fixed << std::right << i++ << " ";
             std::cout << result.to_string(maxModel) << std::endl;
             if (i == numFiles) {
                 break;
             }
-            odd = !odd;
         }
     }
     bool ManageResults::confirmAction(const std::string& intent, const std::string& fileName) const

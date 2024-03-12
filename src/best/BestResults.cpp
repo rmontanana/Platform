@@ -226,7 +226,6 @@ namespace platform {
         }
         std::cout << std::endl;
         auto i = 0;
-        bool odd = true;
         std::map<std::string, double> totals;
         int nDatasets = table.begin().value().size();
         for (const auto& model : models) {
@@ -234,7 +233,7 @@ namespace platform {
         }
         auto datasets = getDatasets(table.begin().value());
         for (auto const& dataset_ : datasets) {
-            auto color = odd ? Colors::BLUE() : Colors::CYAN();
+            auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
             std::cout << color << std::setw(3) << std::fixed << std::right << i++ << " ";
             std::cout << std::setw(maxDatasetName) << std::left << dataset_ << " ";
             double maxValue = 0;
@@ -272,7 +271,6 @@ namespace platform {
                 }
             }
             std::cout << std::endl;
-            odd = !odd;
         }
         std::cout << Colors::GREEN() << "=== " << std::string(maxDatasetName, '=') << " ";
         for (const auto& model : models) {

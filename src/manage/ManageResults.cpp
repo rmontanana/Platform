@@ -18,7 +18,7 @@ namespace platform {
         indexList = true;
         openExcel = false;
         workbook = NULL;
-        if (numFiles == 0) {
+        if (numFiles == 0 or numFiles > results.size()) {
             this->numFiles = results.size();
         }
     }

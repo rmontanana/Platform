@@ -4,7 +4,7 @@
 
 namespace platform {
     ResultsManager::ResultsManager(const std::string& model, const std::string& score, bool complete, bool partial) :
-        path(Paths::results()), model(model), scoreName(score), complete(complete), partial(partial), maxModel(0)
+        path(Paths::results()), model(model), scoreName(score), complete(complete), partial(partial), maxModel(0), maxTitle(0)
     {
     }
     void ResultsManager::load()
@@ -23,6 +23,7 @@ namespace platform {
             }
         }
         maxModel = std::max(size_t(5), (*max_element(files.begin(), files.end(), [](const Result& a, const Result& b) { return a.getModel().size() < b.getModel().size(); })).getModel().size());
+        maxTitle = std::max(size_t(5), (*max_element(files.begin(), files.end(), [](const Result& a, const Result& b) { return a.getTitle().size() < b.getTitle().size(); })).getTitle().size());
     }
     void ResultsManager::hideResult(int index, const std::string& pathHidden)
     {

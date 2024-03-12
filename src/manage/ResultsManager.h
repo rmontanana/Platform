@@ -15,6 +15,7 @@ namespace platform {
         void sortModel();
         void sortDuration();
         int maxModelSize() const { return maxModel; };
+        int maxTitleSize() const { return maxTitle; };
         void hideResult(int index, const std::string& pathHidden);
         void deleteResult(int index);
         int size() const;
@@ -29,6 +30,7 @@ namespace platform {
         bool complete;
         bool partial;
         int maxModel;
+        int maxTitle;
         std::vector<Result> files;
     };
 };

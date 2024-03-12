@@ -1,8 +1,9 @@
 #include <iostream>
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include <argparse/argparse.hpp>
 #include "ManageResults.h"
 #include "config.h"
-
 
 void manageArguments(argparse::ArgumentParser& program, int argc, char** argv)
 {
@@ -31,6 +32,21 @@ void manageArguments(argparse::ArgumentParser& program, int argc, char** argv)
     }
 }
 
+int numRows()
+{
+#ifdef TIOCGSIZE
+    struct ttysize ts;
+    ioctl(STDIN_FILENO, TIOCGSIZE, &ts);
+    // cols = ts.ts_cols;
+    return ts.ts_lines;
+#elif defined(TIOCGWINSZ)
+    struct winsize ts;
+    ioctl(STDIN_FILENO, TIOCGWINSZ, &ts);
+    // cols = ts.ws_col;
+    return ts.ws_row;
+#endif /* TIOCGSIZE */
+}
+
 int main(int argc, char** argv)
 {
     auto program = argparse::ArgumentParser("b_manage", { platform_project_version.begin(), platform_project_version.end() });
@@ -41,6 +57,9 @@ int main(int argc, char** argv)
     auto complete = program.get<bool>("complete");
     auto partial = program.get<bool>("partial");
     auto compare = program.get<bool>("compare");
+    if (number == 0) {
+        number = std::max(0, numRows() - 5); // 5 is the number of lines used by the menu & header
+    }
     if (complete)
         partial = false;
     auto manager = platform::ManageResults(number, model, score, complete, partial, compare);

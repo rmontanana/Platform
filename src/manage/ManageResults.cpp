@@ -10,7 +10,6 @@
 #include "ManageResults.h"
 
 namespace platform {
-
     ManageResults::ManageResults(int numFiles, const std::string& model, const std::string& score, bool complete, bool partial, bool compare) :
         numFiles{ numFiles }, complete{ complete }, partial{ partial }, compare{ compare }, results(ResultsManager(model, score, complete, partial))
     {
@@ -53,8 +52,9 @@ namespace platform {
         }
         auto i = 0;
         int maxModel = results.maxModelSize();
+        int maxTitle = results.maxTitleSize();
         std::cout << Colors::GREEN() << " #  Date       " << std::setw(maxModel) << std::left << "Model" << " Score Name  Score       C/P Duration  Title" << std::endl;
-        std::cout << "=== ========== " << std::string(maxModel, '=') << " =========== =========== === ========= =============================================================" << std::endl;
+        std::cout << "=== ========== " << std::string(maxModel, '=') << " =========== =========== === ========= " << std::string(maxTitle, '=') << std::endl;
         bool odd = true;
         for (auto& result : results) {
             auto color = odd ? Colors::BLUE() : Colors::CYAN();

@@ -14,12 +14,14 @@ namespace platform {
         numFiles{ numFiles }, complete{ complete }, partial{ partial }, compare{ compare }, results(ResultsManager(model, score, complete, partial))
     {
         results.load();
-        results.sortDate();
-        indexList = true;
-        openExcel = false;
-        workbook = NULL;
-        if (numFiles == 0 or numFiles > results.size()) {
-            this->numFiles = results.size();
+        if (!results.empty()) {
+            results.sortDate();
+            indexList = true;
+            openExcel = false;
+            workbook = NULL;
+            if (numFiles == 0 or numFiles > results.size()) {
+                this->numFiles = results.size();
+            }
         }
     }
     void ManageResults::doMenu()

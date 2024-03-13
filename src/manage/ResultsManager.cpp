@@ -10,6 +10,7 @@ namespace platform {
     void ResultsManager::load()
     {
         using std::filesystem::directory_iterator;
+        bool found = false;
         for (const auto& file : directory_iterator(path)) {
             auto filename = file.path().filename().string();
             if (filename.find(".json") != std::string::npos && filename.find("results_") == 0) {
@@ -18,12 +19,16 @@ namespace platform {
                 bool addResult = true;
                 if (model != "any" && result.getModel() != model || scoreName != "any" && scoreName != result.getScoreName() || complete && !result.isComplete() || partial && result.isComplete())
                     addResult = false;
-                if (addResult)
+                if (addResult) {
                     files.push_back(result);
+                    found = true;
+                }
             }
         }
-        maxModel = std::max(size_t(5), (*max_element(files.begin(), files.end(), [](const Result& a, const Result& b) { return a.getModel().size() < b.getModel().size(); })).getModel().size());
-        maxTitle = std::max(size_t(5), (*max_element(files.begin(), files.end(), [](const Result& a, const Result& b) { return a.getTitle().size() < b.getTitle().size(); })).getTitle().size());
+        if (found) {
+            maxModel = std::max(size_t(5), (*max_element(files.begin(), files.end(), [](const Result& a, const Result& b) { return a.getModel().size() < b.getModel().size(); })).getModel().size());
+            maxTitle = std::max(size_t(5), (*max_element(files.begin(), files.end(), [](const Result& a, const Result& b) { return a.getTitle().size() < b.getTitle().size(); })).getTitle().size());
+        }
     }
     void ResultsManager::hideResult(int index, const std::string& pathHidden)
     {

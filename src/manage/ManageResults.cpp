@@ -45,14 +45,15 @@ namespace platform {
         auto temp = ConfigLocale();
         auto [index_from, index_to] = paginator.getOffset(page);
         std::stringstream oss;
-        oss << index_to - index_from + 1 << " Results on screen - Page " << page << " of " << paginator.getPages();
-        std::cout << Colors::CLRSCR() << Colors::REVERSE() << Colors::BLUE() << oss.str() << std::endl;
+        oss << " " << index_to - index_from + 1 << " Results on screen - Page " << page << " of " << paginator.getPages() << " ";
+        std::cout << Colors::CLRSCR() << Colors::REVERSE() << Colors::BLUE() << oss.str() << " ";
         if (complete) {
-            std::cout << Colors::MAGENTA() << "Only listing complete results" << std::endl;
+            std::cout << Colors::MAGENTA() << " Only listing complete results ";
         }
         if (partial) {
-            std::cout << Colors::MAGENTA() << "Only listing partial results" << std::endl;
+            std::cout << Colors::MAGENTA() << " Only listing partial results ";
         }
+        std::cout << Colors::RESET() << std::endl;
         auto i = 0;
         int maxModel = results.maxModelSize();
         int maxTitle = results.maxTitleSize();

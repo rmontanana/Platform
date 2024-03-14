@@ -16,7 +16,7 @@ namespace platform {
         while (!finished) {
             std::stringstream oss;
             std::string line;
-            oss << color << "Choose option (";
+            oss << color << "Options (";
             bool first = true;
             for (auto& option : options) {
                 if (first) {

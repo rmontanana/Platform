@@ -57,8 +57,8 @@ namespace platform {
         auto i = 0;
         int maxModel = results.maxModelSize();
         int maxTitle = results.maxTitleSize();
-        std::cout << Colors::GREEN() << " #  Date       " << std::setw(maxModel) << std::left << "Model" << " Score Name  Score       C/P Duration  Title" << std::endl;
-        std::cout << "=== ========== " << std::string(maxModel, '=') << " =========== =========== === ========= " << std::string(maxTitle, '=') << std::endl;
+        std::cout << Colors::GREEN() << " #  Date       " << std::setw(maxModel) << std::left << "Model" << " Score Name Score     C/P Time     Title" << std::endl;
+        std::cout << "=== ========== " << std::string(maxModel, '=') << " ========== ========= === ======= " << std::string(maxTitle, '=') << std::endl;
         for (int i = index_from; i <= index_to; i++) {
             auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
             std::cout << color << std::setw(3) << std::fixed << std::right << i << " ";

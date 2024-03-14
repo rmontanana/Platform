@@ -2,6 +2,7 @@
 
 #include <xlsxwriter.h>
 #include "ResultsManager.h"
+#include "Paginator.hpp"
 
 namespace platform {
     class ManageResults {
@@ -23,6 +24,8 @@ namespace platform {
         bool complete;
         bool partial;
         bool compare;
+        int page;
+        Paginator paginator;
         ResultsManager results;
         lxw_workbook* workbook;
     };

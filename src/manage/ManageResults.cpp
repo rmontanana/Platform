@@ -23,6 +23,8 @@ namespace platform {
                 this->numFiles = results.size();
             }
         }
+        paginator = Paginator(numFiles, results.size());
+        page = 1;
     }
     void ManageResults::doMenu()
     {
@@ -41,10 +43,10 @@ namespace platform {
     void ManageResults::list()
     {
         auto temp = ConfigLocale();
-        std::string suffix = numFiles != results.size() ? " of " + std::to_string(results.size()) : "";
+        auto [index_from, index_to] = paginator.getOffset(page);
         std::stringstream oss;
-        oss << "Results on screen: " << numFiles << suffix;
-        std::cout << Colors::GREEN() << oss.str() << std::endl;
+        oss << index_to - index_from + 1 << " Results on screen - Page " << page << " of " << paginator.getPages();
+        std::cout << Colors::CLRSCR() << Colors::GREEN() << oss.str() << std::endl;
         std::cout << std::string(oss.str().size(), '-') << std::endl;
         if (complete) {
             std::cout << Colors::MAGENTA() << "Only listing complete results" << std::endl;
@@ -57,13 +59,10 @@ namespace platform {
         int maxTitle = results.maxTitleSize();
         std::cout << Colors::GREEN() << " #  Date       " << std::setw(maxModel) << std::left << "Model" << " Score Name  Score       C/P Duration  Title" << std::endl;
         std::cout << "=== ========== " << std::string(maxModel, '=') << " =========== =========== === ========= " << std::string(maxTitle, '=') << std::endl;
-        for (auto& result : results) {
+        for (int i = index_from; i <= index_to; i++) {
             auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
-            std::cout << color << std::setw(3) << std::fixed << std::right << i++ << " ";
-            std::cout << result.to_string(maxModel) << std::endl;
-            if (i == numFiles) {
-                break;
-            }
+            std::cout << color << std::setw(3) << std::fixed << std::right << i << " ";
+            std::cout << results.at(i).to_string(maxModel) << std::endl;
         }
     }
     bool ManageResults::confirmAction(const std::string& intent, const std::string& fileName) const
@@ -166,7 +165,10 @@ namespace platform {
             {"title", 't', true},
             {"set A", 'a', true},
             {"set B", 'b', true},
-            {"compare A~B", 'c', false}
+            {"compare A~B", 'c', false},
+            {"Page", 'p', true},
+            {"Page+", '+', false },
+            {"Page-", '-', false}
         };
         // tuple<Option, digit, requires value>
         std::vector<std::tuple<std::string, char, bool>> listOptions = {
@@ -178,11 +180,36 @@ namespace platform {
         auto parser = CommandParser();
         while (!finished) {
             if (indexList) {
-                std::tie(option, index) = parser.parse(Colors::GREEN(), mainOptions, 'r', numFiles - 1);
+                auto [min_index, max_index] = paginator.getOffset(page);
+                std::tie(option, index) = parser.parse(Colors::GREEN(), mainOptions, 'r', min_index, max_index);
             } else {
-                std::tie(option, subIndex) = parser.parse(Colors::BLUE(), listOptions, 'r', results.at(index).getJson()["results"].size() - 1);
+                std::tie(option, subIndex) = parser.parse(Colors::BLUE(), listOptions, 'r', 0, results.at(index).getJson()["results"].size() - 1);
             }
             switch (option) {
+                case 'p':
+                    if (paginator.valid(index)) {
+                        page = index;
+                        list();
+                    } else {
+                        std::cout << Colors::RED() << "Invalid page!" << Colors::RESET() << std::endl;
+                    }
+                    break;
+                case '+':
+                    if (paginator.hasNext(page)) {
+                        page++;
+                        list();
+                    } else {
+                        std::cout << Colors::RED() << "No more pages!" << Colors::RESET() << std::endl;
+                    }
+                    break;
+                case '-':
+                    if (paginator.hasPrev(page)) {
+                        page--;
+                        list();
+                    } else {
+                        std::cout << Colors::RED() << "First page already!" << Colors::RESET() << std::endl;
+                    }
+                    break;
                 case 'q':
                     finished = true;
                     break;

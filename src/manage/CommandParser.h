@@ -8,7 +8,7 @@ namespace platform {
     class CommandParser {
     public:
         CommandParser() = default;
-        std::pair<char, int> parse(const std::string& color, const std::vector<std::tuple<std::string, char, bool>>& options, const char defaultCommand, const int maxIndex);
+        std::pair<char, int> parse(const std::string& color, const std::vector<std::tuple<std::string, char, bool>>& options, const char defaultCommand, const int minIndex, const int maxIndex);
         char getCommand() const { return command; };
         int getIndex() const { return index; };
     private:

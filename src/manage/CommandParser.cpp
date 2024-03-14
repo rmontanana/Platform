@@ -10,7 +10,7 @@ namespace platform {
     {
         std::cout << Colors::RED() << message << Colors::RESET() << std::endl;
     }
-    std::pair<char, int> CommandParser::parse(const std::string& color, const std::vector<std::tuple<std::string, char, bool>>& options, const char defaultCommand, const int maxIndex)
+    std::pair<char, int> CommandParser::parse(const std::string& color, const std::vector<std::tuple<std::string, char, bool>>& options, const char defaultCommand, const int minIndex, const int maxIndex)
     {
         bool finished = false;
         while (!finished) {
@@ -36,7 +36,7 @@ namespace platform {
             if (all_of(line.begin(), line.end(), ::isdigit)) {
                 command = defaultCommand;
                 index = stoi(line);
-                if (index > maxIndex || index < 0) {
+                if (index > maxIndex || index < minIndex) {
                     messageError("Index out of range");
                     continue;
                 }

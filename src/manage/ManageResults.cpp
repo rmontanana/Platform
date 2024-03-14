@@ -46,8 +46,7 @@ namespace platform {
         auto [index_from, index_to] = paginator.getOffset(page);
         std::stringstream oss;
         oss << index_to - index_from + 1 << " Results on screen - Page " << page << " of " << paginator.getPages();
-        std::cout << Colors::CLRSCR() << Colors::GREEN() << oss.str() << std::endl;
-        std::cout << std::string(oss.str().size(), '-') << std::endl;
+        std::cout << Colors::CLRSCR() << Colors::REVERSE() << Colors::BLUE() << oss.str() << std::endl;
         if (complete) {
             std::cout << Colors::MAGENTA() << "Only listing complete results" << std::endl;
         }
@@ -57,8 +56,8 @@ namespace platform {
         auto i = 0;
         int maxModel = results.maxModelSize();
         int maxTitle = results.maxTitleSize();
-        std::cout << Colors::GREEN() << " #  Date       " << std::setw(maxModel) << std::left << "Model" << " Score Name Score     C/P Time     Title" << std::endl;
-        std::cout << "=== ========== " << std::string(maxModel, '=') << " ========== ========= === ======= " << std::string(maxTitle, '=') << std::endl;
+        std::cout << Colors::IGREEN() << " #  Date       " << std::setw(maxModel) << std::left << "Model" << " Score Name Score     C/P Time    Title" << std::endl;
+        std::cout << "=== ========== " << std::string(maxModel, '=') << " ========== ========= === ======= " << std::string(maxTitle, '=') << Colors::RESET() << std::endl;
         for (int i = index_from; i <= index_to; i++) {
             auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
             std::cout << color << std::setw(3) << std::fixed << std::right << i << " ";
@@ -181,9 +180,9 @@ namespace platform {
         while (!finished) {
             if (indexList) {
                 auto [min_index, max_index] = paginator.getOffset(page);
-                std::tie(option, index) = parser.parse(Colors::GREEN(), mainOptions, 'r', min_index, max_index);
+                std::tie(option, index) = parser.parse(Colors::IGREEN(), mainOptions, 'r', min_index, max_index);
             } else {
-                std::tie(option, subIndex) = parser.parse(Colors::BLUE(), listOptions, 'r', 0, results.at(index).getJson()["results"].size() - 1);
+                std::tie(option, subIndex) = parser.parse(Colors::IBLUE(), listOptions, 'r', 0, results.at(index).getJson()["results"].size() - 1);
             }
             switch (option) {
                 case 'p':

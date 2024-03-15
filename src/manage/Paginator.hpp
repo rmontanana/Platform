@@ -7,7 +7,7 @@ public:
     Paginator() = default;
     Paginator(int pageSize, int total) : pageSize(pageSize), total(total)
     {
-        numPages = (total + pageSize - 1) / pageSize;
+        numPages = pageSize > 0 ? (total + pageSize - 1) / pageSize : 0;
     };
     ~Paginator() = default;
     int getPageSize() const { return pageSize; }

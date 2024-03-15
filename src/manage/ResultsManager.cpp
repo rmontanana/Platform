@@ -48,6 +48,8 @@ namespace platform {
     }
     void ResultsManager::sortDate()
     {
+        if (empty())
+            return;
         sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
             if (a.getDate() == b.getDate()) {
                 return a.getModel() < b.getModel();
@@ -57,6 +59,8 @@ namespace platform {
     }
     void ResultsManager::sortModel()
     {
+        if (empty())
+            return;
         sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
             if (a.getModel() == b.getModel()) {
                 return a.getDate() > b.getDate();
@@ -66,12 +70,16 @@ namespace platform {
     }
     void ResultsManager::sortDuration()
     {
+        if (empty())
+            return;
         sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
             return a.getDuration() > b.getDuration();
             });
     }
     void ResultsManager::sortScore()
     {
+        if (files.empty())
+            return;
         sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
             if (a.getScore() == b.getScore()) {
                 return a.getDate() > b.getDate();

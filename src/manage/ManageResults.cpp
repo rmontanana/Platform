@@ -13,21 +13,19 @@ namespace platform {
     const std::string STATUS_OK = "Ok.";
     const std::string STATUS_COLOR = Colors::GREEN();
     ManageResults::ManageResults(int numFiles, const std::string& model, const std::string& score, bool complete, bool partial, bool compare) :
-        numFiles{ numFiles }, complete{ complete }, partial{ partial }, compare{ compare }, results(ResultsManager(model, score, complete, partial))
+        numFiles{ numFiles }, complete{ complete }, partial{ partial }, compare{ compare }, didExcel(false), results(ResultsManager(model, score, complete, partial))
     {
         results.load();
-        if (!results.empty()) {
-            results.sortDate();
-            indexList = true;
-            openExcel = false;
-            workbook = NULL;
-            if (numFiles == 0 or numFiles > results.size()) {
-                this->numFiles = results.size();
-            }
+        results.sortDate();
+        sort_field = "Date";
+        indexList = true;
+        openExcel = false;
+        workbook = NULL;
+        if (numFiles == 0 or numFiles > results.size()) {
+            this->numFiles = results.size();
         }
         paginator = Paginator(numFiles, results.size());
         page = 1;
-        sort_field = "Date";
     }
     void ManageResults::doMenu()
     {
@@ -41,6 +39,9 @@ namespace platform {
         if (openExcel) {
             workbook_close(workbook);
         }
+        if (didExcel) {
+            std::cout << Colors::MAGENTA() << "Excel file created: " << Paths::excel() + Paths::excelResults() << std::endl;
+        }
         std::cout << Colors::RESET() << "Done!" << std::endl;
     }
     void ManageResults::list(const std::string& status_message_init, const std::string& status_color, int index_A, int index_B)
@@ -51,7 +52,7 @@ namespace platform {
         int maxModel = results.maxModelSize();
         int maxTitle = results.maxTitleSize();
         std::vector<int> header_lengths = { 3, 10, maxModel, 10, 9, 3, 7, maxTitle };
-        int maxLine = std::accumulate(header_lengths.begin(), header_lengths.end(), 0) + header_lengths.size() - 1;
+        int maxLine = std::max(size_t(140), std::accumulate(header_lengths.begin(), header_lengths.end(), 0) + header_lengths.size() - 1);
         auto temp = ConfigLocale();
         auto [index_from, index_to] = paginator.getOffset(page);
         std::string suffix = "";
@@ -61,8 +62,9 @@ namespace platform {
         if (partial) {
             suffix = " Only listing partial results ";
         }
-        std::string header = " " + std::to_string(index_to - index_from + 1) + " Results on screen - Page "
-            + std::to_string(page) + " of " + std::to_string(paginator.getPages()) + " ";
+        std::string header = " " + std::to_string(index_to - index_from + 1) + " Results on screen of "
+            + std::to_string(results.size()) + " - Page " + std::to_string(page) + " of "
+            + std::to_string(paginator.getPages()) + " ";
 
         std::string prefix = std::string(maxLine - suffix.size() - header.size(), ' ');
         std::cout << Colors::CLRSCR() << Colors::REVERSE() << Colors::WHITE() << header << prefix << Colors::MAGENTA() << suffix << std::endl;
@@ -136,12 +138,14 @@ namespace platform {
         auto data_B = results.at(index_B).getJson();
         ReportExcelCompared reporter(data_A, data_B);
         reporter.report();
+        didExcel = true;
         return results.at(index_A).getFilename() + " Vs " + results.at(index_B).getFilename();
     }
     std::string ManageResults::report(const int index, const bool excelReport)
     {
         auto data = results.at(index).getJson();
         if (excelReport) {
+            didExcel = true;
             ReportExcel reporter(data, compare, workbook);
             reporter.show();
             openExcel = true;

@@ -21,6 +21,7 @@ namespace platform {
         int numFiles;
         bool indexList;
         bool openExcel;
+        bool didExcel;
         bool complete;
         bool partial;
         bool compare;

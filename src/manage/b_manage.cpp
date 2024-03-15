@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     auto partial = program.get<bool>("partial");
     auto compare = program.get<bool>("compare");
     if (number == 0) {
-        number = std::max(0, numRows() - 5); // 5 is the number of lines used by the menu & header
+        number = std::max(0, numRows() - 6); // 6 is the number of lines used by the menu & header
     }
     if (complete)
         partial = false;

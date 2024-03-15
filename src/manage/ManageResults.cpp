@@ -224,13 +224,21 @@ namespace platform {
         };
         auto parser = CommandParser();
         while (!finished) {
-            if (indexList) {
-                auto [min_index, max_index] = paginator.getOffset(page);
-                std::tie(option, index) = parser.parse(Colors::IGREEN(), mainOptions, 'r', min_index, max_index);
-            } else {
-                std::tie(option, subIndex) = parser.parse(Colors::IBLUE(), listOptions, 'r', 0, results.at(index).getJson()["results"].size() - 1);
+            bool parserError = true; // force the first iteration
+            while (parserError) {
+                if (indexList) {
+                    auto [min_index, max_index] = paginator.getOffset(page);
+                    std::tie(option, index, parserError) = parser.parse(Colors::IGREEN(), mainOptions, 'r', min_index, max_index);
+                } else {
+                    std::tie(option, subIndex, parserError) = parser.parse(Colors::IBLUE(), listOptions, 'r', 0, results.at(index).getJson()["results"].size() - 1);
+                }
+                if (parserError) {
+                    if (indexList)
+                        list(parser.getErrorMessage(), Colors::RED(), index_A, index_B);
+                    else
+                        showIndex(index, subIndex);
+                }
             }
-
             switch (option) {
                 case 'p':
                     if (paginator.valid(index)) {

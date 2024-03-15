@@ -65,7 +65,7 @@ namespace platform {
             + std::to_string(page) + " of " + std::to_string(paginator.getPages()) + " ";
 
         std::string prefix = std::string(maxLine - suffix.size() - header.size(), ' ');
-        std::cout << Colors::CLRSCR() << Colors::REVERSE() << Colors::BLUE() << header << prefix << Colors::MAGENTA() << suffix << std::endl;
+        std::cout << Colors::CLRSCR() << Colors::REVERSE() << Colors::WHITE() << header << prefix << Colors::MAGENTA() << suffix << std::endl;
         //
         // Field names
         //

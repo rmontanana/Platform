@@ -11,12 +11,12 @@ namespace platform {
         ~ManageResults() = default;
         void doMenu();
     private:
-        void list();
+        void list(const std::string& status, const std::string& color, int index_A, int index_B);
         bool confirmAction(const std::string& intent, const std::string& fileName) const;
         void report(const int index, const bool excelReport);
         void report_compared(const int index_A, const int index_B);
         void showIndex(const int index, const int idx);
-        void sortList();
+        std::pair<std::string, std::string> sortList();
         void menu();
         int numFiles;
         bool indexList;
@@ -24,6 +24,7 @@ namespace platform {
         bool complete;
         bool partial;
         bool compare;
+        std::string sort_field;
         int page;
         Paginator paginator;
         ResultsManager results;

@@ -13,8 +13,8 @@ namespace platform {
     private:
         void list(const std::string& status, const std::string& color, int index_A, int index_B);
         bool confirmAction(const std::string& intent, const std::string& fileName) const;
-        void report(const int index, const bool excelReport);
-        void report_compared(const int index_A, const int index_B);
+        std::string report(const int index, const bool excelReport);
+        std::string report_compared(const int index_A, const int index_B);
         void showIndex(const int index, const int idx);
         std::pair<std::string, std::string> sortList();
         void menu();

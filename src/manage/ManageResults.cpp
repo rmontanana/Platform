@@ -43,7 +43,7 @@ namespace platform {
         }
         std::cout << Colors::RESET() << "Done!" << std::endl;
     }
-    void ManageResults::list(const std::string& status_message, const std::string& status_color, int index_A, int index_B)
+    void ManageResults::list(const std::string& status_message_init, const std::string& status_color, int index_A, int index_B)
     {
         //
         // Page info
@@ -102,6 +102,7 @@ namespace platform {
         oss << " A: " << (index_A == -1 ? "<notset>" : std::to_string(index_A)) <<
             " B: " << (index_B == -1 ? "<notset>" : std::to_string(index_B)) << " ";
         int status_length = std::max(oss.str().size(), maxLine - oss.str().size());
+        auto status_message = status_message_init.substr(0, status_length - 1);
         std::string status = status_message + std::string(std::max(size_t(0), status_length - status_message.size()), ' ');
         auto color = (index_A != -1 && index_B != -1) ? Colors::IGREEN() : Colors::IYELLOW();
         std::cout << color << Colors::REVERSE() << oss.str() << Colors::RESET() << Colors::WHITE()
@@ -129,27 +130,27 @@ namespace platform {
         std::cout << "Not done!" << std::endl;
         return false;
     }
-    void ManageResults::report_compared(const int index_A, const int index_B)
+    std::string ManageResults::report_compared(const int index_A, const int index_B)
     {
-        std::cout << "Comparing " << results.at(index_A).getFilename() << " with " << results.at(index_B).getFilename() << std::endl;
         auto data_A = results.at(index_A).getJson();
         auto data_B = results.at(index_B).getJson();
         ReportExcelCompared reporter(data_A, data_B);
         reporter.report();
+        return results.at(index_A).getFilename() + " Vs " + results.at(index_B).getFilename();
     }
-    void ManageResults::report(const int index, const bool excelReport)
+    std::string ManageResults::report(const int index, const bool excelReport)
     {
-        std::cout << Colors::YELLOW() << "Reporting " << results.at(index).getFilename() << std::endl;
         auto data = results.at(index).getJson();
         if (excelReport) {
             ReportExcel reporter(data, compare, workbook);
             reporter.show();
             openExcel = true;
             workbook = reporter.getWorkbook();
-            std::cout << "Adding sheet to " << Paths::excel() + Paths::excelResults() << std::endl;
+            return results.at(index).getFilename() + "->" + Paths::excel() + Paths::excelResults();
         } else {
             ReportConsole reporter(data, compare);
             reporter.show();
+            return "Reporting " + results.at(index).getFilename();
         }
     }
     void ManageResults::showIndex(const int index, const int idx)
@@ -229,7 +230,7 @@ namespace platform {
             } else {
                 std::tie(option, subIndex) = parser.parse(Colors::IBLUE(), listOptions, 'r', 0, results.at(index).getJson()["results"].size() - 1);
             }
-            std::string status_message, status_color;
+
             switch (option) {
                 case 'p':
                     if (paginator.valid(index)) {
@@ -284,7 +285,7 @@ namespace platform {
                         list("Need to set A and B first!", Colors::RED(), index_A, index_B);
                         break;
                     }
-                    report_compared(index_A, index_B);
+                    list(report_compared(index_A, index_B), Colors::GREEN(), index_A, index_B);
                     break;
                 case 'l':
                     list(STATUS_OK, STATUS_COLOR, index_A, index_B);
@@ -292,25 +293,35 @@ namespace platform {
                     break;
                 case 'd':
                     filename = results.at(index).getFilename();
-                    if (!confirmAction("delete", filename))
-                        list("File: " + filename + " not deleted!", Colors::YELLOW(), index_A, index_B);
+                    if (!confirmAction("delete", filename)) {
+                        list(filename + " not deleted!", Colors::YELLOW(), index_A, index_B);
+                        break;
+                    }
                     std::cout << "Deleting " << filename << std::endl;
                     results.deleteResult(index);
-                    list("File: " + filename + " deleted!", Colors::RED(), index_A, index_B);
+                    list(filename + " deleted!", Colors::RED(), index_A, index_B);
                     break;
                 case 'h':
-                    filename = results.at(index).getFilename();
-                    if (!confirmAction("hide", filename))
-                        list("File: " + filename + " not hidden!", Colors::YELLOW(), index_A, index_B);
-                    filename = results.at(index).getFilename();
-                    std::cout << "Hiding " << filename << std::endl;
-                    results.hideResult(index, Paths::hiddenResults());
-                    status_message = "File: " + filename + " hidden! (moved to " + Paths::hiddenResults() + ")";
-                    list(status_message, Colors::YELLOW(), index_A, index_B);
+                    {
+                        std::string status_message;
+                        filename = results.at(index).getFilename();
+                        if (!confirmAction("hide", filename)) {
+                            list(filename + " not hidden!", Colors::YELLOW(), index_A, index_B);
+                            break;
+                        }
+                        filename = results.at(index).getFilename();
+                        std::cout << "Hiding " << filename << std::endl;
+                        results.hideResult(index, Paths::hiddenResults());
+                        status_message = filename + " hidden! (moved to " + Paths::hiddenResults() + ")";
+                        list(status_message, Colors::YELLOW(), index_A, index_B);
+                    }
                     break;
                 case 's':
-                    tie(status_color, status_message) = sortList();
-                    list(status_message, status_color, index_A, index_B);
+                    {
+                        std::string status_message, status_color;
+                        tie(status_color, status_message) = sortList();
+                        list(status_message, status_color, index_A, index_B);
+                    }
                     break;
                 case 'r':
                     if (indexList) {
@@ -321,20 +332,24 @@ namespace platform {
                     }
                     break;
                 case 'e':
-                    report(index, true);
+                    list(report(index, true), Colors::GREEN(), index_A, index_B);
                     break;
                 case 't':
-                    std::cout << "Title: " << results.at(index).getTitle() << std::endl;
-                    std::cout << "New title: ";
-                    std::string newTitle;
-                    getline(std::cin, newTitle);
-                    if (!newTitle.empty()) {
-                        results.at(index).setTitle(newTitle);
-                        results.at(index).save();
-                        status_message = "Title changed to " + newTitle;
-                        list(status_message, Colors::GREEN(), index_A, index_B);
+                    {
+                        std::string status_message;
+                        std::cout << "Title: " << results.at(index).getTitle() << std::endl;
+                        std::cout << "New title: ";
+                        std::string newTitle;
+                        getline(std::cin, newTitle);
+                        if (!newTitle.empty()) {
+                            results.at(index).setTitle(newTitle);
+                            results.at(index).save();
+                            status_message = "Title changed to " + newTitle;
+                            list(status_message, Colors::GREEN(), index_A, index_B);
+                            break;
+                        }
+                        list("No title change!", Colors::YELLOW(), index_A, index_B);
                     }
-                    list("No title change!", Colors::YELLOW(), index_A, index_B);
                     break;
             }
         }

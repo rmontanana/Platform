@@ -153,7 +153,7 @@ namespace platform {
             return results.at(index).getFilename() + "->" + Paths::excel() + Paths::excelResults();
         } else {
             ReportConsole reporter(data, compare);
-            std::cout << reporter.fileReport();
+            std::cout << Colors::CLRSCR() << reporter.fileReport();
             return "Reporting " + results.at(index).getFilename();
         }
     }
@@ -161,9 +161,8 @@ namespace platform {
     {
         // Show a dataset result inside a report
         auto data = results.at(index).getJson();
-        std::cout << Colors::YELLOW() << "Showing " << results.at(index).getFilename() << std::endl;
         ReportConsole reporter(data, compare, idx);
-        std::cout << reporter.fileReport();
+        std::cout << Colors::CLRSCR() << reporter.fileReport();
     }
     std::pair<std::string, std::string> ManageResults::sortList()
     {
@@ -240,7 +239,7 @@ namespace platform {
                     if (indexList)
                         list(parser.getErrorMessage(), Colors::RED(), index_A, index_B);
                     else
-                        showIndex(index, subIndex);
+                        report(index, false);
                 }
             }
             switch (option) {

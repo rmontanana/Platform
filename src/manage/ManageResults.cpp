@@ -153,7 +153,7 @@ namespace platform {
             return results.at(index).getFilename() + "->" + Paths::excel() + Paths::excelResults();
         } else {
             ReportConsole reporter(data, compare);
-            reporter.show();
+            std::cout << reporter.fileReport();
             return "Reporting " + results.at(index).getFilename();
         }
     }
@@ -163,7 +163,7 @@ namespace platform {
         auto data = results.at(index).getJson();
         std::cout << Colors::YELLOW() << "Showing " << results.at(index).getFilename() << std::endl;
         ReportConsole reporter(data, compare, idx);
-        reporter.show();
+        std::cout << reporter.fileReport();
     }
     std::pair<std::string, std::string> ManageResults::sortList()
     {

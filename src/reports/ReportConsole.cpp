@@ -1,5 +1,4 @@
 #include <iostream>
-#include <sstream>
 #include <locale>
 #include "best/BestScore.h"
 #include "common/CLocale.h"
@@ -12,30 +11,43 @@ namespace platform {
         n = n < 0 ? 0 : n;
         return "* " + text + std::string(n + utf, ' ') + "*\n";
     }
-
-    void ReportConsole::header()
+    void ReportConsole::do_header()
     {
+        sheader.str("");
         std::stringstream oss;
-        std::cout << Colors::MAGENTA() << std::string(MAXL, '*') << std::endl;
-        std::cout << headerLine(
+        sheader << Colors::MAGENTA() << std::string(MAXL, '*') << std::endl;
+        sheader << headerLine(
             "Report " + data["model"].get<std::string>() + " ver. " + data["version"].get<std::string>()
             + " with " + std::to_string(data["folds"].get<int>()) + " Folds cross validation and " + std::to_string(data["seeds"].size())
             + " random seeds. " + data["date"].get<std::string>() + " " + data["time"].get<std::string>()
         );
-        std::cout << headerLine(data["title"].get<std::string>());
-        std::cout << headerLine(
+        sheader << headerLine(data["title"].get<std::string>());
+        sheader << headerLine(
             "Random seeds: " + fromVector("seeds") + " Discretized: " + (data["discretized"].get<bool>() ? "True" : "False")
             + " Stratified: " + (data["stratified"].get<bool>() ? "True" : "False")
         );
         oss << "Execution took  " << std::setprecision(2) << std::fixed << data["duration"].get<float>()
             << " seconds,   " << data["duration"].get<float>() / 3600 << " hours, on " << data["platform"].get<std::string>();
-        std::cout << headerLine(oss.str());
-        std::cout << headerLine("Score is " + data["score_name"].get<std::string>());
-        std::cout << std::string(MAXL, '*') << std::endl;
-        std::cout << std::endl;
+        sheader << headerLine(oss.str());
+        sheader << headerLine("Score is " + data["score_name"].get<std::string>());
+        sheader << std::string(MAXL, '*') << std::endl;
+        sheader << std::endl;
     }
-    void ReportConsole::body()
+    void ReportConsole::header()
     {
+        std::cout << sheader.str();
+    }
+    std::string ReportConsole::fileReport()
+    {
+        do_header();
+        do_body();
+        std::stringstream oss;
+        oss << sheader.str() << sbody.str();
+        return oss.str();
+    }
+    void ReportConsole::do_body()
+    {
+        sbody.str("");
         auto tmp = ConfigLocale();
         int maxHyper = 15;
         int maxDataset = 7;
@@ -44,8 +56,8 @@ namespace platform {
             maxDataset = std::max(maxDataset, (int)r["dataset"].get<std::string>().size());
 
         }
-        std::cout << Colors::GREEN() << " #  " << std::setw(maxDataset) << std::left << "Dataset" << " Sampl. Feat. Cls Nodes     Edges     States    Score           Time                Hyperparameters" << std::endl;
-        std::cout << "=== " << std::string(maxDataset, '=') << " ====== ===== === ========= ========= ========= =============== =================== " << std::string(maxHyper, '=') << std::endl;
+        sbody << Colors::GREEN() << " #  " << std::setw(maxDataset) << std::left << "Dataset" << " Sampl. Feat. Cls Nodes     Edges     States    Score           Time                Hyperparameters" << std::endl;
+        sbody << "=== " << std::string(maxDataset, '=') << " ====== ===== === ========= ========= ========= =============== =================== " << std::string(maxHyper, '=') << std::endl;
         json lastResult;
         double totalScore = 0.0;
         int index = 0;
@@ -55,47 +67,51 @@ namespace platform {
                 continue;
             }
             auto color = (index % 2) ? Colors::CYAN() : Colors::BLUE();
-            std::cout << color;
+            sbody << color;
             std::string separator{ " " };
             if (r.find("notes") != r.end()) {
                 separator = r["notes"].size() > 0 ? Colors::YELLOW() + Symbols::notebook + color : " ";
             }
-            std::cout << std::setw(3) << std::right << index++ << separator;
-            std::cout << std::setw(maxDataset) << std::left << r["dataset"].get<std::string>() << " ";
-            std::cout << std::setw(6) << std::right << r["samples"].get<int>() << " ";
-            std::cout << std::setw(5) << std::right << r["features"].get<int>() << " ";
-            std::cout << std::setw(3) << std::right << r["classes"].get<int>() << " ";
-            std::cout << std::setw(9) << std::setprecision(2) << std::fixed << r["nodes"].get<float>() << " ";
-            std::cout << std::setw(9) << std::setprecision(2) << std::fixed << r["leaves"].get<float>() << " ";
-            std::cout << std::setw(9) << std::setprecision(2) << std::fixed << r["depth"].get<float>() << " ";
-            std::cout << std::setw(8) << std::right << std::setprecision(6) << std::fixed << r["score"].get<double>() << "±" << std::setw(6) << std::setprecision(4) << std::fixed << r["score_std"].get<double>();
+            sbody << std::setw(3) << std::right << index++ << separator;
+            sbody << std::setw(maxDataset) << std::left << r["dataset"].get<std::string>() << " ";
+            sbody << std::setw(6) << std::right << r["samples"].get<int>() << " ";
+            sbody << std::setw(5) << std::right << r["features"].get<int>() << " ";
+            sbody << std::setw(3) << std::right << r["classes"].get<int>() << " ";
+            sbody << std::setw(9) << std::setprecision(2) << std::fixed << r["nodes"].get<float>() << " ";
+            sbody << std::setw(9) << std::setprecision(2) << std::fixed << r["leaves"].get<float>() << " ";
+            sbody << std::setw(9) << std::setprecision(2) << std::fixed << r["depth"].get<float>() << " ";
+            sbody << std::setw(8) << std::right << std::setprecision(6) << std::fixed << r["score"].get<double>() << "±" << std::setw(6) << std::setprecision(4) << std::fixed << r["score_std"].get<double>();
             const std::string status = compareResult(r["dataset"].get<std::string>(), r["score"].get<double>());
-            std::cout << status;
-            std::cout << std::setw(12) << std::right << std::setprecision(6) << std::fixed << r["time"].get<double>() << "±" << std::setw(6) << std::setprecision(4) << std::fixed << r["time_std"].get<double>() << " ";
-            std::cout << r["hyperparameters"].dump();
-            std::cout << std::endl;
-            std::cout << std::flush;
+            sbody << status;
+            sbody << std::setw(12) << std::right << std::setprecision(6) << std::fixed << r["time"].get<double>() << "±" << std::setw(6) << std::setprecision(4) << std::fixed << r["time_std"].get<double>() << " ";
+            sbody << r["hyperparameters"].dump();
+            sbody << std::endl;
+            sbody << std::flush;
             lastResult = r;
             totalScore += r["score"].get<double>();
         }
         if (data["results"].size() == 1 || selectedIndex != -1) {
-            std::cout << std::string(MAXL, '*') << std::endl;
+            sbody << std::string(MAXL, '*') << std::endl;
             if (lastResult.find("notes") != lastResult.end()) {
                 if (lastResult["notes"].size() > 0) {
-                    std::cout << headerLine("Notes: ");
+                    sbody << headerLine("Notes: ");
                     for (const auto& note : lastResult["notes"]) {
-                        std::cout << headerLine(note.get<std::string>());
+                        sbody << headerLine(note.get<std::string>());
                     }
                 }
             }
-            std::cout << headerLine(fVector("Train scores: ", lastResult["scores_train"], 14, 12));
-            std::cout << headerLine(fVector("Test  scores: ", lastResult["scores_test"], 14, 12));
-            std::cout << headerLine(fVector("Train  times: ", lastResult["times_train"], 10, 3));
-            std::cout << headerLine(fVector("Test   times: ", lastResult["times_test"], 10, 3));
+            sbody << headerLine(fVector("Train scores: ", lastResult["scores_train"], 14, 12));
+            sbody << headerLine(fVector("Test  scores: ", lastResult["scores_test"], 14, 12));
+            sbody << headerLine(fVector("Train  times: ", lastResult["times_train"], 10, 3));
+            sbody << headerLine(fVector("Test   times: ", lastResult["times_test"], 10, 3));
         } else {
             footer(totalScore);
         }
-        std::cout << std::string(MAXL, '*') << Colors::RESET() << std::endl;
+        sbody << std::string(MAXL, '*') << Colors::RESET() << std::endl;
+    }
+    void ReportConsole::body()
+    {
+        std::cout << sbody.str();
     }
     void ReportConsole::showSummary()
     {
@@ -104,20 +120,20 @@ namespace platform {
             oss << std::setw(3) << std::left << item.first;
             oss << std::setw(3) << std::right << item.second << " ";
             oss << std::left << meaning.at(item.first);
-            std::cout << headerLine(oss.str(), 2);
+            sbody << headerLine(oss.str(), 2);
         }
     }
 
     void ReportConsole::footer(double totalScore)
     {
-        std::cout << Colors::MAGENTA() << std::string(MAXL, '*') << std::endl;
+        sbody << Colors::MAGENTA() << std::string(MAXL, '*') << std::endl;
         showSummary();
         auto score = data["score_name"].get<std::string>();
         auto best = BestScore::getScore(score);
         if (best.first != "") {
             std::stringstream oss;
             oss << score << " compared to " << best.first << " .:  " << totalScore / best.second;
-            std::cout << headerLine(oss.str());
+            sbody << headerLine(oss.str());
         }
         if (!getExistBestFile() && compare) {
             std::cout << headerLine("*** Best Results File not found. Couldn't compare any result!");

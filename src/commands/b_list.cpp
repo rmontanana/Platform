@@ -10,9 +10,9 @@
 #include "common/Datasets.h"
 #include "reports/DatasetsExcel.h"
 #include "reports/DatasetsConsole.h"
+#include "reports/ResultsDatasetConsole.h"
 #include "results/ResultsDataset.h"
 #include "results/ResultsDatasetExcel.h"
-#include "results/ResultsDatasetConsole.h"
 #include "config.h"
 
 

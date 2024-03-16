@@ -105,6 +105,13 @@ namespace platform {
     void ManageScreen::list_result(const std::string& status_message, const std::string& status_color)
     {
 
+        //auto report = DatasetsConsole();
+        //report.report();
+        //paginator[static_cast<int>(output_type)].setTotal(report.getNumLines());
+        // We need to subtract 8 from the page size to make room for the extra header in report
+        auto page_size = paginator[static_cast<int>(OutputType::EXPERIMENTS)].getPageSize();
+        paginator[static_cast<int>(output_type)].setPage(page_size - 8);
+
         //
         // header
         //

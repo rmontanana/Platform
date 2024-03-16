@@ -36,7 +36,7 @@ namespace platform {
                 index = stoi(line);
                 if (index > maxIndex || index < minIndex) {
                     errorMessage = "Index out of range";
-                    return { command, index, true };
+                    return { ' ', -1, true };
                 }
                 finished = true;
                 break;

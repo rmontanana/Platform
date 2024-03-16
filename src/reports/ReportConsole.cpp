@@ -91,7 +91,7 @@ namespace platform {
             totalScore += r["score"].get<double>();
         }
         if (data["results"].size() == 1 || selectedIndex != -1) {
-            sbody << std::string(MAXL, '*') << std::endl;
+            sbody << Colors::MAGENTA() << std::string(MAXL, '*') << std::endl;
             if (lastResult.find("notes") != lastResult.end()) {
                 if (lastResult["notes"].size() > 0) {
                     sbody << headerLine("Notes: ");

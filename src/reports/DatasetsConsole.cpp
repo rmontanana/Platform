@@ -5,14 +5,14 @@
 
 namespace platform {
     const int DatasetsConsole::BALANCE_LENGTH = 75;
-    void DatasetsConsole::split_lines(std::string line, const std::string& balance)
+    void DatasetsConsole::split_lines(int name_len, std::string line, const std::string& balance)
     {
         auto temp = std::string(balance);
         while (temp.size() > DatasetsConsole::BALANCE_LENGTH - 1) {
             auto part = temp.substr(0, DatasetsConsole::BALANCE_LENGTH);
             line += part + "\n";
             body.push_back(line);
-            line = string(52, ' ');
+            line = string(name_len + 22, ' ');
             temp = temp.substr(DatasetsConsole::BALANCE_LENGTH);
         }
         line += temp + "\n";
@@ -36,10 +36,12 @@ namespace platform {
         header.clear();
         body.clear();
         auto datasets = platform::Datasets(false, platform::Paths::datasets());
-        auto loc = std::locale("es_ES");
+        auto loc = std::locale("es_ES.UTF-8");
         std::stringstream sheader;
+        auto datasets_names = datasets.getNames();
+        int maxName = std::max(size_t(7), (*max_element(datasets_names.begin(), datasets_names.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size());
         std::vector<std::string> header_labels = { " #", "Dataset", "Sampl.", "Feat.", "Cls", "Balance" };
-        std::vector<int> header_lengths = { 3, 30, 6, 5, 3, DatasetsConsole::BALANCE_LENGTH };
+        std::vector<int> header_lengths = { 3, maxName, 6, 5, 3, DatasetsConsole::BALANCE_LENGTH };
         sheader << Colors::GREEN();
         for (int i = 0; i < header_labels.size(); i++) {
             sheader << setw(header_lengths[i]) << left << header_labels[i] << " ";
@@ -58,7 +60,7 @@ namespace platform {
             line.imbue(loc);
             auto color = num % 2 ? Colors::CYAN() : Colors::BLUE();
             line << color << setw(3) << right << num++ << " ";
-            line << setw(30) << left << dataset << " ";
+            line << setw(maxName) << left << dataset << " ";
             datasets.loadDataset(dataset);
             auto nSamples = datasets.getNSamples(dataset);
             line << setw(6) << right << nSamples << " ";
@@ -71,7 +73,7 @@ namespace platform {
                 oss << sep << std::setprecision(2) << fixed << (float)number / nSamples * 100.0 << "% (" << number << ")";
                 sep = " / ";
             }
-            split_lines(line.str(), oss.str());
+            split_lines(maxName, line.str(), oss.str());
             // Store data for Excel report
             data[dataset] = json::object();
             data[dataset]["samples"] = nSamples;

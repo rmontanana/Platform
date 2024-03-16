@@ -20,7 +20,7 @@ namespace platform {
         json& getData() { return data; }
         void report();
     private:
-        void split_lines(std::string line, const std::string& balance);
+        void split_lines(int name_len, std::string line, const std::string& balance);
         std::vector<std::string> header, body;
         json data;
     };

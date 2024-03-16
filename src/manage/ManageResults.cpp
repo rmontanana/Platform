@@ -413,7 +413,7 @@ namespace platform {
                     break;
                 case 'r':
                     if (output_type == OutputType::DATASETS) {
-                        list_datasets(STATUS_OK, STATUS_COLOR);
+                        list(STATUS_OK, STATUS_COLOR);
                         break;
                     }
                     if (indexList) {

@@ -11,10 +11,10 @@ namespace platform {
         RESULT = 2,
         Count
     };
-    class ManageResults {
+    class ManageScreen {
     public:
-        ManageResults(int numFiles, const std::string& model, const std::string& score, bool complete, bool partial, bool compare);
-        ~ManageResults() = default;
+        ManageScreen(int numFiles, const std::string& model, const std::string& score, bool complete, bool partial, bool compare);
+        ~ManageScreen() = default;
         void doMenu();
     private:
         void list(const std::string& status, const std::string& color);

@@ -5,7 +5,7 @@
 #include "common/CLocale.h"
 #include "common/Paths.h"
 #include "CommandParser.h"
-#include "ManageResults.h"
+#include "ManageScreen.h"
 #include "reports/DatasetsConsole.h"
 #include "reports/ReportConsole.h"
 #include "reports/ReportExcel.h"
@@ -15,7 +15,7 @@
 namespace platform {
     const std::string STATUS_OK = "Ok.";
     const std::string STATUS_COLOR = Colors::GREEN();
-    ManageResults::ManageResults(int numFiles, const std::string& model, const std::string& score, bool complete, bool partial, bool compare) :
+    ManageScreen::ManageScreen(int numFiles, const std::string& model, const std::string& score, bool complete, bool partial, bool compare) :
         numFiles{ numFiles }, complete{ complete }, partial{ partial }, compare{ compare }, didExcel(false), results(ResultsManager(model, score, complete, partial))
     {
         results.load();
@@ -36,7 +36,7 @@ namespace platform {
         max_status_line = 140;
         output_type = OutputType::EXPERIMENTS;
     }
-    void ManageResults::doMenu()
+    void ManageScreen::doMenu()
     {
         if (results.empty()) {
             std::cout << Colors::MAGENTA() << "No results found!" << Colors::RESET() << std::endl;
@@ -53,7 +53,7 @@ namespace platform {
         }
         std::cout << Colors::RESET() << "Done!" << std::endl;
     }
-    void ManageResults::header()
+    void ManageScreen::header()
     {
         auto [index_from, index_to] = paginator[static_cast<int>(output_type)].getOffset();
         std::string suffix = "";
@@ -75,7 +75,7 @@ namespace platform {
         std::cout << Colors::CLRSCR() << Colors::REVERSE() << Colors::WHITE() << header << prefix
             << Colors::MAGENTA() << suffix << Colors::RESET() << std::endl;
     }
-    void ManageResults::footer(const std::string& status, const std::string& status_color)
+    void ManageScreen::footer(const std::string& status, const std::string& status_color)
     {
         std::stringstream oss;
         oss << " A: " << (index_A == -1 ? "<notset>" : std::to_string(index_A)) <<
@@ -88,21 +88,21 @@ namespace platform {
             << Colors::REVERSE() << status_color << " " << status_line << Colors::IWHITE()
             << Colors::RESET() << std::endl;
     }
-    void ManageResults::list(const std::string& status_message, const std::string& status_color)
+    void ManageScreen::list(const std::string& status_message, const std::string& status_color)
     {
-        switch (output_type) {
-            case OutputType::RESULT:
+        switch (static_cast<int>(output_type)) {
+            case static_cast<int>(OutputType::RESULT):
                 list_result(status_message, status_color);
                 break;
-            case OutputType::DATASETS:
+            case static_cast<int>(OutputType::DATASETS):
                 list_datasets(status_message, status_color);
                 break;
-            case OutputType::EXPERIMENTS:
+            case static_cast<int>(OutputType::EXPERIMENTS):
                 list_experiments(status_message, status_color);
                 break;
         }
     }
-    void ManageResults::list_result(const std::string& status_message, const std::string& status_color)
+    void ManageScreen::list_result(const std::string& status_message, const std::string& status_color)
     {
 
         //
@@ -115,7 +115,7 @@ namespace platform {
         footer(status_message, status_color);
 
     }
-    void ManageResults::list_datasets(const std::string& status_message, const std::string& status_color)
+    void ManageScreen::list_datasets(const std::string& status_message, const std::string& status_color)
     {
         auto report = DatasetsConsole();
         report.report();
@@ -139,7 +139,7 @@ namespace platform {
         footer(status_message, status_color);
 
     }
-    void ManageResults::list_experiments(const std::string& status_message, const std::string& status_color)
+    void ManageScreen::list_experiments(const std::string& status_message, const std::string& status_color)
     {
         //
         // header
@@ -184,7 +184,7 @@ namespace platform {
         //
         footer(status_message, status_color);
     }
-    bool ManageResults::confirmAction(const std::string& intent, const std::string& fileName) const
+    bool ManageScreen::confirmAction(const std::string& intent, const std::string& fileName) const
     {
         std::string color;
         if (intent == "delete") {
@@ -205,7 +205,7 @@ namespace platform {
         std::cout << "Not done!" << std::endl;
         return false;
     }
-    std::string ManageResults::report_compared()
+    std::string ManageScreen::report_compared()
     {
         auto data_A = results.at(index_A).getJson();
         auto data_B = results.at(index_B).getJson();
@@ -214,7 +214,7 @@ namespace platform {
         didExcel = true;
         return results.at(index_A).getFilename() + " Vs " + results.at(index_B).getFilename();
     }
-    std::string ManageResults::report(const int index, const bool excelReport)
+    std::string ManageScreen::report(const int index, const bool excelReport)
     {
         auto data = results.at(index).getJson();
         if (excelReport) {
@@ -230,14 +230,14 @@ namespace platform {
             return "Reporting " + results.at(index).getFilename();
         }
     }
-    void ManageResults::showIndex(const int index, const int idx)
+    void ManageScreen::showIndex(const int index, const int idx)
     {
         // Show a dataset result inside a report
         auto data = results.at(index).getJson();
         ReportConsole reporter(data, compare, idx);
         std::cout << Colors::CLRSCR() << reporter.fileReport();
     }
-    std::pair<std::string, std::string> ManageResults::sortList()
+    std::pair<std::string, std::string> ManageScreen::sortList()
     {
         std::cout << Colors::YELLOW() << "Choose sorting field (date='d', score='s', time='t', model='m'): ";
         std::string line;
@@ -268,7 +268,7 @@ namespace platform {
                 return { Colors::RED(), "Invalid sorting option" };
         }
     }
-    void ManageResults::menu()
+    void ManageScreen::menu()
     {
         char option;
         int index, subIndex;

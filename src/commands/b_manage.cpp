@@ -2,7 +2,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <argparse/argparse.hpp>
-#include "manage/ManageResults.h"
+#include "manage/ManageScreen.h"
 #include "config.h"
 
 void manageArguments(argparse::ArgumentParser& program, int argc, char** argv)
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
     }
     if (complete)
         partial = false;
-    auto manager = platform::ManageResults(number, model, score, complete, partial, compare);
+    auto manager = platform::ManageScreen(number, model, score, complete, partial, compare);
     manager.doMenu();
     return 0;
 }

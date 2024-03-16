@@ -60,9 +60,8 @@ namespace platform {
 
     void ReportExcel::header()
     {
-        std::locale mylocale(std::cout.getloc(), new separated);
-        std::locale::global(mylocale);
-        std::cout.imbue(mylocale);
+        auto loc = std::locale("es_ES");
+        std::cout.imbue(loc);
         std::stringstream oss;
         std::string message = data["model"].get<std::string>() + " ver. " + data["version"].get<std::string>() + " " +
             data["language"].get<std::string>() + " ver. " + data["language_version"].get<std::string>() +

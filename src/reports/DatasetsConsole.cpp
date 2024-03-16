@@ -18,10 +18,10 @@ namespace platform {
     }
     void DatasetsConsole::list_datasets()
     {
+        output.str("");
         auto datasets = platform::Datasets(false, platform::Paths::datasets());
-        locale mylocale(std::cout.getloc(), new separated_datasets);
-        locale::global(mylocale);
-        output.imbue(mylocale);
+        auto loc = std::locale("es_ES");
+        output.imbue(loc);
         output << Colors::GREEN() << " #  Dataset                        Sampl. Feat. Cls Balance" << std::endl;
         std::string balanceBars = std::string(DatasetsConsole::BALANCE_LENGTH, '=');
         output << "=== ============================== ====== ===== === " << balanceBars << std::endl;

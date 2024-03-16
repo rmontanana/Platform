@@ -6,6 +6,8 @@ namespace platform {
     void ResultsDatasetsConsole::list_results(const std::string& dataset, const std::string& score, const std::string& model)
     {
         output.str("");
+        auto loc = std::locale("es_ES");
+        output.imbue(loc);
         auto results = platform::ResultsDataset(dataset, model, score);
         results.load();
         results.sortModel();
@@ -16,8 +18,16 @@ namespace platform {
         int maxModel = results.maxModelSize();
         int maxHyper = results.maxHyperSize();
         double maxResult = results.maxResultScore();
+        //
         // Build data for the Report
-        json data = json::object();
+        //
+        data = json::object();
+        data["dataset"] = dataset;
+        data["score"] = score;
+        data["model"] = model;
+        data["lengths"]["maxModel"] = maxModel;
+        data["lengths"]["maxHyper"] = maxHyper;
+        data["maxResult"] = maxResult;
         data["results"] = json::array();
         data["max_models"] = json::object(); // Max score per model
         for (const auto& result : results) {
@@ -27,7 +37,6 @@ namespace platform {
             }
             for (const auto& item : results["results"]) {
                 if (item["dataset"] == dataset) {
-
                     // Store data for Excel report
                     json res = json::object();
                     res["date"] = result.getDate();
@@ -65,12 +74,6 @@ namespace platform {
             output << item["hyperparameters"].get<std::string>() << std::endl;
             numLines++;
         }
-        data["dataset"] = dataset;
-        data["score"] = score;
-        data["model"] = model;
-        data["lengths"]["maxModel"] = maxModel;
-        data["lengths"]["maxHyper"] = maxHyper;
-        data["maxResult"] = maxResult;
     }
 }
 

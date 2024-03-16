@@ -6,13 +6,6 @@
 #include <xlsxwriter.h>
 
 namespace platform {
-    struct separated : std::numpunct<char> {
-        char do_decimal_point() const { return ','; }
-
-        char do_thousands_sep() const { return '.'; }
-
-        std::string do_grouping() const { return "\03"; }
-    };
     class ExcelFile {
     public:
         ExcelFile();

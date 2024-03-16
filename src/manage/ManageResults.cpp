@@ -5,7 +5,7 @@
 #include "common/Paths.h"
 #include "CommandParser.h"
 #include "ManageResults.h"
-//#include "reports/DatasetsConsole.h"
+#include "reports/DatasetsConsole.h"
 #include "reports/ReportConsole.h"
 #include "reports/ReportExcel.h"
 #include "reports/ReportExcelCompared.h"
@@ -114,10 +114,10 @@ namespace platform {
     }
     void ManageResults::list_datasets(const std::string& status_message, const std::string& status_color)
     {
-        // auto report = DatasetsConsole();
-        // report.list_datasets();
-        // auto output = report.getOutput();
-        // paginator[static_cast<int>(output_type)].setTotal(report.getNumLines());
+        auto report = DatasetsConsole();
+        report.list_datasets();
+        auto output = report.getOutput();
+        paginator[static_cast<int>(output_type)].setTotal(report.getNumLines());
         //
         // header
         //

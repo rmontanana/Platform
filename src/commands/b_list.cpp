@@ -20,7 +20,7 @@ void list_datasets(argparse::ArgumentParser& program)
 {
     auto excel = program.get<bool>("excel");
     auto report = platform::DatasetsConsole();
-    report.list_datasets();
+    report.report();
     std::cout << report.getOutput();
     if (excel) {
         auto data = report.getData();

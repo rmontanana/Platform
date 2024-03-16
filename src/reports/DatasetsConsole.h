@@ -13,15 +13,16 @@ namespace platform {
         static const int BALANCE_LENGTH;
         DatasetsConsole() = default;
         ~DatasetsConsole() = default;
-        std::string getOutput() const { return output.str(); }
-        int getNumLines() const { return numLines; }
+        std::string getOutput() const;
+        std::string getHeader() const;
+        std::vector<std::string>& getBody() { return body; }
+        int getNumLines() const { return body.size(); }
         json& getData() { return data; }
-        std::string outputBalance(const std::string& balance);
-        void list_datasets();
+        void report();
     private:
-        std::stringstream output;
+        void split_lines(std::string line, const std::string& balance);
+        std::vector<std::string> header, body;
         json data;
-        int numLines = 0;
     };
 }
 

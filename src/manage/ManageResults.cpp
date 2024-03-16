@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <tuple>
+#include <string>
 #include "common/Colors.h"
 #include "common/CLocale.h"
 #include "common/Paths.h"
@@ -66,12 +67,13 @@ namespace platform {
         auto pages = paginator[static_cast<int>(output_type)].getPages();
         auto lines = paginator[static_cast<int>(output_type)].getLines();
         auto total = paginator[static_cast<int>(output_type)].getTotal();
-        std::string header = " Lines " + std::to_string(lines) + "  "
+        std::string header = " Lines " + std::to_string(lines) + " of "
             + std::to_string(total) + " - Page " + std::to_string(page) + " of "
             + std::to_string(pages) + " ";
 
         std::string prefix = std::string(max_status_line - suffix.size() - header.size(), ' ');
-        std::cout << Colors::CLRSCR() << Colors::REVERSE() << Colors::WHITE() << header << prefix << Colors::MAGENTA() << suffix << std::endl;
+        std::cout << Colors::CLRSCR() << Colors::REVERSE() << Colors::WHITE() << header << prefix
+            << Colors::MAGENTA() << suffix << Colors::RESET() << std::endl;
     }
     void ManageResults::footer(const std::string& status, const std::string& status_color)
     {
@@ -102,6 +104,7 @@ namespace platform {
     }
     void ManageResults::list_result(const std::string& status_message, const std::string& status_color)
     {
+
         //
         // header
         //
@@ -115,14 +118,21 @@ namespace platform {
     void ManageResults::list_datasets(const std::string& status_message, const std::string& status_color)
     {
         auto report = DatasetsConsole();
-        report.list_datasets();
-        auto output = report.getOutput();
+        report.report();
         paginator[static_cast<int>(output_type)].setTotal(report.getNumLines());
         //
         // header
         //
         header();
-
+        //
+        // Results
+        //
+        auto data = report.getBody();
+        std::cout << report.getHeader();
+        auto [index_from, index_to] = paginator[static_cast<int>(output_type)].getOffset();
+        for (int i = index_from; i <= index_to; i++) {
+            std::cout << data[i];
+        }
         //
         // Status Area
         //
@@ -268,7 +278,7 @@ namespace platform {
         std::vector<std::tuple<std::string, char, bool>>  mainOptions = {
             {"quit", 'q', false},
             {"list", 'l', false},
-            {"delete", 'x', true},
+            {"delete", 'D', true},
             {"datasets", 'd', false},
             {"hide", 'h', true},
             {"sort", 's', false},
@@ -289,6 +299,7 @@ namespace platform {
             {"back", 'b', false},
             {"quit", 'q', false}
         };
+
         auto parser = CommandParser();
         while (!finished) {
             bool parserError = true; // force the first iteration
@@ -368,7 +379,7 @@ namespace platform {
                     list(STATUS_OK, STATUS_COLOR);
                     indexList = true;
                     break;
-                case 'x':
+                case 'D':
                     filename = results.at(index).getFilename();
                     if (!confirmAction("delete", filename)) {
                         list(filename + " not deleted!", Colors::YELLOW());
@@ -401,6 +412,10 @@ namespace platform {
                     }
                     break;
                 case 'r':
+                    if (output_type == OutputType::DATASETS) {
+                        list_datasets(STATUS_OK, STATUS_COLOR);
+                        break;
+                    }
                     if (indexList) {
                         report(index, false);
                         indexList = false;

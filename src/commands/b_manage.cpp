@@ -2,7 +2,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <argparse/argparse.hpp>
-#include "ManageResults.h"
+#include "manage/ManageResults.h"
 #include "config.h"
 
 void manageArguments(argparse::ArgumentParser& program, int argc, char** argv)

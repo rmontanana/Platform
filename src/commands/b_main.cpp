@@ -1,12 +1,12 @@
 #include <iostream>
 #include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>
-#include "Experiment.h"
+#include "main/Experiment.h"
 #include "common/Datasets.h"
 #include "common/DotEnv.h"
 #include "common/Paths.h"
-#include "Models.h"
-#include "modelRegister.h"
+#include "main/Models.h"
+#include "main/modelRegister.h"
 #include "config.h"
 
 

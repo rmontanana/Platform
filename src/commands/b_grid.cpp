@@ -10,7 +10,7 @@
 #include "common/Timer.h"
 #include "common/Colors.h"
 #include "common/DotEnv.h"
-#include "GridSearch.h"
+#include "grid/GridSearch.h"
 #include "config.h"
 
 using json = nlohmann::json;

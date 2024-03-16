@@ -6,9 +6,9 @@
 #include <algorithm>
 #include "common/Colors.h"
 #include "common/CLocale.h"
-#include "main/Result.h"
+#include "results/Result.h"
 #include "BestResultsExcel.h"
-#include "Statistics.h"
+#include "best/Statistics.h"
 #include "BestResults.h"
 
 

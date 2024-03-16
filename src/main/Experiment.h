@@ -6,7 +6,7 @@
 #include <folding.hpp>
 #include "bayesnet/BaseClassifier.h"
 #include "HyperParameters.h"
-#include "Result.h"
+#include "results/Result.h"
 
 namespace platform {
     using json = nlohmann::json;

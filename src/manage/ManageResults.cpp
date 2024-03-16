@@ -3,11 +3,13 @@
 #include "common/Colors.h"
 #include "common/CLocale.h"
 #include "common/Paths.h"
+#include "CommandParser.h"
+#include "ManageResults.h"
+// #include "reports/DatasetsConsole.hpp"
 #include "reports/ReportConsole.h"
 #include "reports/ReportExcel.h"
 #include "reports/ReportExcelCompared.h"
-#include "CommandParser.h"
-#include "ManageResults.h"
+
 
 namespace platform {
     const std::string STATUS_OK = "Ok.";
@@ -24,8 +26,14 @@ namespace platform {
         if (numFiles == 0 or numFiles > results.size()) {
             this->numFiles = results.size();
         }
-        paginator = Paginator(numFiles, results.size());
-        page = 1;
+        // Initializes the paginator for each output type (experiments, datasets, result)
+        for (int i = 0; i < static_cast<int>(OutputType::Count); i++) {
+            paginator.push_back(Paginator(numFiles, results.size()));
+        }
+        index_A = -1;
+        index_B = -1;
+        max_status_line = 140;
+        output_type = OutputType::EXPERIMENTS;
     }
     void ManageResults::doMenu()
     {
@@ -34,7 +42,7 @@ namespace platform {
             return;
         }
         results.sortDate();
-        list(STATUS_OK, STATUS_COLOR, -1, -1);
+        list(STATUS_OK, STATUS_COLOR);
         menu();
         if (openExcel) {
             workbook_close(workbook);
@@ -44,17 +52,9 @@ namespace platform {
         }
         std::cout << Colors::RESET() << "Done!" << std::endl;
     }
-    void ManageResults::list(const std::string& status_message_init, const std::string& status_color, int index_A, int index_B)
+    void ManageResults::header()
     {
-        //
-        // Page info
-        //
-        int maxModel = results.maxModelSize();
-        int maxTitle = results.maxTitleSize();
-        std::vector<int> header_lengths = { 3, 10, maxModel, 10, 9, 3, 7, maxTitle };
-        int maxLine = std::max(size_t(140), std::accumulate(header_lengths.begin(), header_lengths.end(), 0) + header_lengths.size() - 1);
-        auto temp = ConfigLocale();
-        auto [index_from, index_to] = paginator.getOffset(page);
+        auto [index_from, index_to] = paginator[static_cast<int>(output_type)].getOffset();
         std::string suffix = "";
         if (complete) {
             suffix = " Only listing complete results ";
@@ -62,14 +62,85 @@ namespace platform {
         if (partial) {
             suffix = " Only listing partial results ";
         }
-        std::string header = " " + std::to_string(index_to - index_from + 1) + " Results on screen of "
-            + std::to_string(results.size()) + " - Page " + std::to_string(page) + " of "
-            + std::to_string(paginator.getPages()) + " ";
+        auto page = paginator[static_cast<int>(output_type)].getPage();
+        auto pages = paginator[static_cast<int>(output_type)].getPages();
+        auto lines = paginator[static_cast<int>(output_type)].getLines();
+        auto total = paginator[static_cast<int>(output_type)].getTotal();
+        std::string header = " Lines " + std::to_string(lines) + "  "
+            + std::to_string(total) + " - Page " + std::to_string(page) + " of "
+            + std::to_string(pages) + " ";
 
-        std::string prefix = std::string(maxLine - suffix.size() - header.size(), ' ');
+        std::string prefix = std::string(max_status_line - suffix.size() - header.size(), ' ');
         std::cout << Colors::CLRSCR() << Colors::REVERSE() << Colors::WHITE() << header << prefix << Colors::MAGENTA() << suffix << std::endl;
+    }
+    void ManageResults::footer(const std::string& status, const std::string& status_color)
+    {
+        std::stringstream oss;
+        oss << " A: " << (index_A == -1 ? "<notset>" : std::to_string(index_A)) <<
+            " B: " << (index_B == -1 ? "<notset>" : std::to_string(index_B)) << " ";
+        int status_length = std::max(oss.str().size(), max_status_line - oss.str().size());
+        auto status_message = status.substr(0, status_length - 1);
+        std::string status_line = status_message + std::string(std::max(size_t(0), status_length - status_message.size() - 1), ' ');
+        auto color = (index_A != -1 && index_B != -1) ? Colors::IGREEN() : Colors::IYELLOW();
+        std::cout << color << Colors::REVERSE() << oss.str() << Colors::RESET() << Colors::WHITE()
+            << Colors::REVERSE() << status_color << " " << status_line << Colors::IWHITE()
+            << Colors::RESET() << std::endl;
+    }
+    void ManageResults::list(const std::string& status_message, const std::string& status_color)
+    {
+        switch (output_type) {
+            case OutputType::RESULT:
+                list_result(status_message, status_color);
+                break;
+            case OutputType::DATASETS:
+                list_datasets(status_message, status_color);
+                break;
+            case OutputType::EXPERIMENTS:
+                list_experiments(status_message, status_color);
+                break;
+        }
+    }
+    void ManageResults::list_result(const std::string& status_message, const std::string& status_color)
+    {
+        //
+        // header
+        //
+        header();
+        //
+        // Status Area
+        //
+        footer(status_message, status_color);
+
+    }
+    void ManageResults::list_datasets(const std::string& status_message, const std::string& status_color)
+    {
+        // auto report = DatasetsConsole();
+        // report.list_datasets();
+        // auto output = report.getOutput();
+        // paginator[static_cast<int>(output_type)].setTotal(report.getNumLines());
+        //
+        // header
+        //
+        header();
+
+        //
+        // Status Area
+        //
+        footer(status_message, status_color);
+
+    }
+    void ManageResults::list_experiments(const std::string& status_message, const std::string& status_color)
+    {
+        //
+        // header
+        //
+        header();
         //
         // Field names
+        //
+        int maxModel = results.maxModelSize();
+        int maxTitle = results.maxTitleSize();
+        std::vector<int> header_lengths = { 3, 10, maxModel, 10, 9, 3, 7, maxTitle };
         //
         std::cout << Colors::RESET();
         std::string arrow = Symbols::downward_arrow + " ";
@@ -92,6 +163,7 @@ namespace platform {
         //
         // Results
         //
+        auto [index_from, index_to] = paginator[static_cast<int>(output_type)].getOffset();
         for (int i = index_from; i <= index_to; i++) {
             auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
             std::cout << color << std::setw(3) << std::fixed << std::right << i << " ";
@@ -100,16 +172,7 @@ namespace platform {
         //
         // Status Area
         //
-        std::stringstream oss;
-        oss << " A: " << (index_A == -1 ? "<notset>" : std::to_string(index_A)) <<
-            " B: " << (index_B == -1 ? "<notset>" : std::to_string(index_B)) << " ";
-        int status_length = std::max(oss.str().size(), maxLine - oss.str().size());
-        auto status_message = status_message_init.substr(0, status_length - 1);
-        std::string status = status_message + std::string(std::max(size_t(0), status_length - status_message.size()), ' ');
-        auto color = (index_A != -1 && index_B != -1) ? Colors::IGREEN() : Colors::IYELLOW();
-        std::cout << color << Colors::REVERSE() << oss.str() << Colors::RESET() << Colors::WHITE()
-            << Colors::REVERSE() << status_color << " " << status << Colors::IWHITE()
-            << Colors::RESET() << std::endl;
+        footer(status_message, status_color);
     }
     bool ManageResults::confirmAction(const std::string& intent, const std::string& fileName) const
     {
@@ -132,7 +195,7 @@ namespace platform {
         std::cout << "Not done!" << std::endl;
         return false;
     }
-    std::string ManageResults::report_compared(const int index_A, const int index_B)
+    std::string ManageResults::report_compared()
     {
         auto data_A = results.at(index_A).getJson();
         auto data_B = results.at(index_B).getJson();
@@ -198,14 +261,15 @@ namespace platform {
     void ManageResults::menu()
     {
         char option;
-        int index, subIndex, index_A = -1, index_B = -1;
+        int index, subIndex;
         bool finished = false;
         std::string filename;
         // tuple<Option, digit, requires value>
         std::vector<std::tuple<std::string, char, bool>>  mainOptions = {
             {"quit", 'q', false},
             {"list", 'l', false},
-            {"delete", 'd', true},
+            {"delete", 'x', true},
+            {"datasets", 'd', false},
             {"hide", 'h', true},
             {"sort", 's', false},
             {"report", 'r', true},
@@ -230,41 +294,42 @@ namespace platform {
             bool parserError = true; // force the first iteration
             while (parserError) {
                 if (indexList) {
-                    auto [min_index, max_index] = paginator.getOffset(page);
+                    auto [min_index, max_index] = paginator[static_cast<int>(output_type)].getOffset();
                     std::tie(option, index, parserError) = parser.parse(Colors::IGREEN(), mainOptions, 'r', min_index, max_index);
                 } else {
                     std::tie(option, subIndex, parserError) = parser.parse(Colors::IBLUE(), listOptions, 'r', 0, results.at(index).getJson()["results"].size() - 1);
                 }
                 if (parserError) {
                     if (indexList)
-                        list(parser.getErrorMessage(), Colors::RED(), index_A, index_B);
+                        list(parser.getErrorMessage(), Colors::RED());
                     else
                         report(index, false);
                 }
             }
             switch (option) {
+                case 'd':
+                    output_type = OutputType::DATASETS;
+                    list_datasets(STATUS_OK, STATUS_COLOR);
+                    break;
                 case 'p':
-                    if (paginator.valid(index)) {
-                        page = index;
-                        list(STATUS_OK, STATUS_COLOR, index_A, index_B);
+                    if (paginator[static_cast<int>(output_type)].setPage(index)) {
+                        list(STATUS_OK, STATUS_COLOR);
                     } else {
-                        list("Invalid page!", Colors::RED(), index_A, index_B);
+                        list("Invalid page!", Colors::RED());
                     }
                     break;
                 case '+':
-                    if (paginator.hasNext(page)) {
-                        page++;
-                        list(STATUS_OK, STATUS_COLOR, index_A, index_B);
+                    if (paginator[static_cast<int>(output_type)].addPage()) {
+                        list(STATUS_OK, STATUS_COLOR);
                     } else {
-                        list("No more pages!", Colors::RED(), index_A, index_B);
+                        list("No more pages!", Colors::RED());
                     }
                     break;
                 case '-':
-                    if (paginator.hasPrev(page)) {
-                        page--;
-                        list(STATUS_OK, STATUS_COLOR, index_A, index_B);
+                    if (paginator[static_cast<int>(output_type)].subPage()) {
+                        list(STATUS_OK, STATUS_COLOR);
                     } else {
-                        list("First page already!", Colors::RED(), index_A, index_B);
+                        list("First page already!", Colors::RED());
                     }
                     break;
                 case 'q':
@@ -272,20 +337,20 @@ namespace platform {
                     break;
                 case 'a':
                     if (index == index_B) {
-                        list("A and B cannot be the same!", Colors::RED(), index_A, index_B);
+                        list("A and B cannot be the same!", Colors::RED());
                         break;
                     }
                     index_A = index;
-                    list("A set to " + std::to_string(index), Colors::GREEN(), index_A, index_B);
+                    list("A set to " + std::to_string(index), Colors::GREEN());
                     break;
                 case 'b':
                     if (indexList) {
                         if (index == index_A) {
-                            list("A and B cannot be the same!", Colors::RED(), index_A, index_B);
+                            list("A and B cannot be the same!", Colors::RED());
                             break;
                         }
                         index_B = index;
-                        list("B set to " + std::to_string(index), Colors::GREEN(), index_A, index_B);
+                        list("B set to " + std::to_string(index), Colors::GREEN());
                     } else {
                         // back to show the report
                         report(index, false);
@@ -293,45 +358,46 @@ namespace platform {
                     break;
                 case 'c':
                     if (index_A == -1 || index_B == -1) {
-                        list("Need to set A and B first!", Colors::RED(), index_A, index_B);
+                        list("Need to set A and B first!", Colors::RED());
                         break;
                     }
-                    list(report_compared(index_A, index_B), Colors::GREEN(), index_A, index_B);
+                    list(report_compared(), Colors::GREEN());
                     break;
                 case 'l':
-                    list(STATUS_OK, STATUS_COLOR, index_A, index_B);
+                    output_type = OutputType::EXPERIMENTS;
+                    list(STATUS_OK, STATUS_COLOR);
                     indexList = true;
                     break;
-                case 'd':
+                case 'x':
                     filename = results.at(index).getFilename();
                     if (!confirmAction("delete", filename)) {
-                        list(filename + " not deleted!", Colors::YELLOW(), index_A, index_B);
+                        list(filename + " not deleted!", Colors::YELLOW());
                         break;
                     }
                     std::cout << "Deleting " << filename << std::endl;
                     results.deleteResult(index);
-                    list(filename + " deleted!", Colors::RED(), index_A, index_B);
+                    list(filename + " deleted!", Colors::RED());
                     break;
                 case 'h':
                     {
                         std::string status_message;
                         filename = results.at(index).getFilename();
                         if (!confirmAction("hide", filename)) {
-                            list(filename + " not hidden!", Colors::YELLOW(), index_A, index_B);
+                            list(filename + " not hidden!", Colors::YELLOW());
                             break;
                         }
                         filename = results.at(index).getFilename();
                         std::cout << "Hiding " << filename << std::endl;
                         results.hideResult(index, Paths::hiddenResults());
                         status_message = filename + " hidden! (moved to " + Paths::hiddenResults() + ")";
-                        list(status_message, Colors::YELLOW(), index_A, index_B);
+                        list(status_message, Colors::YELLOW());
                     }
                     break;
                 case 's':
                     {
                         std::string status_message, status_color;
                         tie(status_color, status_message) = sortList();
-                        list(status_message, status_color, index_A, index_B);
+                        list(status_message, status_color);
                     }
                     break;
                 case 'r':
@@ -343,7 +409,7 @@ namespace platform {
                     }
                     break;
                 case 'e':
-                    list(report(index, true), Colors::GREEN(), index_A, index_B);
+                    list(report(index, true), Colors::GREEN());
                     break;
                 case 't':
                     {
@@ -356,10 +422,10 @@ namespace platform {
                             results.at(index).setTitle(newTitle);
                             results.at(index).save();
                             status_message = "Title changed to " + newTitle;
-                            list(status_message, Colors::GREEN(), index_A, index_B);
+                            list(status_message, Colors::GREEN());
                             break;
                         }
-                        list("No title change!", Colors::YELLOW(), index_A, index_B);
+                        list("No title change!", Colors::YELLOW());
                     }
                     break;
             }

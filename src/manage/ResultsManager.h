@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
-#include "main/Result.h"
+#include "results/Result.h"
 namespace platform {
     using json = nlohmann::json;
     class ResultsManager {

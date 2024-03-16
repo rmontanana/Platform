@@ -4,7 +4,7 @@
 #include "main/modelRegister.h"
 #include "common/Paths.h"
 #include "common/Colors.h"
-#include "BestResults.h"
+#include "best/BestResults.h"
 #include "config.h"
 
 void manageArguments(argparse::ArgumentParser& program)

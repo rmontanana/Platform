@@ -10,26 +10,37 @@ public:
         computePages();
     };
     ~Paginator() = default;
+    // Getters
     int getPageSize() const { return pageSize; }
     int getLines() const
     {
         auto [start, end] = getOffset();
         return std::min(pageSize, end - start + 1);
     }
+    int getPage() const { return page; }
     int getTotal() const { return total; }
-    void setTotal(int total) { this->total = total; computePages(); }
+    int getPages() const { return numPages; }
     std::pair<int, int> getOffset() const
     {
         return { (page - 1) * pageSize, std::min(total - 1, page * pageSize - 1) };
     }
-    int getPages() const { return numPages; }
-    int getPage() const { return page; }
+    // Setters
+    void setTotal(int total) { this->total = total; computePages(); }
+    void setPageSize(int page) { this->pageSize = page; computePages(); }
+    bool setPage(int page) { return valid(page) ? this->page = page, true : false; }
+    // Utils
     bool valid(int page) const { return page > 0 && page <= numPages; }
     bool hasPrev(int page) const { return page > 1; }
     bool hasNext(int page) const { return page < getPages(); }
-    bool setPage(int page) { return valid(page) ? this->page = page, true : false; }
     bool addPage() { return page < numPages ? ++page, true : false; }
     bool subPage() { return page > 1 ? --page, true : false; }
+    std::string to_string() const
+    {
+        auto offset = getOffset();
+        return "Paginator: { pageSize: " + std::to_string(pageSize) + ", total: " + std::to_string(total)
+            + ", page: " + std::to_string(page) + ", numPages: " + std::to_string(numPages)
+            + " Offset [" + std::to_string(offset.first) + ", " + std::to_string(offset.second) + "]}";
+    }
 private:
     void computePages()
     {

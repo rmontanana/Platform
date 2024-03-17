@@ -109,10 +109,10 @@ namespace platform {
         ReportConsole report(data, compare);
         auto header_text = report.getHeader();
         auto body = report.getBody();
-        paginator[static_cast<int>(output_type)].setTotal(data.size());
+        paginator[static_cast<int>(output_type)].setTotal(body.size());
         // We need to subtract 8 from the page size to make room for the extra header in report
         auto page_size = paginator[static_cast<int>(OutputType::EXPERIMENTS)].getPageSize();
-        paginator[static_cast<int>(output_type)].setPage(page_size - 8);
+        paginator[static_cast<int>(output_type)].setPageSize(page_size - 8);
         //
         // header
         //
@@ -310,27 +310,27 @@ namespace platform {
         };
         // tuple<Option, digit, requires value>
         std::vector<std::tuple<std::string, char, bool>> listOptions = {
+            {"quit", 'q', false},
             {"report", 'r', true},
             {"list", 'l', false},
             {"back", 'b', false},
-            {"quit", 'q', false}
+            {"Page", 'p', true},
+            {"Page+", '+', false},
+            {"Page-", '-', false}
         };
 
         auto parser = CommandParser();
         while (!finished) {
             bool parserError = true; // force the first iteration
             while (parserError) {
+                auto [min_index, max_index] = paginator[static_cast<int>(output_type)].getOffset();
                 if (indexList) {
-                    auto [min_index, max_index] = paginator[static_cast<int>(output_type)].getOffset();
                     std::tie(option, index, parserError) = parser.parse(Colors::IGREEN(), mainOptions, 'r', min_index, max_index);
                 } else {
-                    std::tie(option, subIndex, parserError) = parser.parse(Colors::IBLUE(), listOptions, 'r', 0, results.at(index).getJson()["results"].size() - 1);
+                    std::tie(option, subIndex, parserError) = parser.parse(Colors::IBLUE(), listOptions, 'r', min_index, max_index);
                 }
                 if (parserError) {
-                    if (indexList)
-                        list(parser.getErrorMessage(), Colors::RED());
-                    else
-                        report(index, false);
+                    list(parser.getErrorMessage(), Colors::RED());
                 }
             }
             switch (option) {
@@ -339,10 +339,13 @@ namespace platform {
                     list_datasets(STATUS_OK, STATUS_COLOR);
                     break;
                 case 'p':
-                    if (paginator[static_cast<int>(output_type)].setPage(index)) {
-                        list(STATUS_OK, STATUS_COLOR);
-                    } else {
-                        list("Invalid page!", Colors::RED());
+                    {
+                        auto page = output_type == OutputType::EXPERIMENTS ? index : subIndex;
+                        if (paginator[static_cast<int>(output_type)].setPage(page)) {
+                            list(STATUS_OK, STATUS_COLOR);
+                        } else {
+                            list("Invalid page! (" + std::to_string(page) + ")", Colors::RED());
+                        }
                     }
                     break;
                 case '+':
@@ -380,7 +383,7 @@ namespace platform {
                         list("B set to " + std::to_string(index), Colors::GREEN());
                     } else {
                         // back to show the report
-                        report(index, false);
+                        list(STATUS_OK, STATUS_COLOR);
                     }
                     break;
                 case 'c':
@@ -435,7 +438,7 @@ namespace platform {
                     if (indexList) {
                         //report(index, false);
                         output_type = OutputType::RESULT;
-                        list_result(STATUS_OK, STATUS_COLOR);
+                        list(STATUS_OK, STATUS_COLOR);
                         indexList = false;
                     } else {
                         showIndex(subIndex);

@@ -12,6 +12,8 @@ namespace platform {
         explicit ReportConsole(json data_, bool compare = false, int index = -1) : ReportBase(data_, compare), selectedIndex(index) {};
         virtual ~ReportConsole() = default;
         std::string fileReport();
+        std::string getHeader() { do_header(); do_body(); return sheader.str(); }
+        std::vector<std::string>& getBody() { return vbody; }
     private:
         int selectedIndex;
         std::string headerLine(const std::string& text, int utf);
@@ -23,5 +25,6 @@ namespace platform {
         void showSummary() override;
         std::stringstream sheader;
         std::stringstream sbody;
+        std::vector<std::string> vbody;
     };
 };

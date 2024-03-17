@@ -24,13 +24,14 @@ namespace platform {
         bool confirmAction(const std::string& intent, const std::string& fileName) const;
         std::string report(const int index, const bool excelReport);
         std::string report_compared();
-        void showIndex(const int index, const int idx);
+        void showIndex(const int idx);
         std::pair<std::string, std::string> sortList();
         void menu();
         void header();
         void footer(const std::string& status, const std::string& color);
         OutputType output_type;
         int numFiles;
+        int index;
         int index_A, index_B; // used for comparison of experiments
         int max_status_line;
         bool indexList;

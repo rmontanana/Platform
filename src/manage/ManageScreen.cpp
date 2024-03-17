@@ -105,17 +105,26 @@ namespace platform {
     void ManageScreen::list_result(const std::string& status_message, const std::string& status_color)
     {
 
-        //auto report = DatasetsConsole();
-        //report.report();
-        //paginator[static_cast<int>(output_type)].setTotal(report.getNumLines());
+        auto data = results.at(index).getJson();
+        ReportConsole report(data, compare);
+        auto header_text = report.getHeader();
+        auto body = report.getBody();
+        paginator[static_cast<int>(output_type)].setTotal(data.size());
         // We need to subtract 8 from the page size to make room for the extra header in report
         auto page_size = paginator[static_cast<int>(OutputType::EXPERIMENTS)].getPageSize();
         paginator[static_cast<int>(output_type)].setPage(page_size - 8);
-
         //
         // header
         //
         header();
+        //
+        // Results
+        //
+        std::cout << header_text;
+        auto [index_from, index_to] = paginator[static_cast<int>(output_type)].getOffset();
+        for (int i = index_from; i <= index_to; i++) {
+            std::cout << body[i];
+        }
         //
         // Status Area
         //
@@ -134,11 +143,11 @@ namespace platform {
         //
         // Results
         //
-        auto data = report.getBody();
+        auto body = report.getBody();
         std::cout << report.getHeader();
         auto [index_from, index_to] = paginator[static_cast<int>(output_type)].getOffset();
         for (int i = index_from; i <= index_to; i++) {
-            std::cout << data[i];
+            std::cout << body[i];
         }
         //
         // Status Area
@@ -237,7 +246,7 @@ namespace platform {
             return "Reporting " + results.at(index).getFilename();
         }
     }
-    void ManageScreen::showIndex(const int index, const int idx)
+    void ManageScreen::showIndex(const int idx)
     {
         // Show a dataset result inside a report
         auto data = results.at(index).getJson();
@@ -278,7 +287,7 @@ namespace platform {
     void ManageScreen::menu()
     {
         char option;
-        int index, subIndex;
+        int subIndex;
         bool finished = false;
         std::string filename;
         // tuple<Option, digit, requires value>
@@ -424,10 +433,12 @@ namespace platform {
                         break;
                     }
                     if (indexList) {
-                        report(index, false);
+                        //report(index, false);
+                        output_type = OutputType::RESULT;
+                        list_result(STATUS_OK, STATUS_COLOR);
                         indexList = false;
                     } else {
-                        showIndex(index, subIndex);
+                        showIndex(subIndex);
                     }
                     break;
                 case 'e':

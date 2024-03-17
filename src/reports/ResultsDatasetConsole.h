@@ -5,20 +5,14 @@
 #include <sstream>
 #include <nlohmann/json.hpp>
 #include "results/ResultsDataset.h"
+#include "ReportsPaged.h"
 
 namespace platform {
-    class ResultsDatasetsConsole {
+    class ResultsDatasetsConsole : public ReportsPaged {
     public:
         ResultsDatasetsConsole() = default;
         ~ResultsDatasetsConsole() = default;
-        std::string getOutput() const { return output.str(); }
-        int getNumLines() const { return numLines; }
-        json& getData() { return data; }
-        void list_results(const std::string& dataset, const std::string& score, const std::string& model);
-    private:
-        std::stringstream output;
-        json data;
-        int numLines = 0;
+        void report(const std::string& dataset, const std::string& score, const std::string& model);
     };
 }
 

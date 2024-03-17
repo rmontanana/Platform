@@ -18,25 +18,11 @@ namespace platform {
         line += temp + "\n";
         body.push_back(line);
     }
-    std::string DatasetsConsole::getOutput() const
-    {
-        std::string s;
-        for (const auto& piece : header) s += piece;
-        for (const auto& piece : body) s += piece;
-        return s;
-    }
-    std::string DatasetsConsole::getHeader() const
-    {
-        std::string s;
-        for (const auto& piece : header) s += piece;
-        return s;
-    }
     void DatasetsConsole::report()
     {
         header.clear();
         body.clear();
         auto datasets = platform::Datasets(false, platform::Paths::datasets());
-        auto loc = std::locale("es_ES.UTF-8");
         std::stringstream sheader;
         auto datasets_names = datasets.getNames();
         int maxName = std::max(size_t(7), (*max_element(datasets_names.begin(), datasets_names.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size());
@@ -66,9 +52,8 @@ namespace platform {
             line << setw(6) << right << nSamples << " ";
             line << setw(5) << right << datasets.getFeatures(dataset).size() << " ";
             line << setw(3) << right << datasets.getNClasses(dataset) << " ";
-            std::stringstream oss;
-            oss.imbue(loc);
             std::string sep = "";
+            oss.str("");
             for (auto number : datasets.getClassesCounts(dataset)) {
                 oss << sep << std::setprecision(2) << fixed << (float)number / nSamples * 100.0 << "% (" << number << ")";
                 sep = " / ";

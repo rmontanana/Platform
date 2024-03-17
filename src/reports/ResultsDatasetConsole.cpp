@@ -1,18 +1,16 @@
 
+#include <iostream>
 #include "common/Colors.h"
 #include "results/ResultsDataset.h"
 #include "ResultsDatasetConsole.h"
 namespace platform {
-    void ResultsDatasetsConsole::list_results(const std::string& dataset, const std::string& score, const std::string& model)
+    void ResultsDatasetsConsole::report(const std::string& dataset, const std::string& score, const std::string& model)
     {
-        output.str("");
-        auto loc = std::locale("es_ES");
-        output.imbue(loc);
         auto results = platform::ResultsDataset(dataset, model, score);
         results.load();
         results.sortModel();
         if (results.empty()) {
-            output << Colors::RED() << "No results found for dataset " << dataset << " and model " << model << Colors::RESET() << std::endl;
+            std::cerr << Colors::RED() << "No results found for dataset " << dataset << " and model " << model << Colors::RESET() << std::endl;
             return;
         }
         int maxModel = results.maxModelSize();
@@ -55,24 +53,28 @@ namespace platform {
         //
         // List the results
         //
-        output << Colors::GREEN() << "Results of dataset " << dataset << " - for " << model << " model" << std::endl;
-        output << "There are " << results.size() << " results" << std::endl;
-        output << Colors::GREEN() << " #  " << std::setw(maxModel + 1) << std::left << "Model" << "Date       Time     Score       Hyperparameters" << std::endl;
-        output << "=== " << std::string(maxModel, '=') << " ========== ======== =========== " << std::string(maxHyper, '=') << std::endl;
-        numLines = 4;
+        oss.str("");
+        header.clear();
+        body.clear();
+        oss << Colors::GREEN() << "Results of dataset " << dataset << " - for " << model << " model" << std::endl;
+        oss << "There are " << results.size() << " results" << std::endl;
+        oss << Colors::GREEN() << " #  " << std::setw(maxModel + 1) << std::left << "Model" << "Date       Time     Score       Hyperparameters" << std::endl;
+        oss << "=== " << std::string(maxModel, '=') << " ========== ======== =========== " << std::string(maxHyper, '=') << std::endl;
+        header.push_back(oss.str());
         auto i = 0;
         for (const auto& item : data["results"]) {
+            oss.str("");
             auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
             auto score = item["score"].get<double>();
             color = score == data["max_models"][item["model"].get<std::string>()] ? Colors::YELLOW() : color;
             color = score == maxResult ? Colors::RED() : color;
-            output << color << std::setw(3) << std::fixed << std::right << i++ << " ";
-            output << std::setw(maxModel) << std::left << item["model"].get<std::string>() << " ";
-            output << color << item["date"].get<std::string>() << " ";
-            output << color << item["time"].get<std::string>() << " ";
-            output << std::setw(11) << std::setprecision(9) << std::fixed << score << " ";
-            output << item["hyperparameters"].get<std::string>() << std::endl;
-            numLines++;
+            oss << color << std::setw(3) << std::fixed << std::right << i++ << " ";
+            oss << std::setw(maxModel) << std::left << item["model"].get<std::string>() << " ";
+            oss << color << item["date"].get<std::string>() << " ";
+            oss << color << item["time"].get<std::string>() << " ";
+            oss << std::setw(11) << std::setprecision(9) << std::fixed << score << " ";
+            oss << item["hyperparameters"].get<std::string>() << std::endl;
+            body.push_back(oss.str());
         }
     }
 }

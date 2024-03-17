@@ -37,7 +37,7 @@ void list_results(argparse::ArgumentParser& program)
     auto model = program.get<string>("model");
     auto excel = program.get<bool>("excel");
     auto report = platform::ResultsDatasetsConsole();
-    report.list_results(dataset, score, model);
+    report.report(dataset, score, model);
     std::cout << report.getOutput();
     if (excel) {
         auto data = report.getData();

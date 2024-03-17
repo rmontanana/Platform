@@ -21,7 +21,6 @@ namespace platform {
         results.load();
         results.sortDate();
         sort_field = "Date";
-        indexList = true;
         openExcel = false;
         workbook = NULL;
         if (numFiles == 0 or numFiles > results.size()) {
@@ -324,7 +323,7 @@ namespace platform {
             bool parserError = true; // force the first iteration
             while (parserError) {
                 auto [min_index, max_index] = paginator[static_cast<int>(output_type)].getOffset();
-                if (indexList) {
+                if (output_type == OutputType::EXPERIMENTS) {
                     std::tie(option, index, parserError) = parser.parse(Colors::IGREEN(), mainOptions, 'r', min_index, max_index);
                 } else {
                     std::tie(option, subIndex, parserError) = parser.parse(Colors::IBLUE(), listOptions, 'r', min_index, max_index);
@@ -373,8 +372,8 @@ namespace platform {
                     index_A = index;
                     list("A set to " + std::to_string(index), Colors::GREEN());
                     break;
-                case 'b':
-                    if (indexList) {
+                case 'b': // set_b or back to list
+                    if (output_type == OutputType::EXPERIMENTS) {
                         if (index == index_A) {
                             list("A and B cannot be the same!", Colors::RED());
                             break;
@@ -396,7 +395,6 @@ namespace platform {
                 case 'l':
                     output_type = OutputType::EXPERIMENTS;
                     list(STATUS_OK, STATUS_COLOR);
-                    indexList = true;
                     break;
                 case 'D':
                     filename = results.at(index).getFilename();
@@ -435,11 +433,9 @@ namespace platform {
                         list(STATUS_OK, STATUS_COLOR);
                         break;
                     }
-                    if (indexList) {
-                        //report(index, false);
+                    if (output_type == OutputType::EXPERIMENTS) {
                         output_type = OutputType::RESULT;
                         list(STATUS_OK, STATUS_COLOR);
-                        indexList = false;
                     } else {
                         showIndex(subIndex);
                     }

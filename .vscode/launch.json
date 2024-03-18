@@ -99,7 +99,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build_debug/src/b_list",
             "args": [
-                "--excel"
+                "datasets"
             ],
             //"cwd": "/Users/rmontanana/Code/discretizbench",
             "cwd": "${workspaceFolder}/../discretizbench",

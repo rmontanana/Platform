@@ -35,7 +35,13 @@ namespace platform {
     }
     void ReportConsole::header()
     {
+        do_header();
         std::cout << sheader.str();
+    }
+    void ReportConsole::body()
+    {
+        do_body();
+        std::cout << sbody.str();
     }
     std::string ReportConsole::fileReport()
     {
@@ -131,10 +137,6 @@ namespace platform {
         }
         sbody << std::string(MAXL, '*') << Colors::RESET() << std::endl;
         vbody.push_back(std::string(MAXL, '*') + Colors::RESET() + "\n");
-    }
-    void ReportConsole::body()
-    {
-        std::cout << sbody.str();
     }
     void ReportConsole::showSummary()
     {

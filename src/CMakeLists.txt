@@ -37,8 +37,8 @@ add_executable(b_grid commands/b_grid.cpp ${grid_sources}
 target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 
 # b_list
-add_executable(b_list commands/b_list.cpp ${list_sources} 
-    common/Datasets.cpp common/Dataset.cpp 
+add_executable(b_list commands/b_list.cpp
+    common/Datasets.cpp common/Dataset.cpp
     main/Models.cpp
     reports/ReportExcel.cpp reports/ExcelFile.cpp reports/ReportBase.cpp reports/DatasetsExcel.cpp reports/DatasetsConsole.cpp reports/ResultsDatasetConsole.cpp reports/ReportsPaged.cpp
     results/Result.cpp results/ResultsDatasetExcel.cpp results/ResultsDataset.cpp

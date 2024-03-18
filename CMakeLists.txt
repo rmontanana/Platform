@@ -25,6 +25,8 @@ set(CMAKE_CXX_EXTENSIONS                  OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS          ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+set(CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O0 -g")
 
 # Options
 # -------
@@ -60,7 +62,6 @@ if (CODE_COVERAGE)
     enable_testing()
     include(CodeCoverage)
     MESSAGE("Code coverage enabled")
-    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O0 -g")
     SET(GCC_COVERAGE_LINK_FLAGS " ${GCC_COVERAGE_LINK_FLAGS} -lgcov --coverage")
 endif (CODE_COVERAGE)
 

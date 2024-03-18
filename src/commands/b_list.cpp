@@ -106,7 +106,7 @@ int main(int argc, char** argv)
             }
         }
         if (!found) {
-            throw std::runtime_error("You must specify one of the following commands: datasets, results\n");
+            throw std::runtime_error("You must specify one of the following commands: {datasets, results}\n");
         }
     }
     catch (const exception& err) {

@@ -312,6 +312,7 @@ namespace platform {
             {"quit", 'q', false},
             {"report", 'r', true},
             {"list", 'l', false},
+            {"excel", 'e', false},
             {"back", 'b', false},
             {"Page", 'p', true},
             {"Page+", '+', false},
@@ -441,7 +442,11 @@ namespace platform {
                     }
                     break;
                 case 'e':
-                    list(report(index, true), Colors::GREEN());
+                    if (output_type == OutputType::EXPERIMENTS) {
+                        list(report(index, true), Colors::GREEN());
+                        break;
+                    }
+                    list(report(subIndex, true), Colors::GREEN());
                     break;
                 case 't':
                     {

@@ -23,4 +23,3 @@ namespace platform {
         std::locale loc;
     };
 }
-

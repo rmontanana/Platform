@@ -18,9 +18,11 @@ void manageArguments(argparse::ArgumentParser& program)
     auto datasets = platform::Datasets(false, platform::Paths::datasets());
     program.add_argument("-d", "--dataset")
         .help("Dataset file name: " + datasets.toString())
+        .default_value("all")
         .action([](const std::string& value) {
         auto datasets = platform::Datasets(false, platform::Paths::datasets());
-        static const std::vector<std::string> choices_datasets(datasets.getNames());
+        static std::vector<std::string> choices_datasets(datasets.getNames());
+        choices_datasets.push_back("all");
         if (find(choices_datasets.begin(), choices_datasets.end(), value) != choices_datasets.end()) {
             return value;
         }
@@ -102,7 +104,7 @@ int main(int argc, char** argv)
         exit(1);
     }
     auto datasets = platform::Datasets(discretize_dataset, platform::Paths::datasets());
-    if (file_name != "") {
+    if (file_name != "all") {
         if (!datasets.isDataset(file_name)) {
             cerr << "Dataset " << file_name << " not found" << std::endl;
             exit(1);

@@ -21,4 +21,3 @@ namespace platform {
         return s;
     }
 }
-

@@ -41,7 +41,7 @@ setup: ## Install dependencies for tests and coverage
 dest ?= ${HOME}/bin
 install: ## Copy binary files to bin folder
 	@echo "Destination folder: $(dest)"
-	make buildr
+	@make buildr
 	@echo "*******************************************"
 	@echo ">>> Copying files to $(dest)"
 	@echo "*******************************************"

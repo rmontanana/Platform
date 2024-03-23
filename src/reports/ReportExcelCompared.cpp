@@ -35,7 +35,7 @@ namespace platform {
     }
     double diff(double a, double b)
     {
-        return (a - b) / b;
+        return b != 0 ? (a - b) / b : 0.0;
     }
     float compute_model_number(json& rA)
     {
@@ -52,7 +52,7 @@ namespace platform {
                 average = true;
             }
         }
-        if (average)
+        if (average && num > 0)
             result = models / num;
         return result;
     }

@@ -5,11 +5,13 @@ if(ENABLE_TESTING)
         ${Platform_SOURCE_DIR}/lib/argparse/include
         ${Platform_SOURCE_DIR}/lib/mdlp
         ${Platform_SOURCE_DIR}/lib/Files
+        ${Platform_SOURCE_DIR}/lib/json/include
+        ${Platform_SOURCE_DIR}/lib/folding
         ${CMAKE_BINARY_DIR}/configured_files/include
         /usr/local/include
     )
     set(TEST_SOURCES_PLATFORM TestUtils.cpp TestPlatform.cpp)
     add_executable(${TEST_PLATFORM} ${TEST_SOURCES_PLATFORM})
-    target_link_libraries(${TEST_PLATFORM} PUBLIC "${TORCH_LIBRARIES}" ArffFiles mdlp Catch2::Catch2WithMain)
+    target_link_libraries(${TEST_PLATFORM} PUBLIC "${TORCH_LIBRARIES}" ArffFiles mdlp Catch2::Catch2WithMain BayesNet)
     add_test(NAME ${TEST_PLATFORM} COMMAND ${TEST_PLATFORM})
 endif(ENABLE_TESTING)

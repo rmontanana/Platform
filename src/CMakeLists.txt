@@ -64,4 +64,4 @@ add_executable(
     reports/ReportConsole.cpp reports/ReportExcel.cpp reports/ReportExcelCompared.cpp reports/ReportBase.cpp reports/ExcelFile.cpp reports/DatasetsConsole.cpp reports/ResultsDatasetConsole.cpp reports/ReportsPaged.cpp
     results/Result.cpp results/ResultsDataset.cpp
 )
-target_link_libraries(b_manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp)
+target_link_libraries(b_manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp "${BayesNet}")

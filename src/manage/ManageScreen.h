@@ -9,31 +9,34 @@ namespace platform {
         EXPERIMENTS = 0,
         DATASETS = 1,
         RESULT = 2,
+        DETAIL = 3,
         Count
     };
     class ManageScreen {
     public:
-        ManageScreen(int numFiles, const std::string& model, const std::string& score, bool complete, bool partial, bool compare);
+        ManageScreen(int rows, int cols, const std::string& model, const std::string& score, bool complete, bool partial, bool compare);
         ~ManageScreen() = default;
         void doMenu();
     private:
         void list(const std::string& status, const std::string& color);
         void list_experiments(const std::string& status, const std::string& color);
         void list_result(const std::string& status, const std::string& color);
+        void list_detail(const std::string& status, const std::string& color);
         void list_datasets(const std::string& status, const std::string& color);
         bool confirmAction(const std::string& intent, const std::string& fileName) const;
         std::string report(const int index, const bool excelReport);
         std::string report_compared();
-        void showIndex(const int idx);
         std::pair<std::string, std::string> sortList();
+        std::string getVersions();
         void menu();
         void header();
         void footer(const std::string& status, const std::string& color);
         OutputType output_type;
-        int numFiles;
+        int rows;
+        int cols;
         int index;
+        int subIndex;
         int index_A, index_B; // used for comparison of experiments
-        int max_status_line;
         bool indexList;
         bool openExcel;
         bool didExcel;

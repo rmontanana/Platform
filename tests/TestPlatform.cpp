@@ -18,8 +18,8 @@ TEST_CASE("Test Platform version", "[Platform]")
 }
 TEST_CASE("Test Folding library version", "[Folding]")
 {
-    auto kfold = folding::KFold(5, 100);
-    REQUIRE(kfold.version() == "1.0.1");
+    std::string version = folding::KFold(5, 100).version();
+    REQUIRE(version == "1.0.1");
 }
 TEST_CASE("Test BayesNet version", "[BayesNet]")
 {

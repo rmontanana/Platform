@@ -1,6 +1,8 @@
 #include <filesystem>
 #include <tuple>
 #include <string>
+#include <algorithm>
+#include "folding.hpp"
 #include "common/Colors.h"
 #include "common/CLocale.h"
 #include "common/Paths.h"
@@ -10,29 +12,30 @@
 #include "reports/ReportConsole.h"
 #include "reports/ReportExcel.h"
 #include "reports/ReportExcelCompared.h"
-
+#include <bayesnet/classifiers/TAN.h>
+#include "CPPFImdlp.h"
 
 namespace platform {
     const std::string STATUS_OK = "Ok.";
     const std::string STATUS_COLOR = Colors::GREEN();
-    ManageScreen::ManageScreen(int numFiles, const std::string& model, const std::string& score, bool complete, bool partial, bool compare) :
-        numFiles{ numFiles }, complete{ complete }, partial{ partial }, compare{ compare }, didExcel(false), results(ResultsManager(model, score, complete, partial))
+    ManageScreen::ManageScreen(int rows, int cols, const std::string& model, const std::string& score, bool complete, bool partial, bool compare) :
+        rows{ rows }, cols{ cols }, complete{ complete }, partial{ partial }, compare{ compare }, didExcel(false), results(ResultsManager(model, score, complete, partial))
     {
         results.load();
         results.sortDate();
         sort_field = "Date";
         openExcel = false;
         workbook = NULL;
-        if (numFiles == 0 or numFiles > results.size()) {
-            this->numFiles = results.size();
-        }
+        this->rows = std::max(0, rows - 6); // 6 is the number of lines used by the menu & header
+        cols = std::max(cols, 140);
         // Initializes the paginator for each output type (experiments, datasets, result)
         for (int i = 0; i < static_cast<int>(OutputType::Count); i++) {
-            paginator.push_back(Paginator(numFiles, results.size()));
+            paginator.push_back(Paginator(this->rows, results.size()));
         }
         index_A = -1;
         index_B = -1;
-        max_status_line = 140;
+        index = -1;
+        subIndex = -1;
         output_type = OutputType::EXPERIMENTS;
     }
     void ManageScreen::doMenu()
@@ -52,6 +55,13 @@ namespace platform {
         }
         std::cout << Colors::RESET() << "Done!" << std::endl;
     }
+    std::string ManageScreen::getVersions()
+    {
+        std::string kfold_version = folding::KFold(5, 100).version();
+        std::string bayesnet_version = bayesnet::TAN().getVersion();
+        std::string mdlp_version = mdlp::CPPFImdlp::version();
+        return " BayesNet: " + bayesnet_version + " Folding: " + kfold_version + " MDLP: " + mdlp_version + " ";
+    }
     void ManageScreen::header()
     {
         auto [index_from, index_to] = paginator[static_cast<int>(output_type)].getOffset();
@@ -69,17 +79,18 @@ namespace platform {
         std::string header = " Lines " + std::to_string(lines) + " of "
             + std::to_string(total) + " - Page " + std::to_string(page) + " of "
             + std::to_string(pages) + " ";
-
-        std::string prefix = std::string(max_status_line - suffix.size() - header.size(), ' ');
-        std::cout << Colors::CLRSCR() << Colors::REVERSE() << Colors::WHITE() << header << prefix
-            << Colors::MAGENTA() << suffix << Colors::RESET() << std::endl;
+        std::string versions = getVersions();
+        int filler = std::max(cols - versions.size() - suffix.size() - header.size(), size_t(0));
+        std::string prefix = std::string(filler, ' ');
+        std::cout << Colors::CLRSCR() << Colors::REVERSE() << Colors::WHITE() << header
+            << prefix << Colors::GREEN() << versions << Colors::MAGENTA() << suffix << Colors::RESET() << std::endl;
     }
     void ManageScreen::footer(const std::string& status, const std::string& status_color)
     {
         std::stringstream oss;
         oss << " A: " << (index_A == -1 ? "<notset>" : std::to_string(index_A)) <<
             " B: " << (index_B == -1 ? "<notset>" : std::to_string(index_B)) << " ";
-        int status_length = std::max(oss.str().size(), max_status_line - oss.str().size());
+        int status_length = std::max(oss.str().size(), cols - oss.str().size());
         auto status_message = status.substr(0, status_length - 1);
         std::string status_line = status_message + std::string(std::max(size_t(0), status_length - status_message.size() - 1), ' ');
         auto color = (index_A != -1 && index_B != -1) ? Colors::IGREEN() : Colors::IYELLOW();
@@ -92,6 +103,9 @@ namespace platform {
         switch (static_cast<int>(output_type)) {
             case static_cast<int>(OutputType::RESULT):
                 list_result(status_message, status_color);
+                break;
+            case static_cast<int>(OutputType::DETAIL):
+                list_detail(status_message, status_color);
                 break;
             case static_cast<int>(OutputType::DATASETS):
                 list_datasets(status_message, status_color);
@@ -106,6 +120,35 @@ namespace platform {
 
         auto data = results.at(index).getJson();
         ReportConsole report(data, compare);
+        auto header_text = report.getHeader();
+        auto body = report.getBody();
+        paginator[static_cast<int>(output_type)].setTotal(body.size());
+        // We need to subtract 8 from the page size to make room for the extra header in report
+        auto page_size = paginator[static_cast<int>(OutputType::EXPERIMENTS)].getPageSize();
+        paginator[static_cast<int>(output_type)].setPageSize(page_size - 8);
+        //
+        // header
+        //
+        header();
+        //
+        // Results
+        //
+        std::cout << header_text;
+        auto [index_from, index_to] = paginator[static_cast<int>(output_type)].getOffset();
+        for (int i = index_from; i <= index_to; i++) {
+            std::cout << body[i];
+        }
+        //
+        // Status Area
+        //
+        footer(status_message, status_color);
+
+    }
+    void ManageScreen::list_detail(const std::string& status_message, const std::string& status_color)
+    {
+
+        auto data = results.at(index).getJson();
+        ReportConsole report(data, compare, subIndex);
         auto header_text = report.getHeader();
         auto body = report.getBody();
         paginator[static_cast<int>(output_type)].setTotal(body.size());
@@ -245,13 +288,6 @@ namespace platform {
             return "Reporting " + results.at(index).getFilename();
         }
     }
-    void ManageScreen::showIndex(const int idx)
-    {
-        // Show a dataset result inside a report
-        auto data = results.at(index).getJson();
-        ReportConsole reporter(data, compare, idx);
-        std::cout << Colors::CLRSCR() << reporter.fileReport();
-    }
     std::pair<std::string, std::string> ManageScreen::sortList()
     {
         std::cout << Colors::YELLOW() << "Choose sorting field (date='d', score='s', time='t', model='m'): ";
@@ -286,7 +322,6 @@ namespace platform {
     void ManageScreen::menu()
     {
         char option;
-        int subIndex;
         bool finished = false;
         std::string filename;
         // tuple<Option, digit, requires value>
@@ -383,6 +418,8 @@ namespace platform {
                         list("B set to " + std::to_string(index), Colors::GREEN());
                     } else {
                         // back to show the report
+                        output_type = OutputType::RESULT;
+                        paginator[static_cast<int>(OutputType::DETAIL)].setPage(1);
                         list(STATUS_OK, STATUS_COLOR);
                     }
                     break;
@@ -395,6 +432,9 @@ namespace platform {
                     break;
                 case 'l':
                     output_type = OutputType::EXPERIMENTS;
+                    paginator[static_cast<int>(OutputType::DATASETS)].setPage(1);
+                    paginator[static_cast<int>(OutputType::RESULT)].setPage(1);
+                    paginator[static_cast<int>(OutputType::DETAIL)].setPage(1);
                     list(STATUS_OK, STATUS_COLOR);
                     break;
                 case 'D':
@@ -436,9 +476,11 @@ namespace platform {
                     }
                     if (output_type == OutputType::EXPERIMENTS) {
                         output_type = OutputType::RESULT;
+                        paginator[static_cast<int>(OutputType::DETAIL)].setPage(1);
                         list(STATUS_OK, STATUS_COLOR);
                     } else {
-                        showIndex(subIndex);
+                        output_type = OutputType::DETAIL;
+                        list(STATUS_OK, STATUS_COLOR);
                     }
                     break;
                 case 'e':

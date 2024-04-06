@@ -7,10 +7,6 @@ project(Platform
   LANGUAGES CXX
 )
 
-if (CODE_COVERAGE AND NOT ENABLE_TESTING)
-  MESSAGE(FATAL_ERROR "Code coverage requires testing enabled")
-endif (CODE_COVERAGE AND NOT ENABLE_TESTING)
-
 find_package(Torch REQUIRED)
 
 if (POLICY CMP0135)

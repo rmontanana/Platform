@@ -8,7 +8,8 @@ if(ENABLE_TESTING)
         ${Platform_SOURCE_DIR}/lib/json/include
         ${Platform_SOURCE_DIR}/lib/folding
         ${CMAKE_BINARY_DIR}/configured_files/include
-        /usr/local/include
+        ${PyClassifiers_INCLUDE_DIRS}
+        ${Bayesnet_INCLUDE_DIRS}
     )
     set(TEST_SOURCES_PLATFORM TestUtils.cpp TestPlatform.cpp)
     add_executable(${TEST_PLATFORM} ${TEST_SOURCES_PLATFORM})

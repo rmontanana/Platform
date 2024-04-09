@@ -97,8 +97,6 @@ List all the datasets and its properties. The datasets are located in the _datas
 
 where <real_features> can be either the word _all_ or a list of numbers separated by commas, i.e. [0,3,6,7]
 
-![b_list](img/blist.gif)
-
 ### b_grid
 
 Run a grid search over the parameters of the classifiers. The parameters are defined in the file _grid.txt_ located in the grid folder of the experiments. The file has to be created with the following format:
@@ -138,13 +136,9 @@ Run the main experiment. There are several hyperparameters that can set in comma
 - -\-title <title_text>: Title of the experiment (optional if only one dataset is specificied).
 - -\-quiet: Don't display detailed progress and result of the experiment.
 
-![b_main](img/bmain.gif)
-
 ### b_manage
 
 Manage the results of the experiments.
-
-![b_manage](img/bmanage.gif)
 
 ### b_best
 

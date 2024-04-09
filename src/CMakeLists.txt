@@ -10,7 +10,8 @@ include_directories(
     ${MPI_CXX_INCLUDE_DIRS}
     ${TORCH_INCLUDE_DIRS}
     ${CMAKE_BINARY_DIR}/configured_files/include
-    /usr/local/include
+    ${PyClassifiers_INCLUDE_DIRS}
+    ${Bayesnet_INCLUDE_DIRS}
     ## Platform
     ${Platform_SOURCE_DIR}/src
     ${Platform_SOURCE_DIR}/results

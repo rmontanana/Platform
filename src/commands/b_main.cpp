@@ -28,7 +28,7 @@ void manageArguments(argparse::ArgumentParser& program)
         }
         throw std::runtime_error("Dataset must be one of: " + datasets.toString());
             }
-    );
+        );
     program.add_argument("--hyperparameters").default_value("{}").help("Hyperparameters passed to the model in Experiment");
     program.add_argument("--hyper-file").default_value("").help("Hyperparameters file name." \
         "Mutually exclusive with hyperparameters. This file should contain hyperparameters for each dataset in json format.");
@@ -41,7 +41,7 @@ void manageArguments(argparse::ArgumentParser& program)
         }
         throw std::runtime_error("Model must be one of " + platform::Models::instance()->toString());
             }
-    );
+        );
     program.add_argument("--title").default_value("").help("Experiment title");
     program.add_argument("--discretize").help("Discretize input dataset").default_value((bool)stoi(env.get("discretize"))).implicit_value(true);
     program.add_argument("--no-train-score").help("Don't compute train score").default_value(false).implicit_value(true);
@@ -62,8 +62,8 @@ void manageArguments(argparse::ArgumentParser& program)
         catch (...) {
             throw std::runtime_error("Number of folds must be an integer");
         }});
-    auto seed_values = env.getSeeds();
-    program.add_argument("-s", "--seeds").nargs(1, 10).help("Random seeds. Set to -1 to have pseudo random").scan<'i', int>().default_value(seed_values);
+        auto seed_values = env.getSeeds();
+        program.add_argument("-s", "--seeds").nargs(1, 10).help("Random seeds. Set to -1 to have pseudo random").scan<'i', int>().default_value(seed_values);
 }
 
 int main(int argc, char** argv)
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
      */
     auto env = platform::DotEnv();
     auto experiment = platform::Experiment();
-    experiment.setTitle(title).setLanguage("cpp").setLanguageVersion("14.0.3");
+    experiment.setTitle(title).setLanguage("c++").setLanguageVersion("13.2.1");
     experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform(env.get("platform"));
     experiment.setStratified(stratified).setNFolds(n_folds).setScoreName("accuracy");
     experiment.setHyperparameters(test_hyperparams);

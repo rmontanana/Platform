@@ -26,6 +26,9 @@ namespace platform {
                 max_name = fileName.size();
         }
         std::cout << Colors::MAGENTA() << "*** Starting experiment: " << result.getTitle() << " ***" << Colors::RESET() << std::endl << std::endl;
+        auto clf = Models::instance()->create(result.getModel());
+        auto version = clf->getVersion();
+        std::cout << Colors::BLUE() << " Using " << result.getModel() << " ver. " << version << std::endl << std::endl;
         if (!quiet) {
             std::cout << Colors::GREEN() << " Status Meaning" << std::endl;
             std::cout << " ------ --------------------------------" << Colors::RESET() << std::endl;

@@ -43,7 +43,8 @@ namespace platform {
         bool complete;
         bool partial;
         bool compare;
-        std::string sort_field;
+        SortField sort_field = SortField::DATE;
+        SortType sort_type = SortType::DESC;
         std::vector<Paginator> paginator;
         ResultsManager results;
         lxw_workbook* workbook;

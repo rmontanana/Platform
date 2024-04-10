@@ -46,46 +46,78 @@ namespace platform {
     {
         return files.size();
     }
-    void ResultsManager::sortDate()
+    void ResultsManager::sortDate(SortType type)
     {
         if (empty())
             return;
-        sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
+        sort(files.begin(), files.end(), [type](const Result& a, const Result& b) {
             if (a.getDate() == b.getDate()) {
-                return a.getModel() < b.getModel();
+                if (type == SortType::ASC)
+                    return a.getModel() < b.getModel();
+                return a.getModel() > b.getModel();
             }
+            if (type == SortType::ASC)
+                return a.getDate() < b.getDate();
             return a.getDate() > b.getDate();
             });
     }
-    void ResultsManager::sortModel()
+    void ResultsManager::sortModel(SortType type)
     {
         if (empty())
             return;
-        sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
+        sort(files.begin(), files.end(), [type](const Result& a, const Result& b) {
             if (a.getModel() == b.getModel()) {
+                if (type == SortType::ASC)
+                    return a.getDate() < b.getDate();
                 return a.getDate() > b.getDate();
             }
+            if (type == SortType::ASC)
+                return a.getModel() < b.getModel();
             return a.getModel() > b.getModel();
             });
     }
-    void ResultsManager::sortDuration()
+    void ResultsManager::sortDuration(SortType type)
     {
         if (empty())
             return;
-        sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
+        sort(files.begin(), files.end(), [type](const Result& a, const Result& b) {
+            if (type == SortType::ASC)
+                return a.getDuration() < b.getDuration();
             return a.getDuration() > b.getDuration();
             });
     }
-    void ResultsManager::sortScore()
+    void ResultsManager::sortScore(SortType type)
     {
-        if (files.empty())
+        if (empty())
             return;
-        sort(files.begin(), files.end(), [](const Result& a, const Result& b) {
+        sort(files.begin(), files.end(), [type](const Result& a, const Result& b) {
             if (a.getScore() == b.getScore()) {
+                if (type == SortType::ASC)
+                    return a.getDate() < b.getDate();
                 return a.getDate() > b.getDate();
             }
+            if (type == SortType::ASC)
+                return a.getScore() < b.getScore();
             return a.getScore() > b.getScore();
             });
+    }
+
+    void ResultsManager::sortResults(SortField field, SortType type)
+    {
+        switch (field) {
+            case SortField::DATE:
+                sortDate(type);
+                break;
+            case SortField::MODEL:
+                sortModel(type);
+                break;
+            case SortField::SCORE:
+                sortScore(type);
+                break;
+            case SortField::DURATION:
+                sortDuration(type);
+                break;
+        }
     }
     bool ResultsManager::empty() const
     {

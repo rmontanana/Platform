@@ -6,14 +6,25 @@
 #include "results/Result.h"
 namespace platform {
     using json = nlohmann::json;
+    enum class SortType {
+        ASC = 0,
+        DESC = 1,
+    };
+    enum class SortField {
+        DATE = 0,
+        MODEL = 1,
+        SCORE = 2,
+        DURATION = 3,
+    };
     class ResultsManager {
     public:
         ResultsManager(const std::string& model, const std::string& score, bool complete, bool partial);
         void load(); // Loads the list of results
-        void sortDate();
-        void sortScore();
-        void sortModel();
-        void sortDuration();
+        void sortResults(SortField field, SortType type); // Sorts the list of results
+        void sortDate(SortType type);
+        void sortScore(SortType type);
+        void sortModel(SortType type);
+        void sortDuration(SortType type);
         int maxModelSize() const { return maxModel; };
         int maxTitleSize() const { return maxTitle; };
         void hideResult(int index, const std::string& pathHidden);

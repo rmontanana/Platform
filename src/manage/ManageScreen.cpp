@@ -22,8 +22,6 @@ namespace platform {
         rows{ rows }, cols{ cols }, complete{ complete }, partial{ partial }, compare{ compare }, didExcel(false), results(ResultsManager(model, score, complete, partial))
     {
         results.load();
-        results.sortDate();
-        sort_field = "Date";
         openExcel = false;
         workbook = NULL;
         this->rows = std::max(0, rows - 6); // 6 is the number of lines used by the menu & header
@@ -44,7 +42,7 @@ namespace platform {
             std::cout << Colors::MAGENTA() << "No results found!" << Colors::RESET() << std::endl;
             return;
         }
-        results.sortDate();
+        results.sortResults(sort_field, sort_type);
         list(STATUS_OK, STATUS_COLOR);
         menu();
         if (openExcel) {
@@ -209,17 +207,18 @@ namespace platform {
         int maxModel = results.maxModelSize();
         int maxTitle = results.maxTitleSize();
         std::vector<int> header_lengths = { 3, 10, maxModel, 10, 9, 3, 7, maxTitle };
-        //
         std::cout << Colors::RESET();
-        std::string arrow = Symbols::downward_arrow + " ";
+        std::string arrow_dn = Symbols::down_arrow + " ";
+        std::string arrow_up = Symbols::up_arrow + " ";
         std::vector<std::string> header_labels = { " #", "Date", "Model", "Score Name", "Score", "C/P", "Time", "Title" };
+        std::vector<std::string> sort_fields = { "Date", "Model", "Score", "Time" };
         for (int i = 0; i < header_labels.size(); i++) {
             std::string suffix = "", color = Colors::GREEN();
             int diff = 0;
-            if (header_labels[i] == sort_field) {
+            if (header_labels[i] == sort_fields[static_cast<int>(sort_field)]) {
                 color = Colors::YELLOW();
                 diff = 2;
-                suffix = arrow;
+                suffix = sort_type == SortType::ASC ? arrow_up : arrow_dn;
             }
             std::cout << color << std::setw(header_lengths[i] + diff) << std::left << std::string(header_labels[i] + suffix) << " ";
         }
@@ -290,34 +289,40 @@ namespace platform {
     }
     std::pair<std::string, std::string> ManageScreen::sortList()
     {
-        std::cout << Colors::YELLOW() << "Choose sorting field (date='d', score='s', time='t', model='m'): ";
+        std::cout << Colors::YELLOW() << "Choose sorting field (date='d', score='s', time='t', model='m', ascending='+', descending='-'): ";
+        std::vector<std::string> fields = { "Date", "Model", "Score", "Time" };
+        std::string invalid_option = "Invalid sorting option";
         std::string line;
         char option;
         getline(std::cin, line);
         if (line.size() == 0 || line.size() > 1) {
-            return { Colors::RED(), "Invalid sorting option" };
+            return { Colors::RED(), invalid_option };
         }
         option = line[0];
         switch (option) {
             case 'd':
-                results.sortDate();
-                sort_field = "Date";
-                return { Colors::GREEN(), "Sorted by date" };
+                sort_field = SortField::DATE;
+                break;
             case 's':
-                results.sortScore();
-                sort_field = "Score";
-                return { Colors::GREEN(), "Sorted by score" };
+                sort_field = SortField::SCORE;
+                break;
             case 't':
-                results.sortDuration();
-                sort_field = "Time";
-                return { Colors::GREEN(), "Sorted by time" };
+                sort_field = SortField::DURATION;
+                break;
             case 'm':
-                results.sortModel();
-                sort_field = "Model";
-                return { Colors::GREEN(), "Sorted by model" };
+                sort_field = SortField::MODEL;
+                break;
+            case '+':
+                sort_type = SortType::ASC;
+                break;
+            case '-':
+                sort_type = SortType::DESC;
+                break;
             default:
-                return { Colors::RED(), "Invalid sorting option" };
+                return { Colors::RED(), invalid_option };
         }
+        results.sortResults(sort_field, sort_type);
+        return { Colors::GREEN(), "Sorted by " + fields[static_cast<int>(sort_field)] + " " + (sort_type == SortType::ASC ? "ascending" : "descending") };
     }
     void ManageScreen::menu()
     {

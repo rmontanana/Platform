@@ -36,7 +36,6 @@ namespace platform {
     void ReportConsole::header()
     {
         do_header();
-        std::cout << sheader.str();
     }
     void ReportConsole::body()
     {

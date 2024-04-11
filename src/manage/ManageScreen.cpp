@@ -206,11 +206,11 @@ namespace platform {
         //
         int maxModel = results.maxModelSize();
         int maxTitle = results.maxTitleSize();
-        std::vector<int> header_lengths = { 3, 10, maxModel, 10, 9, 3, 7, maxTitle };
+        std::vector<int> header_lengths = { 3, 10, maxModel, 10, 9, 12, 3, 7, maxTitle };
         std::cout << Colors::RESET();
         std::string arrow_dn = Symbols::down_arrow + " ";
         std::string arrow_up = Symbols::up_arrow + " ";
-        std::vector<std::string> header_labels = { " #", "Date", "Model", "Score Name", "Score", "C/P", "Time", "Title" };
+        std::vector<std::string> header_labels = { " #", "Date", "Model", "Score Name", "Score", "Platform", "C/P", "Time", "Title" };
         std::vector<std::string> sort_fields = { "Date", "Model", "Score", "Time" };
         for (int i = 0; i < header_labels.size(); i++) {
             std::string suffix = "", color = Colors::GREEN();

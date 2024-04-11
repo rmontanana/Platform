@@ -89,6 +89,7 @@ namespace platform {
         oss << std::setw(maxModel) << std::left << data["model"].get<std::string>() << " ";
         oss << std::setw(10) << std::left << data["score_name"].get<std::string>() << " ";
         oss << std::right << std::setw(9) << std::setprecision(7) << std::fixed << score << " ";
+        oss << std::left << std::setw(12) << data["platform"].get<std::string>() << " ";
         auto completeString = isComplete() ? "C" : "P";
         oss << std::setw(1) << " " << completeString << "  ";
         oss << std::setw(5) << std::setprecision(2) << std::fixed << durationShow << " " << durationUnit << " ";

@@ -82,6 +82,9 @@ namespace platform {
     {
         auto tmp = ConfigLocale();
         std::stringstream oss;
+        std::string s = data["stratified"].get<bool>() ? "S" : "";
+        std::string d = data["discretized"].get<bool>() ? "D" : "";
+        std::string sd = s + d;
         auto duration = data["duration"].get<double>();
         double durationShow = duration > 3600 ? duration / 3600 : duration > 60 ? duration / 60 : duration;
         std::string durationUnit = duration > 3600 ? "h" : duration > 60 ? "m" : "s";
@@ -90,6 +93,7 @@ namespace platform {
         oss << std::setw(10) << std::left << data["score_name"].get<std::string>() << " ";
         oss << std::right << std::setw(9) << std::setprecision(7) << std::fixed << score << " ";
         oss << std::left << std::setw(12) << data["platform"].get<std::string>() << " ";
+        oss << std::left << std::setw(2) << sd << " ";
         auto completeString = isComplete() ? "C" : "P";
         oss << std::setw(1) << " " << completeString << "  ";
         oss << std::setw(5) << std::setprecision(2) << std::fixed << durationShow << " " << durationUnit << " ";

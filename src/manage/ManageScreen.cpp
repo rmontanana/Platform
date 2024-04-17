@@ -450,6 +450,7 @@ namespace platform {
                     }
                     std::cout << "Deleting " << filename << std::endl;
                     results.deleteResult(index);
+                    paginator[static_cast<int>(OutputType::EXPERIMENTS)].setTotal(results.size());
                     list(filename + " deleted!", Colors::RED());
                     break;
                 case 'h':

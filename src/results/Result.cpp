@@ -90,13 +90,13 @@ namespace platform {
         std::string durationUnit = duration > 3600 ? "h" : duration > 60 ? "m" : "s";
         oss << data["date"].get<std::string>() << " ";
         oss << std::setw(maxModel) << std::left << data["model"].get<std::string>() << " ";
-        oss << std::setw(10) << std::left << data["score_name"].get<std::string>() << " ";
-        oss << std::right << std::setw(9) << std::setprecision(7) << std::fixed << score << " ";
+        oss << std::setw(11) << std::left << data["score_name"].get<std::string>() << " ";
+        oss << std::right << std::setw(10) << std::setprecision(7) << std::fixed << score << " ";
         oss << std::left << std::setw(12) << data["platform"].get<std::string>() << " ";
         oss << std::left << std::setw(2) << sd << " ";
         auto completeString = isComplete() ? "C" : "P";
         oss << std::setw(1) << " " << completeString << "  ";
-        oss << std::setw(5) << std::setprecision(2) << std::fixed << durationShow << " " << durationUnit << " ";
+        oss << std::setw(5) << std::right << std::setprecision(2) << std::fixed << durationShow << " " << durationUnit << " ";
         oss << std::setw(50) << std::left << data["title"].get<std::string>() << " ";
         return  oss.str();
     }

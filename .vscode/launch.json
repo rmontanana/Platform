@@ -62,9 +62,9 @@
                 "--stratified",
                 "--discretize",
                 "-d",
-                "iris",
+                "glass",
                 "--hyperparameters",
-                "{\"repeatSparent\": true, \"maxModels\": 12}"
+                "{\"block_update\": true}"
             ],
             "cwd": "/home/rmontanana/Code/discretizbench",
         },

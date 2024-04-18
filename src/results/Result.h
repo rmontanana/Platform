@@ -26,6 +26,7 @@ namespace platform {
         std::string getTitle() const { return data["title"].get<std::string>(); };
         double getDuration() const { return data["duration"]; };
         std::string getModel() const { return data["model"].get<std::string>(); };
+        std::string getPlatform() const { return data["platform"].get<std::string>(); };
         std::string getScoreName() const { return data["score_name"].get<std::string>(); };
         bool isComplete() const { return complete; };
         json getData() const { return data; }

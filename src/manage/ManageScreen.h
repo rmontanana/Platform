@@ -14,7 +14,7 @@ namespace platform {
     };
     class ManageScreen {
     public:
-        ManageScreen(int rows, int cols, const std::string& model, const std::string& score, bool complete, bool partial, bool compare);
+        ManageScreen(int rows, int cols, const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial, bool compare);
         ~ManageScreen() = default;
         void doMenu();
     private:

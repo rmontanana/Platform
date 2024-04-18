@@ -18,7 +18,7 @@ namespace platform {
     };
     class ResultsManager {
     public:
-        ResultsManager(const std::string& model, const std::string& score, bool complete, bool partial);
+        ResultsManager(const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial);
         void load(); // Loads the list of results
         void sortResults(SortField field, SortType type); // Sorts the list of results
         void sortDate(SortType type);
@@ -38,6 +38,7 @@ namespace platform {
         std::string path;
         std::string model;
         std::string scoreName;
+        std::string platform;
         bool complete;
         bool partial;
         int maxModel;

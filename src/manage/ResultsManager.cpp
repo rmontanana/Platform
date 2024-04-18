@@ -3,8 +3,8 @@
 #include "ResultsManager.h"
 
 namespace platform {
-    ResultsManager::ResultsManager(const std::string& model, const std::string& score, bool complete, bool partial) :
-        path(Paths::results()), model(model), scoreName(score), complete(complete), partial(partial), maxModel(0), maxTitle(0)
+    ResultsManager::ResultsManager(const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial) :
+        path(Paths::results()), model(model), scoreName(score), platform(platform), complete(complete), partial(partial), maxModel(0), maxTitle(0)
     {
     }
     void ResultsManager::load()
@@ -17,7 +17,11 @@ namespace platform {
                 auto result = Result();
                 result.load(path, filename);
                 bool addResult = true;
-                if (model != "any" && result.getModel() != model || scoreName != "any" && scoreName != result.getScoreName() || complete && !result.isComplete() || partial && result.isComplete())
+                if (platform != "any" && result.getPlatform() != platform
+                    || model != "any" && result.getModel() != model
+                    || scoreName != "any" && scoreName != result.getScoreName()
+                    || complete && !result.isComplete()
+                    || partial && result.isComplete())
                     addResult = false;
                 if (addResult) {
                     files.push_back(result);

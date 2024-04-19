@@ -85,6 +85,9 @@ message(STATUS "Bayesnet_INCLUDE_DIRS=${Bayesnet_INCLUDE_DIRS}")
 
 # Subdirectories
 # --------------
+## Configure test data path
+cmake_path(SET TEST_DATA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tests/data")
+configure_file(src/common/SourceData.h.in "${CMAKE_BINARY_DIR}/configured_files/include/SourceData.h")
 add_subdirectory(lib/Files)
 add_subdirectory(config)
 add_subdirectory(src)

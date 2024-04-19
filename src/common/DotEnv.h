@@ -14,8 +14,15 @@ namespace platform {
     private:
         std::map<std::string, std::string> env;
     public:
-        DotEnv()
+        DotEnv(bool create = false)
         {
+            if (create) {
+                // For testing purposes
+                std::ofstream file(".env");
+                file << "source_data = Test" << std::endl;
+                file << "margin = 0.1" << std::endl;
+                file.close();
+            }
             std::ifstream file(".env");
             if (!file.is_open()) {
                 std::cerr << "File .env not found" << std::endl;
@@ -30,7 +37,7 @@ namespace platform {
                 std::istringstream iss(line);
                 std::string key, value;
                 if (std::getline(iss, key, '=') && std::getline(iss, value)) {
-                    env[key] = value;
+                    env[trim(key)] = trim(value);
                 }
             }
         }

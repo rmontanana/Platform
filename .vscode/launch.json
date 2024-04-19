@@ -108,12 +108,12 @@
             "name": "test",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/build_debug/tests/unit_tests",
+            "program": "${workspaceFolder}/build_debug/tests/unit_tests_platform",
             "args": [
-                "-c=\"Metrics Test\"",
+                // "-c=\"Metrics Test\"",
                 // "-s",
             ],
-            "cwd": "${workspaceFolder}/build/tests",
+            "cwd": "${workspaceFolder}/build_debug/tests",
         },
         {
             "name": "Build & debug active file",

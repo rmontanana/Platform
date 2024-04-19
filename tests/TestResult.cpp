@@ -1,37 +1,25 @@
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
-#include "Result.h"
-#include <filesystem>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
+#include <vector>
+#include <string>
+#include "TestUtils.h"
+#include "results/Result.h"
+#include "common/DotEnv.h"
+#include "common/Datasets.h"
+#include "common/Paths.h"
+#include "config.h"
 
-TEST_CASE("Result class tests", "[Result]")
+
+TEST_CASE("ZeroR comparison in reports", "[Report]")
 {
-    std::string testPath = "test_data";
-    std::string testFile = "test.json";
-
-    SECTION("Constructor and load method")
-    {
-        platform::Result result;
-        result.load(testPath, testFile);
-        REQUIRE(result.date != "");
-        REQUIRE(result.score >= 0);
-        REQUIRE(result.scoreName != "");
-        REQUIRE(result.title != "");
-        REQUIRE(result.duration >= 0);
-        REQUIRE(result.model != "");
-    }
-
-    SECTION("to_string method")
-    {
-        platform::Result result(testPath, testFile);
-        result.load();
-        std::string resultStr = result.to_string(1);
-        REQUIRE(resultStr != "");
-    }
-
-    SECTION("Exception handling in load method")
-    {
-        std::string invalidFile = "invalid.json";
-        auto result = platform::Result();
-        REQUIRE_THROWS_AS(platform::result.load(testPath, invalidFile), std::invalid_argument);
-    }
+    auto dotEnv = platform::DotEnv(true);
+    auto margin = 1e-2;
+    std::string dataset = "liver-disorders";
+    auto dt = platform::Datasets(false, platform::Paths::datasets());
+    dt.loadDataset(dataset);
+    std::vector<int> distribution = dt.getClassesCounts(dataset);
+    double nSamples = dt.getNSamples(dataset);
+    std::vector<int>::iterator maxValue = max_element(distribution.begin(), distribution.end());
+    double mark = *maxValue / nSamples * (1 + margin);
+    REQUIRE(mark == Catch::Approx(0.585507f).epsilon(1e-5));
 }

@@ -69,6 +69,10 @@ namespace platform {
                         mark = 0.9995;
                     }
                     status = result < mark ? Symbols::cross : result > mark ? Symbols::upward_arrow : "=";
+                    if (status == Symbols::cross) {
+                        std::cout << "ZeroR mark: " << mark << " result=" << result << " dataset = " << dataset << std::endl;
+                        exit(1);
+                    }
                 }
             }
         }

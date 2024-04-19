@@ -6,37 +6,9 @@
 #include <string>
 #include <CPPFImdlp.h>
 #include "Utils.h"
+#include "SourceData.h"
 namespace platform {
-    enum fileType_t { CSV, ARFF, RDATA };
-    class SourceData {
-    public:
-        SourceData(std::string source)
-        {
-            if (source == "Surcov") {
-                path = "datasets/";
-                fileType = CSV;
-            } else if (source == "Arff") {
-                path = "datasets/";
-                fileType = ARFF;
-            } else if (source == "Tanveer") {
-                path = "data/";
-                fileType = RDATA;
-            } else {
-                throw std::invalid_argument("Unknown source.");
-            }
-        }
-        std::string getPath()
-        {
-            return path;
-        }
-        fileType_t getFileType()
-        {
-            return fileType;
-        }
-    private:
-        std::string path;
-        fileType_t fileType;
-    };
+
     class Dataset {
     private:
         std::string path;

@@ -15,6 +15,10 @@ namespace platform {
             {Symbols::cross, "Less than or equal to ZeroR"},
             {Symbols::upward_arrow, oss.str()}
         };
+        auto env = DotEnv();
+        nodes_label = env.get("nodes");
+        leaves_label = env.get("leaves");
+        depth_label = env.get("depth");
     }
     std::string ReportBase::fromVector(const std::string& key)
     {

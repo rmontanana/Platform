@@ -61,7 +61,7 @@ namespace platform {
             maxHyper = std::max(maxHyper, (int)r["hyperparameters"].dump().size());
             maxDataset = std::max(maxDataset, (int)r["dataset"].get<std::string>().size());
         }
-        std::vector<std::string> header_labels = { " #", "Dataset", "Sampl.", "Feat.", "Cls", "Nodes", "Edges", "Depth", "Score", "Time", "Hyperparameters" };
+        std::vector<std::string> header_labels = { " #", "Dataset", "Sampl.", "Feat.", "Cls", nodes_label, leaves_label, depth_label, "Score", "Time", "Hyperparameters" };
         sheader << Colors::GREEN();
         std::vector<int> header_lengths = { 3, maxDataset, 6, 5, 3, 9, 9, 9, 15, 20, maxHyper };
         for (int i = 0; i < header_labels.size(); i++) {

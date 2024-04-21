@@ -4,6 +4,10 @@ namespace platform {
 
     ReportExcelCompared::ReportExcelCompared(json& data_A, json& data_B) : data_A(data_A), data_B(data_B), ExcelFile(NULL, NULL)
     {
+        auto env = DotEnv();
+        nodes_label = env.get("nodes");
+        leaves_label = env.get("leaves");
+        depth_label = env.get("depth");
     }
     ReportExcelCompared::~ReportExcelCompared()
     {
@@ -61,7 +65,7 @@ namespace platform {
         // Body Header
         auto sizes = std::vector<int>({ 22, 10, 9, 7, 12, 12, 9, 12, 12, 9, 12, 12, 9, 12, 12, 9, 12, 12, 9, 15, 15, 9, 15, 15 });
         auto head_a = std::vector<std::string>({ "Dataset", "Samples", "Features", "Classes" });
-        auto head_b = std::vector<std::string>({ "Models", "Nodes", "Edges", "States", "Score", "Time" });
+        auto head_b = std::vector<std::string>({ "Models", nodes_label, leaves_label, depth_label, "Score", "Time" });
         int headerRow = 3;
         int col = 0;
         for (const auto& item : head_a) {
@@ -87,7 +91,7 @@ namespace platform {
         row = headerRow + 2;
         int hypSize_A = 15;
         int hypSize_B = 15;
-        auto compared = std::vector<std::string>({ "models", "nodes", "leaves", "depth", "score", "time" });
+        auto compared = std::vector<std::string>({ "models", nodes_label, leaves_label, "depth", "score", "time" });
         auto compared_data = std::vector<double>(compared.size(), 0.0);
         auto totals_A = std::vector<double>(compared.size(), 0.0);
         auto totals_B = std::vector<double>(compared.size(), 0.0);

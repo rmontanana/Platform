@@ -27,6 +27,9 @@ namespace platform {
         double margin;
         std::map<std::string, std::string> meaning;
         bool compare;
+        std::string nodes_label;
+        std::string leaves_label;
+        std::string depth_label;
     private:
         double bestResult(const std::string& dataset, const std::string& model);
         json bestResults;

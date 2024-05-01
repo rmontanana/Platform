@@ -91,7 +91,7 @@ namespace platform {
         row = headerRow + 2;
         int hypSize_A = 15;
         int hypSize_B = 15;
-        auto compared = std::vector<std::string>({ "models", nodes_label, leaves_label, "depth", "score", "time" });
+        auto compared = std::vector<std::string>({ "models", "nodes", "leaves", "depth", "score", "time" });
         auto compared_data = std::vector<double>(compared.size(), 0.0);
         auto totals_A = std::vector<double>(compared.size(), 0.0);
         auto totals_B = std::vector<double>(compared.size(), 0.0);
@@ -108,6 +108,7 @@ namespace platform {
                 totals_A[j] += r_A[key].get<double>();
                 totals_B[j] += r_B[key].get<double>();
             }
+            std::cout << "After comparing data " << std::endl;
             if (r_A["dataset"].get<std::string>() != r_B["dataset"].get<std::string>()) {
                 throw std::runtime_error("Datasets are not the same [" + r_A["dataset"].get<std::string>() + "] vs [" + r_B["dataset"].get<std::string>() + "]");
             }

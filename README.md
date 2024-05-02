@@ -1,4 +1,4 @@
-# Platform
+# <img src="logo.png" alt="logo" width="50"/> Platform
 
 ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=flat&logo=c%2B%2B&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](<https://opensource.org/licenses/MIT>)

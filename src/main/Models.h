@@ -20,10 +20,6 @@
 #include <pyclassifiers/RandomForest.h>
 namespace platform {
     class Models {
-    private:
-        map<std::string, function<bayesnet::BaseClassifier* (void)>> functionRegistry;
-        static Models* factory; //singleton
-        Models() {};
     public:
         Models(Models&) = delete;
         void operator=(const Models&) = delete;
@@ -34,7 +30,10 @@ namespace platform {
             function<bayesnet::BaseClassifier* (void)> classFactoryFunction);
         std::vector<string> getNames();
         std::string toString();
-
+    private:
+        map<std::string, function<bayesnet::BaseClassifier* (void)>> functionRegistry;
+        static Models* factory; //singleton
+        Models() {};
     };
     class Registrar {
     public:

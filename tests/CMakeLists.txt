@@ -11,7 +11,11 @@ if(ENABLE_TESTING)
         ${PyClassifiers_INCLUDE_DIRS}
         ${Bayesnet_INCLUDE_DIRS}
     )
-    set(TEST_SOURCES_PLATFORM TestUtils.cpp TestPlatform.cpp TestResult.cpp ${Platform_SOURCE_DIR}/src/common/Datasets.cpp ${Platform_SOURCE_DIR}/src/common/Dataset.cpp)
+    set(TEST_SOURCES_PLATFORM 
+        TestUtils.cpp TestPlatform.cpp TestResult.cpp TestScores.cpp 
+        ${Platform_SOURCE_DIR}/src/common/Datasets.cpp ${Platform_SOURCE_DIR}/src/common/Dataset.cpp
+        ${Platform_SOURCE_DIR}/src/main/Scores.cpp
+    )
     add_executable(${TEST_PLATFORM} ${TEST_SOURCES_PLATFORM})
     target_link_libraries(${TEST_PLATFORM} PUBLIC "${TORCH_LIBRARIES}" ArffFiles mdlp Catch2::Catch2WithMain BayesNet)
     add_test(NAME ${TEST_PLATFORM} COMMAND ${TEST_PLATFORM})

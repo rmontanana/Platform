@@ -19,6 +19,7 @@ namespace platform {
         torch::Tensor get_confusion_matrix() { return confusion_matrix; }
         std::string classification_report();
         json get_confusion_matrix_json(bool labels_as_keys = false);
+        void aggregate(const Scores& a);
     private:
         std::string classification_report_line(std::string label, float precision, float recall, float f1_score, int support);
         void init_confusion_matrix();

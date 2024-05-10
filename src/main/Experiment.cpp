@@ -2,6 +2,7 @@
 #include "reports/ReportConsole.h"
 #include "common/Paths.h"
 #include "Models.h"
+#include "Scores.h"
 #include "Experiment.h"
 namespace platform {
     using json = nlohmann::json;
@@ -96,6 +97,7 @@ namespace platform {
         auto nodes = torch::zeros({ nResults }, torch::kFloat64);
         auto edges = torch::zeros({ nResults }, torch::kFloat64);
         auto num_states = torch::zeros({ nResults }, torch::kFloat64);
+        json confusion_matrices = json::array();
         std::vector<std::string> notes;
         Timer train_timer, test_timer;
         int item = 0;
@@ -150,10 +152,13 @@ namespace platform {
                 if (!quiet)
                     showProgress(nfold + 1, getColor(clf->getStatus()), "c");
                 test_timer.start();
-                auto accuracy_test_value = clf->score(X_test, y_test);
+                auto y_predict = clf->predict(X_test);
+                Scores scores(y_test, y_predict, states[className].size());
+                auto accuracy_test_value = scores.accuracy();
                 test_time[item] = test_timer.getDuration();
                 accuracy_train[item] = accuracy_train_value;
                 accuracy_test[item] = accuracy_test_value;
+                confusion_matrices.push_back(scores.get_confusion_matrix_json());
                 if (!quiet)
                     std::cout << "\b\b\b, " << flush;
                 // Store results and times in std::vector
@@ -173,6 +178,7 @@ namespace platform {
         partial_result.setTestTimeStd(torch::std(test_time).item<double>()).setTrainTimeStd(torch::std(train_time).item<double>());
         partial_result.setNodes(torch::mean(nodes).item<double>()).setLeaves(torch::mean(edges).item<double>()).setDepth(torch::mean(num_states).item<double>());
         partial_result.setDataset(fileName).setNotes(notes);
+        partial_result.setConfusionMatrices(confusion_matrices);
         addResult(partial_result);
     }
 }

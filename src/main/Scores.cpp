@@ -25,6 +25,15 @@ namespace platform {
             labels.push_back("Class " + std::to_string(i));
         }
     }
+    void Scores::aggregate(const Scores& a)
+    {
+        if (a.num_classes != num_classes)
+            throw std::invalid_argument("The number of classes must be the same");
+        confusion_matrix += a.confusion_matrix;
+        total += a.total;
+        accuracy_value += a.accuracy_value;
+        accuracy_value /= 2;
+    }
     Scores::Scores(json& confusion_matrix_)
     {
         json values;
@@ -46,7 +55,6 @@ namespace platform {
                 confusion_matrix[i][j] = value_int;
                 total += value_int;
             }
-            std::cout << std::endl;
             i++;
         }
         // Compute accuracy with the confusion matrix

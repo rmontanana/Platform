@@ -27,6 +27,7 @@ namespace platform {
             data["notes"].insert(data["notes"].end(), notes_.begin(), notes_.end());
             return *this;
         }
+        PartialResult& setConfusionMatrices(const json& confusion_matrices) { data["confusion_matrices"] = confusion_matrices; return *this; }
         PartialResult& setHyperparameters(const json& hyperparameters) { data["hyperparameters"] = hyperparameters; return *this; }
         PartialResult& setSamples(int samples) { data["samples"] = samples; return *this; }
         PartialResult& setFeatures(int features) { data["features"] = features; return *this; }

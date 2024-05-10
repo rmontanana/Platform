@@ -189,8 +189,10 @@ int main(int argc, char** argv)
     if (saveResults) {
         experiment.saveResult();
     }
-    if (!quiet)
-        experiment.report();
+    if (!quiet) {
+        // Classification report if only one dataset is tested
+        experiment.report(filesToTest.size() == 1);
+    }
     std::cout << "Done!" << std::endl;
     return 0;
 }

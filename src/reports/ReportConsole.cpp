@@ -3,6 +3,7 @@
 #include "best/BestScore.h"
 #include "common/CLocale.h"
 #include "ReportConsole.h"
+#include "main/Scores.h"
 
 namespace platform {
     std::string ReportConsole::headerLine(const std::string& text, int utf = 0)
@@ -163,5 +164,17 @@ namespace platform {
         if (!getExistBestFile() && compare) {
             std::cout << headerLine("*** Best Results File not found. Couldn't compare any result!");
         }
+    }
+    void ReportConsole::showClassificationReport()
+    {
+        if (data["results"].size() > 1)
+            return;
+        auto item = data["results"][0];
+        auto scores = Scores(item["confusion_matrices"][0]);
+        for (int i = 1; i < item["confusion_matrices"].size(); i++) {
+            auto score = Scores(item["confusion_matrices"][i]);
+            scores.aggregate(score);
+        }
+        std::cout << Colors::BLUE() << scores.classification_report() << Colors::RESET();
     }
 }

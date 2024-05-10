@@ -32,7 +32,7 @@ namespace platform {
         void go(std::vector<std::string> filesToProcess, bool quiet, bool no_train_score);
         void saveResult();
         void show();
-        void report();
+        void report(bool classification_report = false);
     private:
         Result result;
         bool discretized{ false }, stratified{ false };

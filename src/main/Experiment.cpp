@@ -11,10 +11,13 @@ namespace platform {
     {
         result.save();
     }
-    void Experiment::report()
+    void Experiment::report(bool classification_report)
     {
         ReportConsole report(result.getJson());
         report.show();
+        if (classification_report) {
+            report.showClassificationReport();
+        }
     }
     void Experiment::show()
     {

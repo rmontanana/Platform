@@ -155,12 +155,14 @@ std::string ArffFiles::trim(const std::string& source)
 std::vector<int> ArffFiles::factorize(const std::vector<std::string>& labels_t)
 {
     std::vector<int> yy;
+    labels.clear();
     yy.reserve(labels_t.size());
     std::map<std::string, int> labelMap;
     int i = 0;
     for (const std::string& label : labels_t) {
         if (labelMap.find(label) == labelMap.end()) {
             labelMap[label] = i++;
+            labels.push_back(label);
         }
         yy.push_back(labelMap[label]);
     }

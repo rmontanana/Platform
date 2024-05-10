@@ -91,6 +91,7 @@ namespace platform {
                 }
                 yv.push_back(stoi(tokens.back()));
             }
+            labels.clear();
             file.close();
         } else {
             throw std::invalid_argument("Unable to open dataset file.");
@@ -117,6 +118,7 @@ namespace platform {
         className = arff.getClassName();
         auto attributes = arff.getAttributes();
         transform(attributes.begin(), attributes.end(), back_inserter(features), [](const auto& attribute) { return attribute.first; });
+        labels = arff.getLabels();
     }
     std::vector<std::string> tokenize(std::string line)
     {
@@ -160,6 +162,7 @@ namespace platform {
                 }
                 yv.push_back(stoi(tokens.back()));
             }
+            labels.clear();
             file.close();
         } else {
             throw std::invalid_argument("Unable to open dataset file.");

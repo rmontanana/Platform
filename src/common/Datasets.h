@@ -3,18 +3,12 @@
 #include "Dataset.h"
 namespace platform {
     class Datasets {
-    private:
-        std::string path;
-        fileType_t fileType;
-        std::string sfileType;
-        std::map<std::string, std::unique_ptr<Dataset>> datasets;
-        bool discretize;
-        void load(); // Loads the list of datasets
     public:
         explicit Datasets(bool discretize, std::string sfileType) : discretize(discretize), sfileType(sfileType) { load(); };
-        std::vector<string> getNames();
-        std::vector<string> getFeatures(const std::string& name) const;
+        std::vector<std::string> getNames();
+        std::vector<std::string> getFeatures(const std::string& name) const;
         int getNSamples(const std::string& name) const;
+        std::vector<std::string> getLabels(const std::string& name) const;
         std::string getClassName(const std::string& name) const;
         int getNClasses(const std::string& name);
         std::vector<int> getClassesCounts(const std::string& name) const;
@@ -25,5 +19,12 @@ namespace platform {
         bool isDataset(const std::string& name) const;
         void loadDataset(const std::string& name) const;
         std::string toString() const;
+    private:
+        std::string path;
+        fileType_t fileType;
+        std::string sfileType;
+        std::map<std::string, std::unique_ptr<Dataset>> datasets;
+        bool discretize;
+        void load(); // Loads the list of datasets
     };
 };

@@ -83,6 +83,7 @@ namespace platform {
         auto features = datasets.getFeatures(fileName);
         auto samples = datasets.getNSamples(fileName);
         auto className = datasets.getClassName(fileName);
+        auto labels = datasets.getLabels(fileName);
         if (!quiet) {
             std::cout << " " << setw(5) << samples << " " << setw(5) << features.size() << flush;
         }
@@ -156,12 +157,12 @@ namespace platform {
                     showProgress(nfold + 1, getColor(clf->getStatus()), "c");
                 test_timer.start();
                 auto y_predict = clf->predict(X_test);
-                Scores scores(y_test, y_predict, states[className].size());
+                Scores scores(y_test, y_predict, states[className].size(), labels);
                 auto accuracy_test_value = scores.accuracy();
                 test_time[item] = test_timer.getDuration();
                 accuracy_train[item] = accuracy_train_value;
                 accuracy_test[item] = accuracy_test_value;
-                confusion_matrices.push_back(scores.get_confusion_matrix_json());
+                confusion_matrices.push_back(scores.get_confusion_matrix_json(true));
                 if (!quiet)
                     std::cout << "\b\b\b, " << flush;
                 // Store results and times in std::vector

@@ -147,6 +147,9 @@ TEST_CASE("Classification Report", "[Scores]")
 weighted avg 0.8250000 0.6000000 0.6400000        10
 )";
     REQUIRE(scores.classification_report() == expected);
+    auto json_matrix = scores.get_confusion_matrix_json(true);
+    platform::Scores scores2(json_matrix);
+    REQUIRE(scores.classification_report() == scores2.classification_report());
 }
 TEST_CASE("JSON constructor", "[Scores]")
 {

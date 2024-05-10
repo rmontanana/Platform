@@ -42,6 +42,14 @@ namespace platform {
             throw std::invalid_argument("Dataset not loaded.");
         }
     }
+    std::vector<std::string> Datasets::getLabels(const std::string& name) const
+    {
+        if (datasets.at(name)->isLoaded()) {
+            return datasets.at(name)->getLabels();
+        } else {
+            throw std::invalid_argument("Dataset not loaded.");
+        }
+    }
     map<std::string, std::vector<int>> Datasets::getStates(const std::string& name) const
     {
         if (datasets.at(name)->isLoaded()) {

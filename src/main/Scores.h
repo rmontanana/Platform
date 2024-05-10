@@ -9,6 +9,7 @@ namespace platform {
     class Scores {
     public:
         Scores(torch::Tensor& y_test, torch::Tensor& y_pred, int num_classes, std::vector<std::string> labels = {});
+        explicit Scores(json& confusion_matrix_);
         float accuracy();
         float f1_score(int num_class);
         float f1_weighted();
@@ -20,6 +21,8 @@ namespace platform {
         json get_confusion_matrix_json(bool labels_as_keys = false);
     private:
         std::string classification_report_line(std::string label, float precision, float recall, float f1_score, int support);
+        void init_confusion_matrix();
+        void init_default_labels();
         int num_classes;
         float accuracy_value;
         int total;

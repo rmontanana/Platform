@@ -110,6 +110,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build_debug/tests/unit_tests_platform",
             "args": [
+                "[Scores]",
                 // "-c=\"Metrics Test\"",
                 // "-s",
             ],

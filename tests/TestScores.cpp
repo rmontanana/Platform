@@ -148,3 +148,32 @@ weighted avg 0.8250000 0.6000000 0.6400000        10
 )";
     REQUIRE(scores.classification_report() == expected);
 }
+TEST_CASE("JSON constructor", "[Scores]")
+{
+    std::vector<int> y_test = { 0, 2, 2, 2, 2, 0, 1, 2, 0, 2 };
+    std::vector<int> y_pred = { 0, 1, 2, 2, 1, 1, 1, 0, 0, 2 };
+    auto y_test_tensor = torch::tensor(y_test, torch::kInt32);
+    auto y_pred_tensor = torch::tensor(y_pred, torch::kInt32);
+    std::vector<std::string> labels = { "Aeroplane", "Boat", "Car" };
+    platform::Scores scores(y_test_tensor, y_pred_tensor, 3, labels);
+    auto res_json_int = scores.get_confusion_matrix_json();
+    platform::Scores scores2(res_json_int);
+    REQUIRE(scores.accuracy() == scores2.accuracy());
+    for (int i = 0; i < 2; ++i) {
+        REQUIRE(scores.f1_score(i) == scores2.f1_score(i));
+        REQUIRE(scores.precision(i) == scores2.precision(i));
+        REQUIRE(scores.recall(i) == scores2.recall(i));
+    }
+    REQUIRE(scores.f1_weighted() == scores2.f1_weighted());
+    REQUIRE(scores.f1_macro() == scores2.f1_macro());
+    auto res_json_key = scores.get_confusion_matrix_json(true);
+    platform::Scores scores3(res_json_key);
+    REQUIRE(scores.accuracy() == scores3.accuracy());
+    for (int i = 0; i < 2; ++i) {
+        REQUIRE(scores.f1_score(i) == scores3.f1_score(i));
+        REQUIRE(scores.precision(i) == scores3.precision(i));
+        REQUIRE(scores.recall(i) == scores3.recall(i));
+    }
+    REQUIRE(scores.f1_weighted() == scores3.f1_weighted());
+    REQUIRE(scores.f1_macro() == scores3.f1_macro());
+}

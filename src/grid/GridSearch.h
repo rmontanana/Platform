@@ -10,7 +10,7 @@
 #include "GridData.h"
 
 namespace platform {
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
     struct ConfigGrid {
         std::string model;
         std::string score;

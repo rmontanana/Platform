@@ -6,7 +6,7 @@
 #include "common/Paths.h"
 #include "common/Symbols.h"
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 namespace platform {
 
     class ReportBase {

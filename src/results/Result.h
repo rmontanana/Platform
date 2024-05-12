@@ -9,7 +9,7 @@
 #include "main/PartialResult.h"
 
 namespace platform {
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
 
     class Result {
     public:

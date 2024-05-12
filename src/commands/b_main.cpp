@@ -10,7 +10,7 @@
 #include "config.h"
 
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 void manageArguments(argparse::ArgumentParser& program)
 {

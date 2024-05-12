@@ -9,7 +9,7 @@
 #include "results/Result.h"
 
 namespace platform {
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
 
     class Experiment {
     public:

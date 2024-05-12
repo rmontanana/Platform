@@ -5,7 +5,7 @@
 #include <torch/torch.h>
 #include <nlohmann/json.hpp>
 namespace platform {
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
     class Scores {
     public:
         Scores(torch::Tensor& y_test, torch::Tensor& y_pred, int num_classes, std::vector<std::string> labels = {});
@@ -24,6 +24,7 @@ namespace platform {
         std::string classification_report_line(std::string label, float precision, float recall, float f1_score, int support);
         void init_confusion_matrix();
         void init_default_labels();
+        void compute_accuracy_value();
         int num_classes;
         float accuracy_value;
         int total;

@@ -16,7 +16,7 @@ namespace platform {
         ReportConsole report(result.getJson());
         report.show();
         if (classification_report) {
-            report.showClassificationReport();
+            std::cout << Colors::BLUE() << report.showClassificationReport() << Colors::RESET();
         }
     }
     void Experiment::show()

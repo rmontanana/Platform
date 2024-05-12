@@ -129,11 +129,15 @@ namespace platform {
             vbody.push_back(line.str()); sbody << line.str();
             line.str(""); line << headerLine(fVector("Test   times: ", lastResult["times_test"], 10, 3));
             vbody.push_back(line.str()); sbody << line.str();
+
         } else {
             footer(totalScore);
         }
         sbody << std::string(MAXL, '*') << Colors::RESET() << std::endl;
         vbody.push_back(std::string(MAXL, '*') + Colors::RESET() + "\n");
+        if (lastResult.find("confusion_matrices") != lastResult.end() && (data["results"].size() == 1 || selectedIndex != -1)) {
+            vbody.push_back(Colors::BLUE() + showClassificationReport() + Colors::RESET());
+        }
     }
     void ReportConsole::showSummary()
     {
@@ -165,16 +169,17 @@ namespace platform {
             std::cout << headerLine("*** Best Results File not found. Couldn't compare any result!");
         }
     }
-    void ReportConsole::showClassificationReport()
+    std::string ReportConsole::showClassificationReport()
     {
-        if (data["results"].size() > 1)
-            return;
+        auto lastResult = data["results"][0];
+        if (data["results"].size() > 1 || lastResult.find("confusion_matrices") == lastResult.end())
+            return "";
         auto item = data["results"][0];
         auto scores = Scores(item["confusion_matrices"][0]);
         for (int i = 1; i < item["confusion_matrices"].size(); i++) {
             auto score = Scores(item["confusion_matrices"][i]);
             scores.aggregate(score);
         }
-        std::cout << Colors::BLUE() << scores.classification_report() << Colors::RESET();
+        return scores.classification_report();
     }
 }

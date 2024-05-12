@@ -14,7 +14,7 @@ namespace platform {
         std::string fileReport();
         std::string getHeader() { do_header(); do_body(); return sheader.str(); }
         std::vector<std::string>& getBody() { return vbody; }
-        void showClassificationReport();
+        std::string showClassificationReport();
     private:
         int selectedIndex;
         std::string headerLine(const std::string& text, int utf);

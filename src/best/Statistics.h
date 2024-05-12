@@ -5,7 +5,7 @@
 #include <map>
 #include <nlohmann/json.hpp>
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 namespace platform {
     struct WTL {

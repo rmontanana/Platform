@@ -6,7 +6,7 @@
 #include <nlohmann/json.hpp>
 
 namespace platform {
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
     const std::string ALL_DATASETS = "all";
     class GridData {
     public:

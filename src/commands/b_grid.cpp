@@ -13,7 +13,7 @@
 #include "grid/GridSearch.h"
 #include "config.h"
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 const int MAXL = 133;
 
 void assignModel(argparse::ArgumentParser& parser)
@@ -29,7 +29,7 @@ void assignModel(argparse::ArgumentParser& parser)
         }
         throw std::runtime_error("Model must be one of " + models->toString());
             }
-    );
+        );
 }
 void add_compute_args(argparse::ArgumentParser& program)
 {
@@ -54,23 +54,23 @@ void add_compute_args(argparse::ArgumentParser& program)
         catch (...) {
             throw std::runtime_error("Number of nested folds must be an integer");
         }});
-    program.add_argument("--score").help("Score used in gridsearch").default_value("accuracy");
-    program.add_argument("-f", "--folds").help("Number of folds").default_value(stoi(env.get("n_folds"))).scan<'i', int>().action([](const std::string& value) {
-        try {
-            auto k = stoi(value);
-            if (k < 2) {
-                throw std::runtime_error("Number of folds must be greater than 1");
+        program.add_argument("--score").help("Score used in gridsearch").default_value("accuracy");
+        program.add_argument("-f", "--folds").help("Number of folds").default_value(stoi(env.get("n_folds"))).scan<'i', int>().action([](const std::string& value) {
+            try {
+                auto k = stoi(value);
+                if (k < 2) {
+                    throw std::runtime_error("Number of folds must be greater than 1");
+                }
+                return k;
             }
-            return k;
-        }
-        catch (const runtime_error& err) {
-            throw std::runtime_error(err.what());
-        }
-        catch (...) {
-            throw std::runtime_error("Number of folds must be an integer");
-        }});
-    auto seed_values = env.getSeeds();
-    program.add_argument("-s", "--seeds").nargs(1, 10).help("Random seeds. Set to -1 to have pseudo random").scan<'i', int>().default_value(seed_values);
+            catch (const runtime_error& err) {
+                throw std::runtime_error(err.what());
+            }
+            catch (...) {
+                throw std::runtime_error("Number of folds must be an integer");
+            }});
+            auto seed_values = env.getSeeds();
+            program.add_argument("-s", "--seeds").nargs(1, 10).help("Random seeds. Set to -1 to have pseudo random").scan<'i', int>().default_value(seed_values);
 }
 std::string headerLine(const std::string& text, int utf = 0)
 {

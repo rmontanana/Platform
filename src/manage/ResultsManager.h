@@ -5,7 +5,7 @@
 #include <nlohmann/json.hpp>
 #include "results/Result.h"
 namespace platform {
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
     enum class SortType {
         ASC = 0,
         DESC = 1,

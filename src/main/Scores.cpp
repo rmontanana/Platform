@@ -37,11 +37,16 @@ namespace platform {
             }
             i++;
         }
-        // Compute accuracy with the confusion matrix
+        compute_accuracy_value();
+    }
+    void Scores::compute_accuracy_value()
+    {
+        accuracy_value = 0;
         for (int i = 0; i < num_classes; i++) {
             accuracy_value += confusion_matrix[i][i].item<int>();
         }
         accuracy_value /= total;
+        accuracy_value = std::min(accuracy_value, 1.0f);
     }
     void Scores::init_confusion_matrix()
     {
@@ -59,8 +64,7 @@ namespace platform {
             throw std::invalid_argument("The number of classes must be the same");
         confusion_matrix += a.confusion_matrix;
         total += a.total;
-        accuracy_value += a.accuracy_value;
-        accuracy_value /= 2;
+        compute_accuracy_value();
     }
     float Scores::accuracy()
     {
@@ -71,6 +75,7 @@ namespace platform {
         // Compute f1_score in a one vs rest fashion
         auto precision_value = precision(num_class);
         auto recall_value = recall(num_class);
+        if (precision_value + recall_value == 0) return 0; // Avoid division by zero (0/0 = 0)
         return 2 * precision_value * recall_value / (precision_value + recall_value);
     }
     float Scores::f1_weighted()
@@ -94,6 +99,7 @@ namespace platform {
         int tp = confusion_matrix[num_class][num_class].item<int>();
         int fp = confusion_matrix.index({ "...", num_class }).sum().item<int>() - tp;
         int fn = confusion_matrix[num_class].sum().item<int>() - tp;
+        if (tp + fp == 0) return 0; // Avoid division by zero (0/0 = 0
         return float(tp) / (tp + fp);
     }
     float Scores::recall(int num_class)
@@ -101,6 +107,7 @@ namespace platform {
         int tp = confusion_matrix[num_class][num_class].item<int>();
         int fp = confusion_matrix.index({ "...", num_class }).sum().item<int>() - tp;
         int fn = confusion_matrix[num_class].sum().item<int>() - tp;
+        if (tp + fn == 0) return 0; // Avoid division by zero (0/0 = 0
         return float(tp) / (tp + fn);
     }
     std::string Scores::classification_report_line(std::string label, float precision, float recall, float f1_score, int support)

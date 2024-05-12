@@ -5,7 +5,7 @@
 #include "Scores.h"
 #include "Experiment.h"
 namespace platform {
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
 
     void Experiment::saveResult()
     {

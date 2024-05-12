@@ -5,7 +5,7 @@
 #include <nlohmann/json.hpp>
 #include "reports/ExcelFile.h"
 
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 
 namespace platform {
 

@@ -5,7 +5,7 @@
 #include <nlohmann/json.hpp>
 #include "results/Result.h"
 namespace platform {
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
     class ResultsDataset {
     public:
         ResultsDataset(const std::string& dataset, const std::string& model, const std::string& score);

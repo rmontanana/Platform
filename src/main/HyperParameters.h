@@ -6,7 +6,7 @@
 #include <nlohmann/json.hpp>
 
 namespace platform {
-    using json = nlohmann::json;
+    using json = nlohmann::ordered_json;
     class HyperParameters {
     public:
         HyperParameters() = default;

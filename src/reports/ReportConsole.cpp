@@ -136,7 +136,7 @@ namespace platform {
         sbody << std::string(MAXL, '*') << Colors::RESET() << std::endl;
         vbody.push_back(std::string(MAXL, '*') + Colors::RESET() + "\n");
         if (lastResult.find("confusion_matrices") != lastResult.end() && (data["results"].size() == 1 || selectedIndex != -1)) {
-            vbody.push_back(Colors::BLUE() + showClassificationReport() + Colors::RESET());
+            vbody.push_back(showClassificationReport(Colors::BLUE()));
         }
     }
     void ReportConsole::showSummary()
@@ -169,7 +169,7 @@ namespace platform {
             std::cout << headerLine("*** Best Results File not found. Couldn't compare any result!");
         }
     }
-    std::string ReportConsole::showClassificationReport()
+    std::string ReportConsole::showClassificationReport(std::string color)
     {
         auto lastResult = data["results"][0];
         if (data["results"].size() > 1 || lastResult.find("confusion_matrices") == lastResult.end())
@@ -180,6 +180,6 @@ namespace platform {
             auto score = Scores(item["confusion_matrices"][i]);
             scores.aggregate(score);
         }
-        return scores.classification_report();
+        return scores.classification_report(color);
     }
 }

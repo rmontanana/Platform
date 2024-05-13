@@ -2,6 +2,8 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#include <cctype> // std::isdigit
+#include <algorithm> // std::all_of
 #include <iostream>
 
 ArffFiles::ArffFiles() = default;
@@ -162,7 +164,11 @@ std::vector<int> ArffFiles::factorize(const std::vector<std::string>& labels_t)
     for (const std::string& label : labels_t) {
         if (labelMap.find(label) == labelMap.end()) {
             labelMap[label] = i++;
-            labels.push_back(label);
+            bool allDigits = std::all_of(label.begin(), label.end(), isdigit);
+            if (allDigits)
+                labels.push_back("Class " + label);
+            else
+                labels.push_back(label);
         }
         yy.push_back(labelMap[label]);
     }

@@ -185,25 +185,21 @@ namespace platform {
         auto result = data["results"][0];
         if (result.find("confusion_matrices") == result.end())
             return "";
-        auto scores = aggregateScore("confusion_matrices");
-        auto output_test = scores.classification_report(color, "Test");
-        oss << Colors::BLUE();
-        if (result.find("confusion_matrices_train") == result.end()) {
-            for (auto& line : output_test) {
-
-                oss << line << std::endl;
-            }
-            oss << Colors::RESET();
-            return oss.str();
-        }
-        auto scores_train = aggregateScore("confusion_matrices_train");
-        auto output_train = scores_train.classification_report(color, "Train");
-        int maxLine = (*std::max_element(output_train.begin(), output_train.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
         bool second_header = false;
         int lines_header = 0;
         std::string color_line;
         std::string suffix = "";
-        for (int i = 0; i < output_train.size(); i++) {
+        auto scores = aggregateScore("confusion_matrices");
+        auto output_test = scores.classification_report(color, "Test");
+        int maxLine = (*std::max_element(output_test.begin(), output_test.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
+        bool train_data = result.find("confusion_matrices_train") != result.end();
+        std::vector<std::string> output_train;
+        if (train_data) {
+            auto scores_train = aggregateScore("confusion_matrices_train");
+            output_train = scores_train.classification_report(color, "Train");
+        }
+        oss << Colors::BLUE();
+        for (int i = 0; i < output_test.size(); i++) {
             if (i < 2 || second_header) {
                 color_line = Colors::GREEN();
             } else {
@@ -211,10 +207,14 @@ namespace platform {
                 if (lines_header > 1)
                     suffix = std::string(14, ' '); // compensate for the color
             }
-            oss << color_line << std::left << std::setw(maxLine) << output_train[i]
-                << suffix << Colors::BLUE() << " | " << color_line << std::left << std::setw(maxLine)
-                << output_test[i] << std::endl;
-            if (output_train[i] == "" || (second_header && lines_header < 2)) {
+            if (train_data) {
+                oss << color_line << std::left << std::setw(maxLine) << output_train[i]
+                    << suffix << Colors::BLUE() << " | " << color_line << std::left << std::setw(maxLine)
+                    << output_test[i] << std::endl;
+            } else {
+                oss << color_line << output_test[i] << std::endl;
+            }
+            if (output_test[i] == "" || (second_header && lines_header < 2)) {
                 lines_header++;
                 second_header = true;
             } else {

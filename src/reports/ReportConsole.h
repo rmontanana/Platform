@@ -20,13 +20,14 @@ namespace platform {
     private:
         int selectedIndex;
         std::string headerLine(const std::string& text, int utf);
+        std::string buildClassificationReport(json& result, std::string color);
         void header() override;
         void do_header();
         void body() override;
         void do_body();
         void footer(double totalScore);
         void showSummary() override;
-        Scores aggregateScore(std::string key);
+        Scores aggregateScore(json& result, std::string key);
         std::stringstream sheader;
         std::stringstream sbody;
         std::vector<std::string> vbody;

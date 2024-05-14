@@ -135,7 +135,7 @@ namespace platform {
         sbody << std::string(MAXL, '*') << Colors::RESET() << std::endl;
         vbody.push_back(std::string(MAXL, '*') + Colors::RESET() + "\n");
         if (data["results"].size() == 1 || selectedIndex != -1) {
-            vbody.push_back(showClassificationReport(Colors::BLUE()));
+            vbody.push_back(buildClassificationReport(lastResult, Colors::BLUE()));
         }
     }
     void ReportConsole::showSummary()
@@ -168,34 +168,31 @@ namespace platform {
             std::cout << headerLine("*** Best Results File not found. Couldn't compare any result!");
         }
     }
-    Scores ReportConsole::aggregateScore(std::string key)
+    Scores ReportConsole::aggregateScore(json& result, std::string key)
     {
-        auto lastResult = data["results"][0];
-        auto item = data["results"][0];
-        auto scores = Scores(item[key][0]);
-        for (int i = 1; i < item[key].size(); i++) {
-            auto score = Scores(item[key][i]);
+        auto scores = Scores(result[key][0]);
+        for (int i = 1; i < result[key].size(); i++) {
+            auto score = Scores(result[key][i]);
             scores.aggregate(score);
         }
         return scores;
     }
-    std::string ReportConsole::showClassificationReport(std::string color)
+    std::string ReportConsole::buildClassificationReport(json& result, std::string color)
     {
         std::stringstream oss;
-        auto result = data["results"][0];
         if (result.find("confusion_matrices") == result.end())
             return "";
         bool second_header = false;
         int lines_header = 0;
         std::string color_line;
         std::string suffix = "";
-        auto scores = aggregateScore("confusion_matrices");
+        auto scores = aggregateScore(result, "confusion_matrices");
         auto output_test = scores.classification_report(color, "Test");
         int maxLine = (*std::max_element(output_test.begin(), output_test.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
         bool train_data = result.find("confusion_matrices_train") != result.end();
         std::vector<std::string> output_train;
         if (train_data) {
-            auto scores_train = aggregateScore("confusion_matrices_train");
+            auto scores_train = aggregateScore(result, "confusion_matrices_train");
             output_train = scores_train.classification_report(color, "Train");
         }
         oss << Colors::BLUE();
@@ -222,6 +219,14 @@ namespace platform {
             }
         }
         oss << Colors::RESET();
+        return oss.str();
+    }
+    std::string ReportConsole::showClassificationReport(std::string color)
+    {
+        std::stringstream oss;
+        for (auto& result : data["results"]) {
+            oss << buildClassificationReport(result, color);
+        }
         return oss.str();
     }
 }

@@ -4,6 +4,8 @@
 #include "common/Colors.h"
 #include <sstream>
 #include "ReportBase.h"
+#include "main/Scores.h"
+
 
 namespace platform {
     const int MAXL = 133;
@@ -24,6 +26,7 @@ namespace platform {
         void do_body();
         void footer(double totalScore);
         void showSummary() override;
+        Scores aggregateScore(std::string key);
         std::stringstream sheader;
         std::stringstream sbody;
         std::vector<std::string> vbody;

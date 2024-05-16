@@ -99,7 +99,9 @@
             "request": "launch",
             "program": "${workspaceFolder}/build_debug/src/b_list",
             "args": [
-                "datasets"
+                "results",
+                "-d",
+                "mfeat-morphological"
             ],
             //"cwd": "/Users/rmontanana/Code/discretizbench",
             "cwd": "${workspaceFolder}/../discretizbench",

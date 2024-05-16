@@ -55,6 +55,10 @@ namespace platform {
                 }
             }
         }
+        if (bests.empty()) {
+            std::cerr << Colors::MAGENTA() << "No results found for model " << model << " and score " << score << Colors::RESET() << std::endl;
+            exit(1);
+        }
         std::string bestFileName = path + bestResultFile();
         std::ofstream file(bestFileName);
         file << bests;

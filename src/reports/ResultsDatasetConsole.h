@@ -12,7 +12,7 @@ namespace platform {
     public:
         ResultsDatasetsConsole() = default;
         ~ResultsDatasetsConsole() = default;
-        void report(const std::string& dataset, const std::string& score, const std::string& model);
+        bool report(const std::string& dataset, const std::string& score, const std::string& model);
     };
 }
 

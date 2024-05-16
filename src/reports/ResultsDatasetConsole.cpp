@@ -4,15 +4,15 @@
 #include "results/ResultsDataset.h"
 #include "ResultsDatasetConsole.h"
 namespace platform {
-    void ResultsDatasetsConsole::report(const std::string& dataset, const std::string& score, const std::string& model)
+    bool ResultsDatasetsConsole::report(const std::string& dataset, const std::string& score, const std::string& model)
     {
         auto results = platform::ResultsDataset(dataset, model, score);
         results.load();
-        results.sortModel();
         if (results.empty()) {
             std::cerr << Colors::RED() << "No results found for dataset " << dataset << " and model " << model << Colors::RESET() << std::endl;
-            return;
+            return false;
         }
+        results.sortModel();
         int maxModel = results.maxModelSize();
         int maxHyper = results.maxHyperSize();
         double maxResult = results.maxResultScore();
@@ -76,6 +76,7 @@ namespace platform {
             oss << item["hyperparameters"].get<std::string>() << std::endl;
             body.push_back(oss.str());
         }
+        return true;
     }
 }
 

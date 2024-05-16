@@ -6,12 +6,14 @@
 #include <bayesnet/ensembles/A2DE.h>
 #include <bayesnet/ensembles/AODELd.h>
 #include <bayesnet/ensembles/BoostAODE.h>
+#include <bayesnet/ensembles/BoostA2DE.h>
 #include <bayesnet/classifiers/TAN.h>
 #include <bayesnet/classifiers/KDB.h>
 #include <bayesnet/classifiers/SPODE.h>
 #include <bayesnet/classifiers/SPnDE.h>
 #include <bayesnet/classifiers/TANLd.h>
 #include <bayesnet/classifiers/KDBLd.h>
+#include <bayesnet/classifiers/SPODELd.h>
 #include <bayesnet/classifiers/SPODELd.h>
 #include <pyclassifiers/STree.h>
 #include <pyclassifiers/ODTE.h>

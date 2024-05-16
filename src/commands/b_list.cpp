@@ -37,7 +37,8 @@ void list_results(argparse::ArgumentParser& program)
     auto model = program.get<string>("model");
     auto excel = program.get<bool>("excel");
     auto report = platform::ResultsDatasetsConsole();
-    report.report(dataset, score, model);
+    if (!report.report(dataset, score, model))
+        return;
     std::cout << report.getOutput();
     if (excel) {
         auto data = report.getData();
@@ -73,7 +74,7 @@ int main(int argc, char** argv)
         }
         throw std::runtime_error("Dataset must be one of " + datasets.toString());
             }
-    );
+        );
     results_command.add_argument("-m", "--model")
         .help("Model to use: " + platform::Models::instance()->toString() + " or any")
         .default_value("any")
@@ -86,7 +87,7 @@ int main(int argc, char** argv)
         }
         throw std::runtime_error("Model must be one of " + platform::Models::instance()->toString() + " or any");
             }
-    );
+        );
     results_command.add_argument("--excel").help("Output in Excel format").default_value(false).implicit_value(true);
     results_command.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
 

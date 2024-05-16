@@ -22,6 +22,8 @@ static platform::Registrar registrarALD("AODELd",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::AODELd();});
 static platform::Registrar registrarBA("BoostAODE",
     [](void) -> bayesnet::BaseClassifier* { return new bayesnet::BoostAODE();});
+static platform::Registrar registrarBA2("BoostA2DE",
+    [](void) -> bayesnet::BaseClassifier* { return new bayesnet::BoostA2DE();});
 static platform::Registrar registrarSt("STree",
     [](void) -> bayesnet::BaseClassifier* { return new pywrap::STree();});
 static platform::Registrar registrarOdte("Odte",

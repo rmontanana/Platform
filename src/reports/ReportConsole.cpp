@@ -186,13 +186,13 @@ namespace platform {
         int lines_header = 0;
         std::string color_line;
         std::string suffix = "";
-        auto scores = aggregateScore(result, "confusion_matrices");
+        auto scores = Scores::create_aggregate(result, "confusion_matrices");
         auto output_test = scores.classification_report(color, "Test");
         int maxLine = (*std::max_element(output_test.begin(), output_test.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
         bool train_data = result.find("confusion_matrices_train") != result.end();
         std::vector<std::string> output_train;
         if (train_data) {
-            auto scores_train = aggregateScore(result, "confusion_matrices_train");
+            auto scores_train = Scores::create_aggregate(result, "confusion_matrices_train");
             output_train = scores_train.classification_report(color, "Train");
         }
         oss << Colors::BLUE();

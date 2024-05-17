@@ -40,11 +40,11 @@ namespace platform {
         }
         compute_accuracy_value();
     }
-    static Score Scores::create_aggregate(json& data, std::string key)
+    Scores Scores::create_aggregate(json& data, std::string key)
     {
-        auto scores = Scores(result[key][0]);
-        for (int i = 1; i < result[key].size(); i++) {
-            auto score = Scores(result[key][i]);
+        auto scores = Scores(data[key][0]);
+        for (int i = 1; i < data[key].size(); i++) {
+            auto score = Scores(data[key][i]);
             scores.aggregate(score);
         }
         return scores;

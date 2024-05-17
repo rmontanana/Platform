@@ -6,7 +6,6 @@
 #include "ReportBase.h"
 #include "main/Scores.h"
 
-
 namespace platform {
     const int MAXL = 133;
     class ReportConsole : public ReportBase {

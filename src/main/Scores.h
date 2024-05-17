@@ -10,7 +10,7 @@ namespace platform {
     public:
         Scores(torch::Tensor& y_test, torch::Tensor& y_pred, int num_classes, std::vector<std::string> labels = {});
         explicit Scores(json& confusion_matrix_);
-        static Score create_aggregate(json& data, std::string key);
+        static Scores create_aggregate(json& data, std::string key);
         float accuracy();
         float f1_score(int num_class);
         float f1_weighted();

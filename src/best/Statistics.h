@@ -5,9 +5,9 @@
 #include <map>
 #include <nlohmann/json.hpp>
 
-using json = nlohmann::ordered_json;
-
 namespace platform {
+    using json = nlohmann::ordered_json;
+
     struct WTL {
         int win;
         int tie;

@@ -5,10 +5,9 @@
 #include <nlohmann/json.hpp>
 #include "reports/ExcelFile.h"
 
-using json = nlohmann::ordered_json;
 
 namespace platform {
-
+    using json = nlohmann::ordered_json;
     class BestResultsExcel : public ExcelFile {
     public:
         BestResultsExcel(const std::string& score, const std::vector<std::string>& datasets);

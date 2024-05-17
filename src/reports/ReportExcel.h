@@ -1,11 +1,13 @@
-#pragma once
-
+#ifndef REPORT_EXCEL_H
+#define REPORT_EXCEL_H
 #include <map>
 #include <xlsxwriter.h>
 #include "common/Colors.h"
 #include "ReportBase.h"
 #include "ExcelFile.h"
 namespace platform {
+    using json = nlohmann::ordered_json;
+
     class ReportExcel : public ReportBase, public ExcelFile {
     public:
         explicit ReportExcel(json data_, bool compare, lxw_workbook* workbook, lxw_worksheet* worksheet = NULL);
@@ -22,3 +24,4 @@ namespace platform {
         void header_notes(int row);
     };
 };
+#endif

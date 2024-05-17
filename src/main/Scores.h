@@ -2,8 +2,8 @@
 #define SCORES_H
 #include <vector>
 #include <string>
-#include <torch/torch.h>
 #include <nlohmann/json.hpp>
+#include <torch/torch.h>
 namespace platform {
     using json = nlohmann::ordered_json;
     class Scores {

@@ -2,8 +2,9 @@
 
 #include <string>
 #include <nlohmann/json.hpp>
-using json = nlohmann::ordered_json;
 namespace platform {
+    using json = nlohmann::ordered_json;
+
     class BestResults {
     public:
         explicit BestResults(const std::string& path, const std::string& score, const std::string& model, const std::string& dataset, bool friedman, double significance = 0.05)

@@ -8,7 +8,6 @@
 namespace platform {
     using json = nlohmann::ordered_json;
 
-
     class DatasetsConsole : public ReportsPaged {
     public:
         static const int BALANCE_LENGTH;

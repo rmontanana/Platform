@@ -3,10 +3,9 @@
 #include <nlohmann/json.hpp>
 #include "reports/ExcelFile.h"
 
-using json = nlohmann::ordered_json;
 
 namespace platform {
-
+    using json = nlohmann::ordered_json;
     class DatasetsExcel : public ExcelFile {
     public:
         DatasetsExcel();

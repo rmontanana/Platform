@@ -1,14 +1,14 @@
-#pragma once
+#ifndef REPORTBASE_H
+#define REPORTBASE_H
 
+//#include "main/Scores.h"
 #include <string>
-#include <iostream>
 #include <nlohmann/json.hpp>
 #include "common/Paths.h"
 #include "common/Symbols.h"
 
-using json = nlohmann::ordered_json;
 namespace platform {
-
+    using json = nlohmann::ordered_json;
     class ReportBase {
     public:
         explicit ReportBase(json data_, bool compare);
@@ -36,3 +36,4 @@ namespace platform {
         bool existBestFile = true;
     };
 };
+#endif

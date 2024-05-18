@@ -4,15 +4,14 @@
 #include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
-#include <xlsxwriter.h>
 
 namespace platform {
     using json = nlohmann::ordered_json;
     class Scores {
     public:
         Scores(torch::Tensor& y_test, torch::Tensor& y_pred, int num_classes, std::vector<std::string> labels = {});
-        explicit Scores(json& confusion_matrix_);
-        static Scores create_aggregate(json& data, std::string key);
+        explicit Scores(const json& confusion_matrix_);
+        static Scores create_aggregate(const json& data, const std::string key);
         float accuracy();
         float f1_score(int num_class);
         float f1_weighted();
@@ -21,6 +20,7 @@ namespace platform {
         float recall(int num_class);
         torch::Tensor get_confusion_matrix() { return confusion_matrix; }
         std::vector<std::string> classification_report(std::string color = "", std::string title = "");
+        json classification_report_json(std::string title = "");
         json get_confusion_matrix_json(bool labels_as_keys = false);
         void aggregate(const Scores& a);
     private:
@@ -28,6 +28,7 @@ namespace platform {
         void init_confusion_matrix();
         void init_default_labels();
         void compute_accuracy_value();
+        std::tuple<float, float, float, float> compute_averages();
         int num_classes;
         float accuracy_value;
         int total;

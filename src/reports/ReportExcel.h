@@ -1,5 +1,6 @@
 #ifndef REPORT_EXCEL_H
 #define REPORT_EXCEL_H
+#include "main/Scores.h"
 #include "common/Colors.h"
 #include "ReportBase.h"
 #include "ExcelFile.h"
@@ -19,6 +20,8 @@ namespace platform {
         void showSummary() override;
         void footer(double totalScore, int row);
         void append_notes(const json& r, int row);
+        void create_classification_report(const json& result);
+        int write_classification_report(const json& result, int row);
         void header_notes(int row);
     };
 };

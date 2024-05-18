@@ -195,27 +195,78 @@ namespace platform {
             }
             // Classificacion report
             if (lastResult.find("confusion_matrices") != lastResult.end()) {
-                // auto score = platform2::Scores::create_aggregate(lastResult, "confusion_matrices");
-                // row++;
-                // writeString(row, 1, "Classification Report", "bodyHeader");
-                // row++;
-                // auto output = platform2::Scores::classification_report("", "test");
-                // for (const auto& item : output) {
-                //     writeString(row, 1, item, "text");
-                //     row++;
-                // }
+                create_classification_report(lastResult);
             }
             // Set with of columns to show those totals completely
-            worksheet_set_column(worksheet, 1, 1, 12, NULL);
-            for (int i = 2; i < 7; ++i) {
+            for (int i = 0; i < 5; ++i) {
                 // doesn't work with from col to col, so...
-                worksheet_set_column(worksheet, i, i, 15, NULL);
+                worksheet_set_column(worksheet, i, i, 12, NULL);
             }
+            worksheet_set_column(worksheet, 5, 5, 7, NULL);
         } else {
             footer(totalScore, row);
         }
     }
+    void ReportExcel::create_classification_report(const json& result)
+    {
+        auto matrix_sheet = workbook_add_worksheet(workbook, "classif_report");
+        lxw_worksheet* tmp = worksheet;
+        worksheet = matrix_sheet;
+        if (matrix_sheet == NULL) {
+            throw std::invalid_argument("Couldn't create sheet classif_report");
+        }
+        worksheet_merge_range(matrix_sheet, 0, 0, 0, 5, "Classification Report", efectiveStyle("bodyHeader"));
+        int row = 3;
+        if (result.find("confusion_matrices_train") != result.end()) {
+            auto score = Scores::create_aggregate(result, "confusion_matrices_train");
+            auto train = score.classification_report_json("Train");
+            row = write_classification_report(train, row);
+        }
+        auto score = Scores::create_aggregate(result, "confusion_matrices");
+        auto test = score.classification_report_json("Test");
+        write_classification_report(test, ++row);
+        for (int i = 1; i < 6; ++i) {
+            // doesn't work with from col to col, so...
+            worksheet_set_column(worksheet, i, i, 15, NULL);
+        }
+        worksheet = tmp;
+    }
+    int ReportExcel::write_classification_report(const json& result, int row)
+    {
+        auto text = result["title"].get<std::string>().c_str();
+        std::cout << "title: " << text << std::endl;
+        worksheet_merge_range(worksheet, row, 0, row, 5, text, efectiveStyle("bodyHeader"));
+        int col = 2;
+        row++;
+        bool first_item = true;
+        for (const auto& item : result["headers"]) {
+            auto text = item.get<std::string>().c_str();
+            if (first_item) {
+                first_item = false;
+                worksheet_merge_range(worksheet, row, 0, row, 1, text, efectiveStyle("bodyHeader"));
+            } else {
+                writeString(row, col++, text, "bodyHeader");
+            }
+        }
+        row++;
+        for (const auto& item : result["body"]) {
+            col = 2;
+            for (const auto& value : item) {
+                if (value.is_string()) {
+                    worksheet_merge_range(worksheet, row, 0, row, 1, value.get<std::string>().c_str(), efectiveStyle("text"));
+                } else {
+                    if (value.is_number_integer()) {
+                        writeInt(row, col++, value.get<int>(), "result");
+                    } else {
+                        writeDouble(row, col++, value.get<double>(), "result");
+                    }
+                }
+                row++;
+            }
+        }
+        return row;
 
+    }
     void ReportExcel::showSummary()
     {
         for (const auto& item : summary) {

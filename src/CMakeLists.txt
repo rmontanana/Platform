@@ -22,7 +22,7 @@ add_executable(
     b_best commands/b_best.cpp best/Statistics.cpp
     best/BestResultsExcel.cpp best/BestResults.cpp
     common/Datasets.cpp common/Dataset.cpp
-    main/Models.cpp
+    main/Models.cpp main/Scores.cpp
     reports/ReportExcel.cpp reports/ReportBase.cpp reports/ExcelFile.cpp
     results/Result.cpp
 )

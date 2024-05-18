@@ -40,9 +40,9 @@ target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} "${PyClassifiers}" "${BayesNet
 # b_list
 add_executable(b_list commands/b_list.cpp
     common/Datasets.cpp common/Dataset.cpp
-    main/Models.cpp
-    reports/ReportExcel.cpp reports/ExcelFile.cpp reports/ReportBase.cpp reports/DatasetsExcel.cpp reports/DatasetsConsole.cpp reports/ResultsDatasetConsole.cpp reports/ReportsPaged.cpp
-    results/Result.cpp results/ResultsDatasetExcel.cpp results/ResultsDataset.cpp
+    main/Models.cpp main/Scores.cpp
+    reports/ReportExcel.cpp reports/ExcelFile.cpp reports/ReportBase.cpp reports/DatasetsExcel.cpp reports/DatasetsConsole.cpp reports/ReportsPaged.cpp
+    results/Result.cpp results/ResultsDatasetExcel.cpp results/ResultsDataset.cpp results/ResultsDatasetConsole.cpp
 )
 target_link_libraries(b_list "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
@@ -62,8 +62,8 @@ list(TRANSFORM manage_sources PREPEND manage/)
 add_executable(
     b_manage commands/b_manage.cpp ${manage_sources} 
     common/Datasets.cpp common/Dataset.cpp
-    reports/ReportConsole.cpp reports/ReportExcel.cpp reports/ReportExcelCompared.cpp reports/ReportBase.cpp reports/ExcelFile.cpp reports/DatasetsConsole.cpp reports/ResultsDatasetConsole.cpp reports/ReportsPaged.cpp
-    results/Result.cpp results/ResultsDataset.cpp
+    reports/ReportConsole.cpp reports/ReportExcel.cpp reports/ReportExcelCompared.cpp reports/ReportBase.cpp reports/ExcelFile.cpp reports/DatasetsConsole.cpp reports/ReportsPaged.cpp
+    results/Result.cpp results/ResultsDataset.cpp results/ResultsDatasetConsole.cpp
     main/Scores.cpp
 )
 target_link_libraries(b_manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp "${BayesNet}")

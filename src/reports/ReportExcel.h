@@ -1,7 +1,5 @@
 #ifndef REPORT_EXCEL_H
 #define REPORT_EXCEL_H
-#include <map>
-#include <xlsxwriter.h>
 #include "common/Colors.h"
 #include "ReportBase.h"
 #include "ExcelFile.h"

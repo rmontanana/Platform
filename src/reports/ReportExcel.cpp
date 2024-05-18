@@ -3,7 +3,6 @@
 #include "best/BestScore.h"
 #include "ReportExcel.h"
 namespace platform {
-
     ReportExcel::ReportExcel(json data_, bool compare, lxw_workbook* workbook, lxw_worksheet* worksheet) : ReportBase(data_, compare), ExcelFile(workbook, worksheet)
     {
         createFile();
@@ -193,6 +192,18 @@ namespace platform {
                     std::string style = group.find("scores") != std::string::npos ? "result" : "time";
                     writeDouble(row, ++col, item, style);
                 }
+            }
+            // Classificacion report
+            if (lastResult.find("confusion_matrices") != lastResult.end()) {
+                // auto score = platform2::Scores::create_aggregate(lastResult, "confusion_matrices");
+                // row++;
+                // writeString(row, 1, "Classification Report", "bodyHeader");
+                // row++;
+                // auto output = platform2::Scores::classification_report("", "test");
+                // for (const auto& item : output) {
+                //     writeString(row, 1, item, "text");
+                //     row++;
+                // }
             }
             // Set with of columns to show those totals completely
             worksheet_set_column(worksheet, 1, 1, 12, NULL);

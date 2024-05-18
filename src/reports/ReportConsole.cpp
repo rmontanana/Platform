@@ -3,6 +3,7 @@
 #include "best/BestScore.h"
 #include "common/CLocale.h"
 #include "ReportConsole.h"
+#include "main/Scores.h"
 
 namespace platform {
     std::string ReportConsole::headerLine(const std::string& text, int utf = 0)

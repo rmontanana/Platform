@@ -1,9 +1,9 @@
 #ifndef SCORES_H
 #define SCORES_H
+#include <torch/torch.h>
 #include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
-#include <torch/torch.h>
 #include <xlsxwriter.h>
 
 namespace platform {

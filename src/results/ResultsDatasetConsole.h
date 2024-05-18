@@ -4,8 +4,8 @@
 #include <string>
 #include <sstream>
 #include <nlohmann/json.hpp>
-#include "results/ResultsDataset.h"
-#include "ReportsPaged.h"
+#include "reports/ReportsPaged.h"
+#include "ResultsDataset.h"
 
 namespace platform {
     class ResultsDatasetsConsole : public ReportsPaged {

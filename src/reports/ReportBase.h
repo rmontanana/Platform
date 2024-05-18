@@ -1,7 +1,7 @@
 #ifndef REPORTBASE_H
 #define REPORTBASE_H
-
 #include <string>
+#include <map>
 #include <nlohmann/json.hpp>
 #include "common/Paths.h"
 #include "common/Symbols.h"

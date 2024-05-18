@@ -1,4 +1,5 @@
-#pragma once
+#ifndef REPORT_EXCEL_COMPARED_H
+#define REPORT_EXCEL_COMPARED_H
 #include "ReportExcel.h"
 namespace platform {
     class ReportExcelCompared : public ExcelFile {
@@ -17,3 +18,4 @@ namespace platform {
         std::string depth_label;
     };
 };
+#endif

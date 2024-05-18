@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef HYPERPARAMETERS_H
+#define HYPERPARAMETERS_H
 #include <string>
 #include <map>
 #include <vector>
@@ -20,3 +20,4 @@ namespace platform {
         std::map<std::string, json> hyperparameters;
     };
 } /* namespace platform */
+#endif

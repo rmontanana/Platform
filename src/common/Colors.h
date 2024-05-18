@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef COLORS_H
+#define COLORS_H
 #include <string>
 class Colors {
 public:
@@ -27,3 +27,4 @@ public:
     static std::string CONCEALED() { return "\033[8m"; }
     static std::string CLRSCR() { return "\033[2J\033[1;1H"; }
 };
+#endif

@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef PATHS_H
+#define PATHS_H
 #include <string>
 #include <filesystem>
 #include "DotEnv.h"
@@ -36,3 +36,4 @@ namespace platform {
         }
     };
 }
+#endif

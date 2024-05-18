@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef DATASETS_H
+#define DATASETS_H
 #include "Dataset.h"
 namespace platform {
     class Datasets {
@@ -28,3 +28,4 @@ namespace platform {
         void load(); // Loads the list of datasets
     };
 };
+#endif

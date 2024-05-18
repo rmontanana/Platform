@@ -254,7 +254,7 @@ namespace platform {
         while (!finished) {
             std::cout << color << "Really want to " << intent << " " << fileName << "? (y/n): ";
             getline(std::cin, line);
-            finished = line.size() == 1 && (tolower(line[0]) == 'y' || tolower(line[0] == 'n'));
+            finished = line.size() == 1 && (tolower(line[0]) == 'y' || tolower(line[0]) == 'n');
         }
         if (tolower(line[0]) == 'y') {
             return true;

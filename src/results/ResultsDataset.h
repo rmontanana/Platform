@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef RESULTSDATASET_H
+#define RESULTSDATASET_H
 #include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
@@ -32,3 +32,4 @@ namespace platform {
         std::vector<Result> files;
     };
 };
+#endif

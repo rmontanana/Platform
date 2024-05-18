@@ -4,6 +4,8 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include <torch/torch.h>
+#include <xlsxwriter.h>
+
 namespace platform {
     using json = nlohmann::ordered_json;
     class Scores {

@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TESTUTILS_H
+#define TESTUTILS_H
 #include <torch/torch.h>
 #include <string>
 #include <vector>
@@ -39,4 +39,4 @@ public:
     int nSamples, classNumStates;
     double epsilon = 1e-5;
 };
-
+#endif

@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef DATASETSCONSOLE_H
+#define DATASETSCONSOLE_H
 #include <locale>
 #include <sstream>
 #include <nlohmann/json.hpp>
@@ -18,4 +18,4 @@ namespace platform {
         void split_lines(int name_len, std::string line, const std::string& balance);
     };
 }
-
+#endif

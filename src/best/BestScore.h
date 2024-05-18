@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef BESTSCORE_H
+#define BESTSCORE_H
 #include <string>
 #include <map>
 #include <utility>
@@ -24,3 +24,4 @@ namespace platform {
         }
     };
 }
+#endif

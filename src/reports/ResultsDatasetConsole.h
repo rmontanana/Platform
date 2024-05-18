@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef RESULTSDATASETSCONSOLE_H
+#define RESULTSDATASETSCONSOLE_H
 #include <locale>
 #include <string>
 #include <sstream>
@@ -15,7 +15,4 @@ namespace platform {
         bool report(const std::string& dataset, const std::string& score, const std::string& model);
     };
 }
-
-
-
-
+#endif

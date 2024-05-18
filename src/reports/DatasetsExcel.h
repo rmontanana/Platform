@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef DATASETSEXCEL_H
+#define DATASETSEXCEL_H
 #include <nlohmann/json.hpp>
 #include "reports/ExcelFile.h"
 
@@ -13,3 +13,4 @@ namespace platform {
         void report(json& data);
     };
 }
+#endif

@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef RESULTSMANAGER_H
+#define RESULTSMANAGER_H
 #include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
@@ -46,3 +46,4 @@ namespace platform {
         std::vector<Result> files;
     };
 };
+#endif

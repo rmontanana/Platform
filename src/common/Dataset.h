@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef DATASET_H
+#define DATASET_H
 #include <torch/torch.h>
 #include <map>
 #include <vector>
@@ -48,4 +48,4 @@ namespace platform {
         std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y);
     };
 };
-
+#endif

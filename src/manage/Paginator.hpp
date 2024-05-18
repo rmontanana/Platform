@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef PAGINATOR_HPP
+#define PAGINATOR_HPP
 #include <utility>
 
 class Paginator {
@@ -54,3 +54,4 @@ private:
     int page;
     int numPages;
 };
+#endif

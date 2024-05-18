@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef MANAGE_SCREEN_H
+#define MANAGE_SCREEN_H
 #include <xlsxwriter.h>
 #include "ResultsManager.h"
 #include "Paginator.hpp"
@@ -50,3 +50,4 @@ namespace platform {
         lxw_workbook* workbook;
     };
 }
+#endif

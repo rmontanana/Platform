@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef BESTRESULTSEXCEL_H
+#define BESTRESULTSEXCEL_H
 #include <vector>
 #include <map>
 #include <nlohmann/json.hpp>
@@ -33,3 +33,4 @@ namespace platform {
         int datasetNameSize = 25; // Min size of the column
     };
 }
+#endif

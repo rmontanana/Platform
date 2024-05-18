@@ -1,5 +1,4 @@
 #include "DatasetsExcel.h"
-
 namespace platform {
     DatasetsExcel::DatasetsExcel()
     {

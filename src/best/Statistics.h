@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef STATISTICS_H
+#define STATISTICS_H
 #include <iostream>
 #include <vector>
 #include <map>
@@ -60,3 +60,4 @@ namespace platform {
         std::map<std::string, std::map<std::string, float>> ranksModels;
     };
 }
+#endif

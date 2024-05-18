@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef REPORTS_PAGED_H
+#define REPORTS_PAGED_H
 #include <locale>
 #include <sstream>
 #include <nlohmann/json.hpp>
@@ -23,3 +23,4 @@ namespace platform {
         std::locale loc;
     };
 }
+#endif

@@ -1,10 +1,9 @@
-#pragma once
-
+#ifndef UTILS_H
+#define UTILS_H
 #include <sstream>
 #include <string>
 #include <vector>
 namespace platform {
-    //static std::vector<std::string> split(const std::string& text, char delimiter);
     static std::vector<std::string> split(const std::string& text, char delimiter)
     {
         std::vector<std::string> result;
@@ -27,3 +26,4 @@ namespace platform {
         return result;
     }
 }
+#endif

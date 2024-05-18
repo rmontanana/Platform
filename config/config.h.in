@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef PLATFORM_H
+#define PLATFORM_H
 #include <string>
 #include <string_view>
 
@@ -8,3 +8,4 @@ static constexpr std::string_view platform_project_version = "@PROJECT_VERSION@"
 static constexpr std::string_view platform_project_description = "@PROJECT_DESCRIPTION@";
 static constexpr std::string_view platform_git_sha = "@GIT_SHA@";
 static constexpr std::string_view platform_data_path = "@Platform_SOURCE_DIR@/tests/data/";
+#endif

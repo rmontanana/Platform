@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef REPORT_CONSOLE_H
+#define REPORT_CONSOLE_H
 #include <string>
 #include "common/Colors.h"
 #include <sstream>
@@ -32,3 +32,4 @@ namespace platform {
         std::vector<std::string> vbody;
     };
 };
+#endif

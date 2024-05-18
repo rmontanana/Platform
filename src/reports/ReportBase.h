@@ -1,7 +1,6 @@
 #ifndef REPORTBASE_H
 #define REPORTBASE_H
 
-//#include "main/Scores.h"
 #include <string>
 #include <nlohmann/json.hpp>
 #include "common/Paths.h"

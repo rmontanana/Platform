@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef COMMAND_PARSER_H
+#define COMMAND_PARSER_H
 #include <string>
 #include <vector>
 #include <tuple>
@@ -18,3 +18,4 @@ namespace platform {
         int index;
     };
 } /* namespace platform */
+#endif

@@ -2,8 +2,6 @@
 #include <locale>
 #include "best/BestScore.h"
 #include "ReportExcel.h"
-
-
 namespace platform {
 
     ReportExcel::ReportExcel(json data_, bool compare, lxw_workbook* workbook, lxw_worksheet* worksheet) : ReportBase(data_, compare), ExcelFile(workbook, worksheet)

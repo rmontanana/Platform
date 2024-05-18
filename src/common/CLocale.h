@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef CLOCALE_H
+#define CLOCALE_H
 #include <locale>
 #include <iostream>
 #include <string>
@@ -19,3 +19,4 @@ namespace platform {
         }
     };
 }
+#endif

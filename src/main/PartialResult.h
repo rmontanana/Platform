@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef PARTIAL_RESULT_H
+#define PARTIAL_RESULT_H
 #include <string>
 #include <nlohmann/json.hpp>
 
@@ -73,3 +73,4 @@ namespace platform {
         json data;
     };
 }
+#endif

@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef EXPERIMENT_H
+#define EXPERIMENT_H
 #include <torch/torch.h>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -43,3 +43,4 @@ namespace platform {
         int max_name{ 7 }; // max length of dataset name for formatting (default 7)
     };
 }
+#endif

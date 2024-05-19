@@ -75,7 +75,7 @@ namespace platform {
     }
     void ExcelFile::boldGreen()
     {
-        boldFontColor(0x00FF00);
+        boldFontColor(0x009900);
     }
     void ExcelFile::boldRed()
     {

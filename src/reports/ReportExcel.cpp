@@ -215,8 +215,7 @@ namespace platform {
         if (matrix_sheet == NULL) {
             throw std::invalid_argument("Couldn't create sheet classif_report");
         }
-        worksheet_merge_range(matrix_sheet, 0, 0, 0, 5, "Classification Report", efectiveStyle("bodyHeader"));
-        int row = 2;
+        row = 1;
         int col = 0;
         if (result.find("confusion_matrices_train") != result.end()) {
             // Train classification report
@@ -229,11 +228,14 @@ namespace platform {
                 auto item = result["confusion_matrices_train"][i];
                 auto score_item = Scores(item);
                 auto title = "Train Fold " + std::to_string(i);
-                std::tie(new_row, new_col) = write_classification_report(score_item.classification_report_json(title), 2, new_col);
+                std::tie(new_row, new_col) = write_classification_report(score_item.classification_report_json(title), 1, new_col);
                 new_col++;
             }
+            col = new_col;
+            worksheet_merge_range(matrix_sheet, 0, 0, 0, col - 1, "Train Classification Report", efectiveStyle("headerRest"));
         }
         // Test classification report
+        worksheet_merge_range(matrix_sheet, row, 0, row, col - 1, "Test Classification Report", efectiveStyle("headerRest"));
         auto score = Scores::create_aggregate(result, "confusion_matrices");
         auto test = score.classification_report_json("Test");
         int init_row = ++row;
@@ -256,9 +258,10 @@ namespace platform {
     }
     std::pair<int, int> ReportExcel::write_classification_report(const json& result, int init_row, int init_col)
     {
-        int row = init_row;
+        row = init_row;
         auto text = result["title"].get<std::string>();
-        worksheet_merge_range(worksheet, row++, init_col, row, init_col + 5, text.c_str(), efectiveStyle("bodyHeader"));
+        worksheet_merge_range(worksheet, row, init_col, row + 1, init_col + 5, text.c_str(), efectiveStyle("bodyHeader"));
+        row += 2;
         int col = init_col + 2;
         // Headers
         bool first_item = true;
@@ -288,8 +291,6 @@ namespace platform {
             }
             row++;
         }
-        worksheet_merge_range(worksheet, row, init_col, row, init_col + 5, "", efectiveStyle("text"));
-        row++;
         // Accuracy and average f1-score
         for (const auto& item : { "accuracy", "averages", "weighted" }) {
             col = init_col + 2;
@@ -307,11 +308,10 @@ namespace platform {
             row++;
         }
         // Confusion matrix
-        worksheet_merge_range(worksheet, row, init_col, row, init_col + 5, "", efectiveStyle("bodyHeader"));
-        row++;
         auto n_items = result["confusion_matrix"].size();
         worksheet_merge_range(worksheet, row, init_col, row, init_col + n_items + 1, "Confusion Matrix", efectiveStyle("bodyHeader"));
         row++;
+        boldGreen();
         for (int i = 0; i < n_items; ++i) {
             col = init_col + 2;
             auto label = result["body"][i][0].get<std::string>();
@@ -326,7 +326,7 @@ namespace platform {
             }
             row++;
         }
-        int maxcol = std::max(5, int(init_col + n_items + 1));
+        int maxcol = std::max(init_col + 5, int(init_col + n_items + 1));
         return { row, maxcol };
     }
     void ReportExcel::showSummary()

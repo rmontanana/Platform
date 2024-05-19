@@ -22,6 +22,27 @@ namespace platform {
         colorOdd = 0xDCE6F1;
         colorEven = 0xFDE9D9;
     }
+    lxw_worksheet* ExcelFile::createWorksheet(const std::string& name)
+    {
+        lxw_worksheet* sheet;
+        std::string suffix = "";
+        std::string efectiveName;
+        int num = 1;
+        // Create a sheet with the name of the model
+        while (true) {
+            efectiveName = name + suffix;
+            if (workbook_get_worksheet_by_name(workbook, efectiveName.c_str())) {
+                suffix = std::to_string(++num);
+            } else {
+                sheet = workbook_add_worksheet(workbook, efectiveName.c_str());
+                break;
+            }
+            if (num > 100) {
+                throw std::invalid_argument("Couldn't create sheet " + efectiveName);
+            }
+        }
+        return sheet;
+    }
 
     lxw_workbook* ExcelFile::getWorkbook()
     {

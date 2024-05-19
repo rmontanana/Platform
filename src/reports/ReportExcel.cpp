@@ -17,26 +17,7 @@ namespace platform {
             worksheet_set_column(worksheet, i, i, columns_sizes.at(i), NULL);
         }
     }
-    void ReportExcel::createWorksheet()
-    {
-        const std::string name = data["model"].get<std::string>();
-        std::string suffix = "";
-        std::string efectiveName;
-        int num = 1;
-        // Create a sheet with the name of the model
-        while (true) {
-            efectiveName = name + suffix;
-            if (workbook_get_worksheet_by_name(workbook, efectiveName.c_str())) {
-                suffix = std::to_string(++num);
-            } else {
-                worksheet = workbook_add_worksheet(workbook, efectiveName.c_str());
-                break;
-            }
-            if (num > 100) {
-                throw std::invalid_argument("Couldn't create sheet " + efectiveName);
-            }
-        }
-    }
+
 
     void ReportExcel::createFile()
     {
@@ -44,7 +25,8 @@ namespace platform {
             workbook = workbook_new((Paths::excel() + Paths::excelResults()).c_str());
         }
         if (worksheet == NULL) {
-            createWorksheet();
+            const std::string name = data["model"].get<std::string>();
+            worksheet = createWorksheet(name);
         }
         setProperties(data["title"].get<std::string>());
         formatColumns();
@@ -209,7 +191,8 @@ namespace platform {
     }
     void ReportExcel::create_classification_report(const json& result)
     {
-        auto matrix_sheet = workbook_add_worksheet(workbook, "classif_report");
+
+        auto matrix_sheet = createWorksheet("clf_report");
         lxw_worksheet* tmp = worksheet;
         worksheet = matrix_sheet;
         if (matrix_sheet == NULL) {

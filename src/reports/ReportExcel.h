@@ -15,7 +15,6 @@ namespace platform {
     private:
         void formatColumns();
         void createFile();
-        void createWorksheet();
         void header() override;
         void body() override;
         void showSummary() override;

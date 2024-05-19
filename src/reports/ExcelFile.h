@@ -24,6 +24,7 @@ namespace platform {
         void boldBlue(); //set blue color for the bold styles
         void boldGreen(); //set green color for the bold styles
         void createStyle(const std::string& name, lxw_format* style, bool odd);
+        lxw_worksheet* createWorksheet(const std::string& name);
         void addColor(lxw_format* style, bool odd);
         lxw_format* efectiveStyle(const std::string& name);
         lxw_workbook* workbook;

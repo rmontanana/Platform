@@ -64,7 +64,7 @@ namespace platform {
         json data = loadResultData(fileName);
 
         std::string title = "Best results for " + model;
-        worksheet_merge_range(worksheet, 0, 0, 0, 4, title.c_str(), styles["headerFirst"]);
+        worksheet_merge_range(worksheet, 0, 0, 0, 5, title.c_str(), styles["headerFirst"]);
         // Body header
         row = 3;
         int col = 1;
@@ -73,10 +73,12 @@ namespace platform {
         writeString(row, 2, "Score", "bodyHeader");
         writeString(row, 3, "File", "bodyHeader");
         writeString(row, 4, "Hyperparameters", "bodyHeader");
+        writeString(row, 5, "F", "bodyHeader");
         auto i = 0;
         std::string hyperparameters;
         int hypSize = 22;
         std::map<std::string, std::string> files; // map of files imported and their tabs
+        int numLines = data.size();
         for (auto const& item : data.items()) {
             row++;
             writeInt(row, 0, i++, "ints");
@@ -104,6 +106,8 @@ namespace platform {
                 hypSize = hyperparameters.size();
             }
             writeString(row, 4, hyperparameters, "text");
+            std::string countHyperparameters = "=COUNTIF(e5:e" + std::to_string(numLines + 4) + ", e" + std::to_string(row + 1) + ")";
+            worksheet_write_formula(worksheet, row, 5, countHyperparameters.c_str(), efectiveStyle("ints"));
         }
         row++;
         // Set Totals

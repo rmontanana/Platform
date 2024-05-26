@@ -26,7 +26,7 @@ add_executable(
     reports/ReportExcel.cpp reports/ReportBase.cpp reports/ExcelFile.cpp
     results/Result.cpp
 )
-target_link_libraries(b_best Boost::boost "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
+target_link_libraries(b_best Boost::boost "${PyClassifiers}" "${BayesNet}" mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
 # b_grid
 set(grid_sources GridSearch.cpp GridData.cpp)
@@ -35,7 +35,7 @@ add_executable(b_grid commands/b_grid.cpp ${grid_sources}
     common/Datasets.cpp common/Dataset.cpp
     main/HyperParameters.cpp main/Models.cpp 
 )
-target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
+target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} "${PyClassifiers}" "${BayesNet}" mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 
 # b_list
 add_executable(b_list commands/b_list.cpp
@@ -44,7 +44,7 @@ add_executable(b_list commands/b_list.cpp
     reports/ReportExcel.cpp reports/ExcelFile.cpp reports/ReportBase.cpp reports/DatasetsExcel.cpp reports/DatasetsConsole.cpp reports/ReportsPaged.cpp
     results/Result.cpp results/ResultsDatasetExcel.cpp results/ResultsDataset.cpp results/ResultsDatasetConsole.cpp
 )
-target_link_libraries(b_list "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
+target_link_libraries(b_list "${PyClassifiers}" "${BayesNet}" mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
 # b_main
 set(main_sources Experiment.cpp Models.cpp HyperParameters.cpp Scores.cpp)
@@ -54,7 +54,7 @@ add_executable(b_main commands/b_main.cpp ${main_sources}
     reports/ReportConsole.cpp reports/ReportBase.cpp 
     results/Result.cpp
 )
-target_link_libraries(b_main "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
+target_link_libraries(b_main "${PyClassifiers}" "${BayesNet}" mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 
 # b_manage
 set(manage_sources ManageScreen.cpp CommandParser.cpp ResultsManager.cpp)
@@ -66,4 +66,4 @@ add_executable(
     results/Result.cpp results/ResultsDataset.cpp results/ResultsDatasetConsole.cpp
     main/Scores.cpp
 )
-target_link_libraries(b_manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" ArffFiles mdlp "${BayesNet}")
+target_link_libraries(b_manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" mdlp "${BayesNet}")

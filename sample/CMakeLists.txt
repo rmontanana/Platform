@@ -12,4 +12,4 @@ include_directories(
     ${Bayesnet_INCLUDE_DIRS}
 )
 add_executable(PlatformSample sample.cpp ${Platform_SOURCE_DIR}/src/main/Models.cpp) 
-target_link_libraries(PlatformSample "${PyClassifiers}" "${BayesNet}" ArffFiles mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
+target_link_libraries(PlatformSample "${PyClassifiers}" "${BayesNet}" mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)

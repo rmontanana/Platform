@@ -17,3 +17,6 @@
 [submodule "lib/folding"]
 	path = lib/folding
 	url = https://github.com/rmontanana/folding
+[submodule "lib/Files"]
+	path = lib/Files
+	url = https://github.com/rmontanana/ArffFiles

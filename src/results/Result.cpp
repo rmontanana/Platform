@@ -64,7 +64,7 @@ namespace platform {
 
     void Result::save()
     {
-        std::ofstream file(Paths::results() + "/" + getFilename());
+        std::ofstream file(Paths::results() + getFilename());
         file << data;
         file.close();
     }

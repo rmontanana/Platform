@@ -23,7 +23,7 @@ namespace platform {
     {
         std::cout << result.getJson().dump(4) << std::endl;
     }
-    void Experiment::go(std::vector<std::string> filesToProcess, bool quiet, bool no_train_score)
+    void Experiment::go(std::vector<std::string> filesToProcess, bool quiet, bool no_train_score, bool generate_fold_files)
     {
         for (auto fileName : filesToProcess) {
             if (fileName.size() > max_name)
@@ -47,7 +47,7 @@ namespace platform {
         for (auto fileName : filesToProcess) {
             if (!quiet)
                 std::cout << " " << setw(3) << right << num++ << " " << setw(max_name) << left << fileName << right << flush;
-            cross_validation(fileName, quiet, no_train_score);
+            cross_validation(fileName, quiet, no_train_score, generate_fold_files);
             if (!quiet)
                 std::cout << std::endl;
         }
@@ -74,7 +74,45 @@ namespace platform {
         std::cout << prefix << color << fold << Colors::RESET() << "(" << color << phase << Colors::RESET() << ")" << flush;
 
     }
-    void Experiment::cross_validation(const std::string& fileName, bool quiet, bool no_train_score)
+    void generate_files(const std::string& fileName, bool discretize, bool stratified, int seed, int nfold, torch::Tensor X_train, torch::Tensor y_train, torch::Tensor X_test, torch::Tensor y_test, std::vector<int>& train, std::vector<int>& test)
+    {
+        std::string file_name = Paths::experiment_file(fileName, discretize, stratified, seed, nfold);
+        auto file = std::ofstream(file_name);
+        json output;
+        output["seed"] = seed;
+        output["nfold"] = nfold;
+        output["X_train"] = json::array();
+        auto n = X_train.size(1);
+        for (int i = 0; i < X_train.size(0); i++) {
+            if (X_train.dtype() == torch::kFloat32) {
+                auto xvf_ptr = X_train.index({ i }).data_ptr<float>();
+                auto feature = std::vector<float>(xvf_ptr, xvf_ptr + n);
+                output["X_train"].push_back(feature);
+            } else {
+                auto feature = std::vector<int>(X_train.index({ i }).data_ptr<int>(), X_train.index({ i }).data_ptr<int>() + n);
+                output["X_train"].push_back(feature);
+            }
+        }
+        output["y_train"] = std::vector<int>(y_train.data_ptr<int>(), y_train.data_ptr<int>() + n);
+        output["X_test"] = json::array();
+        n = X_test.size(1);
+        for (int i = 0; i < X_test.size(0); i++) {
+            if (X_train.dtype() == torch::kFloat32) {
+                auto xvf_ptr = X_test.index({ i }).data_ptr<float>();
+                auto feature = std::vector<float>(xvf_ptr, xvf_ptr + n);
+                output["X_test"].push_back(feature);
+            } else {
+                auto feature = std::vector<int>(X_test.index({ i }).data_ptr<int>(), X_test.index({ i }).data_ptr<int>() + n);
+                output["X_test"].push_back(feature);
+            }
+        }
+        output["y_test"] = std::vector<int>(y_test.data_ptr<int>(), y_test.data_ptr<int>() + n);
+        output["train"] = train;
+        output["test"] = test;
+        file << output.dump(4);
+        file.close();
+    }
+    void Experiment::cross_validation(const std::string& fileName, bool quiet, bool no_train_score, bool generate_fold_files)
     {
         auto datasets = Datasets(discretized, Paths::datasets());
         // Get dataset
@@ -137,6 +175,8 @@ namespace platform {
                 auto y_train = y.index({ train_t });
                 auto X_test = X.index({ "...", test_t });
                 auto y_test = y.index({ test_t });
+                if (generate_fold_files)
+                    generate_files(fileName, discretized, stratified, seed, nfold, X_train, y_train, X_test, y_test, train, test);
                 if (!quiet)
                     showProgress(nfold + 1, getColor(clf->getStatus()), "a");
                 // Train model

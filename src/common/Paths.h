@@ -15,6 +15,12 @@ namespace platform {
             auto env = platform::DotEnv();
             return env.get("source_data");
         }
+        static std::string experiment_file(const std::string& fileName, bool discretize, bool stratified, int seed, int nfold)
+        {
+            std::string disc = discretize ? "_disc_" : "_ndisc_";
+            std::string strat = stratified ? "strat_" : "nstrat_";
+            return "datasets_experiment/" + fileName + disc + strat + std::to_string(seed) + "_" + std::to_string(nfold) + ".json";
+        }
         static void createPath(const std::string& path)
         {
             // Create directory if it does not exist

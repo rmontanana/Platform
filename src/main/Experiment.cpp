@@ -10,6 +10,7 @@ namespace platform {
     void Experiment::saveResult()
     {
         result.save();
+        std::cout << "Result saved in " << Paths::results() << result.getFilename() << std::endl;
     }
     void Experiment::report(bool classification_report)
     {

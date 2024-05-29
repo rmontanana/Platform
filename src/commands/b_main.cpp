@@ -188,12 +188,12 @@ int main(int argc, char** argv)
     timer.start();
     experiment.go(filesToTest, quiet, no_train_score, generate_fold_files);
     experiment.setDuration(timer.getDuration());
-    if (saveResults) {
-        experiment.saveResult();
-    }
     if (!quiet) {
         // Classification report if only one dataset is tested
         experiment.report(filesToTest.size() == 1);
+    }
+    if (saveResults) {
+        experiment.saveResult();
     }
     std::cout << "Done!" << std::endl;
     return 0;

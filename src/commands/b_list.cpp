@@ -76,18 +76,8 @@ int main(int argc, char** argv)
             }
         );
     results_command.add_argument("-m", "--model")
-        .help("Model to use: " + platform::Models::instance()->toString() + " or any")
-        .default_value("any")
-        .action([](const std::string& value) {
-        std::vector<std::string> valid(platform::Models::instance()->getNames());
-        valid.push_back("any");
-        static const std::vector<std::string> choices = valid;
-        if (find(choices.begin(), choices.end(), value) != choices.end()) {
-            return value;
-        }
-        throw std::runtime_error("Model must be one of " + platform::Models::instance()->toString() + " or any");
-            }
-        );
+        .help("Model to use or any")
+        .default_value("any");
     results_command.add_argument("--excel").help("Output in Excel format").default_value(false).implicit_value(true);
     results_command.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
 

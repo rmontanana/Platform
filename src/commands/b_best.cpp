@@ -10,17 +10,8 @@
 void manageArguments(argparse::ArgumentParser& program)
 {
     program.add_argument("-m", "--model")
-        .help("Model to use: " + platform::Models::instance()->toString() + " or any")
-        .action([](const std::string& value) {
-        std::vector<std::string> valid(platform::Models::instance()->getNames());
-        valid.push_back("any");
-        static const std::vector<std::string> choices = valid;
-        if (find(choices.begin(), choices.end(), value) != choices.end()) {
-            return value;
-        }
-        throw std::runtime_error("Model must be one of " + platform::Models::instance()->toString() + " or any");
-            }
-    );
+        .help("Model to use or any")
+        .default_value("any");
     program.add_argument("-d", "--dataset").default_value("any").help("Filter results of the selected model) (any for all datasets)");
     program.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
     program.add_argument("--friedman").help("Friedman test").default_value(false).implicit_value(true);

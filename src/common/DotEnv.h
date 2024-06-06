@@ -13,9 +13,30 @@ namespace platform {
     class DotEnv {
     private:
         std::map<std::string, std::string> env;
+        std::map<std::string, std::vector<std::string>> valid;
     public:
         DotEnv(bool create = false)
         {
+            valid =
+            {
+                {"source_data", {"Arff", "Tanveer", "Surcov"}},
+                {"experiment", {"discretiz", "odte", "covid"}},
+                {"fit_features", {"0", "1"}},
+                {"discretize", {"0", "1"}},
+                {"ignore_nan", {"0", "1"}},
+                {"stratified", {"0", "1"}},
+                {"score", {"accuracy"}},
+                {"framework", {"bulma", "bootstrap"}},
+                {"margin", {"0.1", "0.2", "0.3"}},
+                {"n_folds", {"5", "10"}},
+                {"discretiz_algo", {"mdlp", "bin3u", "bin3q"}},
+                {"platform", {"any"}},
+                {"model", {"any"}},
+                {"seeds", {"any"}},
+                {"nodes", {"any"}},
+                {"leaves", {"any"}},
+                {"depth", {"any"}},
+            };
             if (create) {
                 // For testing purposes
                 std::ofstream file(".env");
@@ -37,7 +58,39 @@ namespace platform {
                 std::istringstream iss(line);
                 std::string key, value;
                 if (std::getline(iss, key, '=') && std::getline(iss, value)) {
-                    env[trim(key)] = trim(value);
+                    key = trim(key);
+                    value = trim(value);
+                    parse(key, value);
+                    env[key] = value;
+                }
+            }
+            parseEnv();
+        }
+        void parse(const std::string& key, const std::string& value)
+        {
+            if (valid.find(key) == valid.end()) {
+                std::cerr << "Invalid key in .env: " << key << std::endl;
+                exit(1);
+            }
+            if (valid[key].front() == "any") {
+                return;
+            }
+            if (std::find(valid[key].begin(), valid[key].end(), value) == valid[key].end()) {
+                std::cerr << "Invalid value in .env: " << key << " = " << value << std::endl;
+                exit(1);
+            }
+        }
+        void parseEnv()
+        {
+            for (auto& [key, values] : valid) {
+                if (env.find(key) == env.end()) {
+                    std::string valid_values = "", sep = "";
+                    for (const auto& value : values) {
+                        valid_values += sep + value;
+                        sep = ", ";
+                    }
+                    std::cerr << "Key not found in .env: " << key << ", valid values: " << valid_values << std::endl;
+                    exit(1);
                 }
             }
         }

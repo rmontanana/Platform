@@ -12,41 +12,51 @@ namespace platform {
         path = sd.getPath();
         ifstream catalog(path + "all.txt");
         std::vector<int> numericFeaturesIdx;
-        if (catalog.is_open()) {
-            std::string line;
-            while (getline(catalog, line)) {
-                if (line.empty() || line[0] == '#') {
-                    continue;
-                }
-                std::vector<std::string> tokens = split(line, ';');
-                std::string name = tokens[0];
-                std::string className;
-                numericFeaturesIdx.clear();
-                if (tokens.size() == 1) {
+        if (!catalog.is_open()) {
+            throw std::invalid_argument("Unable to open catalog file. [" + path + "all.txt" + "]");
+        }
+        std::string line;
+        while (getline(catalog, line)) {
+            if (line.empty() || line[0] == '#') {
+                continue;
+            }
+            std::vector<std::string> tokens = split(line, ';');
+            std::string name = tokens[0];
+            std::string className;
+            numericFeaturesIdx.clear();
+            int size = tokens.size();
+            switch (size) {
+                case 1:
                     className = "-1";
                     numericFeaturesIdx.push_back(-1);
-                } else {
+                    break;
+                case 2:
                     className = tokens[1];
-                    if (tokens.size() > 2) {
+                    numericFeaturesIdx.push_back(-1);
+                    break;
+                case 3:
+                    {
+                        className = tokens[1];
                         auto numericFeatures = tokens[2];
                         if (numericFeatures == "all") {
                             numericFeaturesIdx.push_back(-1);
                         } else {
-                            auto features = json::parse(numericFeatures);
-                            for (auto& f : features) {
-                                numericFeaturesIdx.push_back(f);
+                            if (numericFeatures != "none") {
+                                auto features = json::parse(numericFeatures);
+                                for (auto& f : features) {
+                                    numericFeaturesIdx.push_back(f);
+                                }
                             }
                         }
-                    } else {
-                        numericFeaturesIdx.push_back(-1);
                     }
-                }
-                datasets[name] = make_unique<Dataset>(path, name, className, discretize, fileType, numericFeaturesIdx);
+                    break;
+                default:
+                    throw std::invalid_argument("Invalid catalog file format.");
+
             }
-            catalog.close();
-        } else {
-            throw std::invalid_argument("Unable to open catalog file. [" + path + "all.txt" + "]");
+            datasets[name] = make_unique<Dataset>(path, name, className, discretize, fileType, numericFeaturesIdx);
         }
+        catalog.close();
     }
     std::vector<std::string> Datasets::getNames()
     {

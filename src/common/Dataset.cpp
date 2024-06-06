@@ -187,12 +187,16 @@ namespace platform {
         }
         n_samples = Xv[0].size();
         n_features = Xv.size();
-        if (numericFeaturesIdx.at(0) == -1) {
-            numericFeatures = std::vector<bool>(n_features, true);
-        } else {
+        if (numericFeaturesIdx.size() == 0) {
             numericFeatures = std::vector<bool>(n_features, false);
-            for (auto i : numericFeaturesIdx) {
-                numericFeatures[i] = true;
+        } else {
+            if (numericFeaturesIdx.at(0) == -1) {
+                numericFeatures = std::vector<bool>(n_features, true);
+            } else {
+                numericFeatures = std::vector<bool>(n_features, false);
+                for (auto i : numericFeaturesIdx) {
+                    numericFeatures[i] = true;
+                }
             }
         }
         if (discretize) {

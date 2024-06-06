@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(Platform
-  VERSION 1.0.4
+  VERSION 1.1.0
   DESCRIPTION "Platform to run Experiments with classifiers."
   HOMEPAGE_URL "https://github.com/rmontanana/platform"
   LANGUAGES CXX

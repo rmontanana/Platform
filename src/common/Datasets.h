@@ -11,6 +11,7 @@ namespace platform {
         std::vector<std::string> getLabels(const std::string& name) const;
         std::string getClassName(const std::string& name) const;
         int getNClasses(const std::string& name);
+        std::vector<bool>& getNumericFeatures(const std::string& name) const;
         std::vector<int> getClassesCounts(const std::string& name) const;
         std::map<std::string, std::vector<int>> getStates(const std::string& name) const;
         std::pair<std::vector<std::vector<float>>&, std::vector<int>&> getVectors(const std::string& name);

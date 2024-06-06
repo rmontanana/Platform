@@ -115,7 +115,7 @@ namespace platform {
     }
     void Experiment::cross_validation(const std::string& fileName, bool quiet, bool no_train_score, bool generate_fold_files)
     {
-        auto datasets = Datasets(discretized, Paths::datasets());
+        auto datasets = Datasets(false, Paths::datasets()); // Never discretize here
         // Get dataset
         auto [X, y] = datasets.getTensors(fileName);
         auto states = datasets.getStates(fileName);
@@ -176,6 +176,12 @@ namespace platform {
                 auto y_train = y.index({ train_t });
                 auto X_test = X.index({ "...", test_t });
                 auto y_test = y.index({ test_t });
+                if (discretized) {
+                    // compute states too
+                    // discretizer->fit(X_train, y_train);
+                    // X_train = discretizer->transform(X_train);
+                    // X_test = discretizer->transform(X_test);
+                }
                 if (generate_fold_files)
                     generate_files(fileName, discretized, stratified, seed, nfold, X_train, y_train, X_test, y_test, train, test);
                 if (!quiet)

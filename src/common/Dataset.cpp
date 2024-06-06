@@ -2,7 +2,12 @@
 #include <fstream>
 #include "Dataset.h"
 namespace platform {
-    Dataset::Dataset(const Dataset& dataset) : path(dataset.path), name(dataset.name), className(dataset.className), n_samples(dataset.n_samples), n_features(dataset.n_features), features(dataset.features), states(dataset.states), loaded(dataset.loaded), discretize(dataset.discretize), X(dataset.X), y(dataset.y), Xv(dataset.Xv), Xd(dataset.Xd), yv(dataset.yv), fileType(dataset.fileType)
+    Dataset::Dataset(const Dataset& dataset) :
+        path(dataset.path), name(dataset.name), className(dataset.className), n_samples(dataset.n_samples),
+        n_features(dataset.n_features), numericFeatures(dataset.numericFeatures), features(dataset.features),
+        states(dataset.states), loaded(dataset.loaded), discretize(dataset.discretize), X(dataset.X), y(dataset.y),
+        X_train(dataset.X_train), X_test(dataset.X_test), Xv(dataset.Xv), Xd(dataset.Xd), yv(dataset.yv),
+        fileType(dataset.fileType)
     {
     }
     std::string Dataset::getName() const
@@ -180,12 +185,20 @@ namespace platform {
         } else if (fileType == RDATA) {
             load_rdata();
         }
+        n_samples = Xv[0].size();
+        n_features = Xv.size();
+        if (numericFeaturesIdx.at(0) == -1) {
+            numericFeatures = std::vector<bool>(n_features, true);
+        } else {
+            numericFeatures = std::vector<bool>(n_features, false);
+            for (auto i : numericFeaturesIdx) {
+                numericFeatures[i] = true;
+            }
+        }
         if (discretize) {
             Xd = discretizeDataset(Xv, yv);
             computeStates();
         }
-        n_samples = Xv[0].size();
-        n_features = Xv.size();
         loaded = true;
     }
     void Dataset::buildTensors()
@@ -214,5 +227,10 @@ namespace platform {
             Xd.push_back(xd);
         }
         return Xd;
+    }
+    std::pair <torch::Tensor&, torch::Tensor&> Dataset::getDiscretizedTrainTestTensors()
+    {
+        auto discretizer = Discretization::instance()->create("mdlp");
+        return { X_train, X_test };
     }
 }

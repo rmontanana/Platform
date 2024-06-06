@@ -21,7 +21,7 @@ include_directories(
 add_executable(
     b_best commands/b_best.cpp best/Statistics.cpp
     best/BestResultsExcel.cpp best/BestResults.cpp
-    common/Datasets.cpp common/Dataset.cpp
+    common/Datasets.cpp common/Dataset.cpp common/Discretization.cpp
     main/Models.cpp main/Scores.cpp
     reports/ReportExcel.cpp reports/ReportBase.cpp reports/ExcelFile.cpp
     results/Result.cpp
@@ -32,14 +32,14 @@ target_link_libraries(b_best Boost::boost "${PyClassifiers}" "${BayesNet}" mdlp 
 set(grid_sources GridSearch.cpp GridData.cpp)
 list(TRANSFORM grid_sources PREPEND grid/)
 add_executable(b_grid commands/b_grid.cpp ${grid_sources} 
-    common/Datasets.cpp common/Dataset.cpp
+    common/Datasets.cpp common/Dataset.cpp common/Discretization.cpp
     main/HyperParameters.cpp main/Models.cpp 
 )
 target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} "${PyClassifiers}" "${BayesNet}" mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 
 # b_list
 add_executable(b_list commands/b_list.cpp
-    common/Datasets.cpp common/Dataset.cpp
+    common/Datasets.cpp common/Dataset.cpp common/Discretization.cpp
     main/Models.cpp main/Scores.cpp
     reports/ReportExcel.cpp reports/ExcelFile.cpp reports/ReportBase.cpp reports/DatasetsExcel.cpp reports/DatasetsConsole.cpp reports/ReportsPaged.cpp
     results/Result.cpp results/ResultsDatasetExcel.cpp results/ResultsDataset.cpp results/ResultsDatasetConsole.cpp
@@ -50,7 +50,7 @@ target_link_libraries(b_list "${PyClassifiers}" "${BayesNet}" mdlp ${Python3_LIB
 set(main_sources Experiment.cpp Models.cpp HyperParameters.cpp Scores.cpp)
 list(TRANSFORM main_sources PREPEND main/)
 add_executable(b_main commands/b_main.cpp ${main_sources} 
-    common/Datasets.cpp common/Dataset.cpp 
+    common/Datasets.cpp common/Dataset.cpp common/Discretization.cpp
     reports/ReportConsole.cpp reports/ReportBase.cpp 
     results/Result.cpp
 )
@@ -61,7 +61,7 @@ set(manage_sources ManageScreen.cpp CommandParser.cpp ResultsManager.cpp)
 list(TRANSFORM manage_sources PREPEND manage/)
 add_executable(
     b_manage commands/b_manage.cpp ${manage_sources} 
-    common/Datasets.cpp common/Dataset.cpp
+    common/Datasets.cpp common/Dataset.cpp common/Discretization.cpp
     reports/ReportConsole.cpp reports/ReportExcel.cpp reports/ReportExcelCompared.cpp reports/ReportBase.cpp reports/ExcelFile.cpp reports/DatasetsConsole.cpp reports/ReportsPaged.cpp
     results/Result.cpp results/ResultsDataset.cpp results/ResultsDatasetConsole.cpp
     main/Scores.cpp

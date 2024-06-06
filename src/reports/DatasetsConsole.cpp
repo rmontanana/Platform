@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "common/Colors.h"
 #include "common/Datasets.h"
 #include "common/Paths.h"
@@ -12,7 +13,7 @@ namespace platform {
             auto part = temp.substr(0, DatasetsConsole::BALANCE_LENGTH);
             line += part + "\n";
             body.push_back(line);
-            line = string(name_len + 22, ' ');
+            line = string(name_len + 28, ' ');
             temp = temp.substr(DatasetsConsole::BALANCE_LENGTH);
         }
         line += temp + "\n";
@@ -26,8 +27,8 @@ namespace platform {
         std::stringstream sheader;
         auto datasets_names = datasets.getNames();
         int maxName = std::max(size_t(7), (*max_element(datasets_names.begin(), datasets_names.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size());
-        std::vector<std::string> header_labels = { " #", "Dataset", "Sampl.", "Feat.", "Cls", "Balance" };
-        std::vector<int> header_lengths = { 3, maxName, 6, 5, 3, DatasetsConsole::BALANCE_LENGTH };
+        std::vector<std::string> header_labels = { " #", "Dataset", "Sampl.", "Feat.", "#Num.", "Cls", "Balance" };
+        std::vector<int> header_lengths = { 3, maxName, 6, 5, 5, 3, DatasetsConsole::BALANCE_LENGTH };
         sheader << Colors::GREEN();
         for (int i = 0; i < header_labels.size(); i++) {
             sheader << setw(header_lengths[i]) << left << header_labels[i] << " ";
@@ -50,7 +51,11 @@ namespace platform {
             datasets.loadDataset(dataset);
             auto nSamples = datasets.getNSamples(dataset);
             line << setw(6) << right << nSamples << " ";
-            line << setw(5) << right << datasets.getFeatures(dataset).size() << " ";
+            auto nFeatures = datasets.getFeatures(dataset).size();
+            line << setw(5) << right << nFeatures << " ";
+            auto numericFeatures = datasets.getNumericFeatures(dataset);
+            auto num = std::count(numericFeatures.begin(), numericFeatures.end(), true);
+            line << setw(5) << right << num << " ";
             line << setw(3) << right << datasets.getNClasses(dataset) << " ";
             std::string sep = "";
             oss.str("");
@@ -63,6 +68,7 @@ namespace platform {
             data[dataset] = json::object();
             data[dataset]["samples"] = nSamples;
             data[dataset]["features"] = datasets.getFeatures(dataset).size();
+            data[dataset]["numericFeatures"] = num;
             data[dataset]["classes"] = datasets.getNClasses(dataset);
             data[dataset]["balance"] = oss.str();
         }

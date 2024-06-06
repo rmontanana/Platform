@@ -32,6 +32,7 @@ namespace platform {
         json getData() const { return data; }
         // Setters
         void setTitle(const std::string& title) { data["title"] = title; };
+        void setDiscretizationAlgorithm(const std::string& discretization_algo) { data["discretization_algorithm"] = discretization_algo; };
         void setLanguage(const std::string& language) { data["language"] = language; };
         void setLanguageVersion(const std::string& language_version) { data["language_version"] = language_version; };
         void setDuration(double duration) { data["duration"] = duration; };

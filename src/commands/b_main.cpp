@@ -177,7 +177,9 @@ int main(int argc, char** argv)
      */
     auto env = platform::DotEnv();
     auto experiment = platform::Experiment();
+    std::string discretiz_algo = env.get("discretiz_algo");
     experiment.setTitle(title).setLanguage("c++").setLanguageVersion("13.2.1");
+    experiment.setDiscretizationAlgorithm(discretiz_algo);
     experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform(env.get("platform"));
     experiment.setStratified(stratified).setNFolds(n_folds).setScoreName("accuracy");
     experiment.setHyperparameters(test_hyperparams);

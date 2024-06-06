@@ -20,6 +20,10 @@ namespace platform {
         Experiment& setModelVersion(const std::string& model_version) { this->result.setModelVersion(model_version); return *this; }
         Experiment& setModel(const std::string& model) { this->result.setModel(model); return *this; }
         Experiment& setLanguage(const std::string& language) { this->result.setLanguage(language); return *this; }
+        Experiment& setDiscretizationAlgorithm(const std::string& discretization_algo)
+        {
+            this->discretization_algo = discretization_algo; this->result.setDiscretizationAlgorithm(discretization_algo); return *this;
+        }
         Experiment& setLanguageVersion(const std::string& language_version) { this->result.setLanguageVersion(language_version); return *this; }
         Experiment& setDiscretized(bool discretized) { this->discretized = discretized; result.setDiscretized(discretized); return *this; }
         Experiment& setStratified(bool stratified) { this->stratified = stratified; result.setStratified(stratified); return *this; }
@@ -38,6 +42,7 @@ namespace platform {
         bool discretized{ false }, stratified{ false };
         std::vector<PartialResult> results;
         std::vector<int> randomSeeds;
+        std::string discretization_algo;
         HyperParameters hyperparameters;
         int nfolds{ 0 };
         int max_name{ 7 }; // max length of dataset name for formatting (default 7)

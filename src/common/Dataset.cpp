@@ -2,6 +2,7 @@
 #include <fstream>
 #include "Dataset.h"
 namespace platform {
+    const std::string message_dataset_not_loaded = "Dataset not loaded.";
     Dataset::Dataset(const Dataset& dataset) :
         path(dataset.path), name(dataset.name), className(dataset.className), n_samples(dataset.n_samples),
         n_features(dataset.n_features), numericFeatures(dataset.numericFeatures), features(dataset.features),
@@ -23,7 +24,7 @@ namespace platform {
         if (loaded) {
             return features;
         } else {
-            throw std::invalid_argument("Dataset not loaded.");
+            throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
     int Dataset::getNFeatures() const
@@ -31,7 +32,7 @@ namespace platform {
         if (loaded) {
             return n_features;
         } else {
-            throw std::invalid_argument("Dataset not loaded.");
+            throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
     int Dataset::getNSamples() const
@@ -39,7 +40,7 @@ namespace platform {
         if (loaded) {
             return n_samples;
         } else {
-            throw std::invalid_argument("Dataset not loaded.");
+            throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
     std::map<std::string, std::vector<int>> Dataset::getStates() const
@@ -47,7 +48,7 @@ namespace platform {
         if (loaded) {
             return states;
         } else {
-            throw std::invalid_argument("Dataset not loaded.");
+            throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
     pair<std::vector<std::vector<float>>&, std::vector<int>&> Dataset::getVectors()
@@ -55,7 +56,7 @@ namespace platform {
         if (loaded) {
             return { Xv, yv };
         } else {
-            throw std::invalid_argument("Dataset not loaded.");
+            throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
     pair<std::vector<std::vector<int>>&, std::vector<int>&> Dataset::getVectorsDiscretized()
@@ -63,7 +64,7 @@ namespace platform {
         if (loaded) {
             return { Xd, yv };
         } else {
-            throw std::invalid_argument("Dataset not loaded.");
+            throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
     pair<torch::Tensor&, torch::Tensor&> Dataset::getTensors()
@@ -72,7 +73,7 @@ namespace platform {
             buildTensors();
             return { X, y };
         } else {
-            throw std::invalid_argument("Dataset not loaded.");
+            throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
     void Dataset::load_csv()

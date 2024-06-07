@@ -373,7 +373,8 @@ namespace platform {
         MPI_Bcast(msg, tasks_size + 1, MPI_CHAR, config_mpi.manager, MPI_COMM_WORLD);
         tasks = json::parse(msg);
         delete[] msg;
-        auto datasets = Datasets(config.discretize, Paths::datasets());
+        auto env = platform::DotEnv();
+        auto datasets = Datasets(config.discretize, Paths::datasets(), env.get("discretiz_algo"));
         if (config_mpi.rank == config_mpi.manager) {
             //
             // 2a. Producer delivers the tasks to the consumers

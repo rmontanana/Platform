@@ -111,7 +111,7 @@ int main(int argc, char** argv)
         cerr << program;
         exit(1);
     }
-    auto datasets = platform::Datasets(discretize_dataset, platform::Paths::datasets());
+    auto datasets = platform::Datasets(false, platform::Paths::datasets());
     if (datasets_file != "") {
         ifstream catalog(datasets_file);
         if (catalog.is_open()) {

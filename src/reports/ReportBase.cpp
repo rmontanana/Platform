@@ -61,12 +61,13 @@ namespace platform {
             }
         } else {
             if (data["score_name"].get<std::string>() == "accuracy") {
-                auto dt = Datasets(false, Paths::datasets());
-                dt.loadDataset(dataset);
-                auto numClasses = dt.getNClasses(dataset);
+                auto datasets = Datasets(false, Paths::datasets());
+                auto& dt = datasets.getDataset(dataset);
+                dt.load();
+                auto numClasses = dt.getNClasses();
                 if (numClasses == 2) {
-                    std::vector<int> distribution = dt.getClassesCounts(dataset);
-                    double nSamples = dt.getNSamples(dataset);
+                    std::vector<int> distribution = dt.getClassesCounts();
+                    double nSamples = dt.getNSamples();
                     std::vector<int>::iterator maxValue = max_element(distribution.begin(), distribution.end());
                     double mark = *maxValue / nSamples * (1 + margin);
                     if (mark > 1) {

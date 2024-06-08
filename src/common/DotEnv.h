@@ -29,7 +29,7 @@ namespace platform {
                 {"framework", {"bulma", "bootstrap"}},
                 {"margin", {"0.1", "0.2", "0.3"}},
                 {"n_folds", {"5", "10"}},
-                {"discretiz_algo", {"mdlp", "bin3u", "bin3q"}},
+                {"discretiz_algo", {"mdlp", "bin3u", "bin3q", "bin4u", "bin4q"}},
                 {"platform", {"any"}},
                 {"model", {"any"}},
                 {"seeds", {"any"}},

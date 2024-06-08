@@ -127,7 +127,6 @@ namespace platform {
         auto& dataset = datasets.getDataset(dataset_name);
         auto combinations = grid.getGrid(dataset_name);
         auto [X, y] = dataset.getTensors();
-        auto states = dataset.getStates();
         auto features = dataset.getFeatures();
         auto className = dataset.getClassName();
         //
@@ -140,6 +139,7 @@ namespace platform {
             fold = new folding::KFold(config.n_folds, y.size(0), seed);
         auto [train, test] = fold->getFold(n_fold);
         auto [X_train, X_test, y_train, y_test] = dataset.getTrainTestTensors(train, test);
+        auto states = dataset.getStates(); // Get the states of the features Once they are discretized
         double best_fold_score = 0.0;
         int best_idx_combination = -1;
         json best_fold_hyper;

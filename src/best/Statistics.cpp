@@ -130,7 +130,7 @@ namespace platform {
                 stats[i] = 0.0;
                 continue;
             }
-            double z = abs(ranks.at(models[controlIdx]) - ranks.at(models[i])) / diff;
+            double z = std::abs(ranks.at(models[controlIdx]) - ranks.at(models[i])) / diff;
             double p_value = (long double)2 * (1 - cdf(dist, z));
             stats[i] = p_value;
         }

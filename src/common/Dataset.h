@@ -25,7 +25,6 @@ namespace platform {
         std::vector<string> getFeatures() const;
         std::map<std::string, std::vector<int>> getStates() const;
         std::pair<vector<std::vector<float>>&, std::vector<int>&> getVectors();
-        std::pair<vector<std::vector<int>>&, std::vector<int>&> getVectorsDiscretized();
         std::pair<torch::Tensor&, torch::Tensor&> getTensors();
         std::tuple<torch::Tensor&, torch::Tensor&, torch::Tensor&, torch::Tensor&> getTrainTestTensors(std::vector<int>& train, std::vector<int>& test);
         int getNFeatures() const;
@@ -50,7 +49,6 @@ namespace platform {
         torch::Tensor X, y;
         torch::Tensor X_train, X_test, y_train, y_test;
         std::vector<std::vector<float>> Xv;
-        std::vector<std::vector<int>> Xd;
         std::vector<int> yv;
         void load_csv();
         void load_arff();

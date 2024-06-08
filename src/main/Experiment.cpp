@@ -118,7 +118,7 @@ namespace platform {
         //
         // Load dataset and prepare data
         //
-        auto datasets = Datasets(false, Paths::datasets()); // Never discretize here
+        auto datasets = Datasets(discretized, Paths::datasets(), discretization_algo);
         auto& dataset = datasets.getDataset(fileName);
         dataset.load();
         auto [X, y] = dataset.getTensors(); // Only need y for folding
@@ -186,7 +186,7 @@ namespace platform {
                 train_timer.start();
                 auto [train, test] = fold->getFold(nfold);
                 auto [X_train, X_test, y_train, y_test] = dataset.getTrainTestTensors(train, test);
-                auto states = dataset.getStates();
+                auto states = dataset.getStates(); // Get the states of the features Once they are discretized
                 if (generate_fold_files)
                     generate_files(fileName, discretized, stratified, seed, nfold, X_train, y_train, X_test, y_test, train, test);
                 if (!quiet)
@@ -194,6 +194,14 @@ namespace platform {
                 //
                 // Train model
                 //
+                std::cout << "X_Train.dtype: " << X_train.dtype() << "\n";
+                std::cout << "y_Train.dtype: " << y_train.dtype() << "\n";
+                std::cout << "X_Test.dtype: " << X_test.dtype() << "\n";
+                std::cout << "y_Test.dtype: " << y_test.dtype() << "\n";
+                for (int i = 0; i < features.size(); i++) {
+                    std::cout << "Feature: " << features[i] << " states: " << states[features[i]].size() << "\n";
+                }
+                std::cout << "className: " << className << " states: " << states[className].size() << "\n";
                 clf->fit(X_train, y_train, features, className, states);
                 if (!quiet)
                     showProgress(nfold + 1, getColor(clf->getStatus()), "b");

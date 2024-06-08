@@ -65,7 +65,8 @@ namespace platform {
         worksheet_merge_range(worksheet, 3, 10, 3, 11, oss.str().c_str(), styles["headerSmall"]);
         oss.str("");
         oss.clear();
-        oss << "Discretized: " << (data["discretized"].get<bool>() ? "True" : "False");
+        std::string algorithm = data["discretized"].get<bool>() ? " (" + data["discretization_algorithm"].get<std::string>() + ")" : "";
+        oss << "Discretized: " << (data["discretized"].get<bool>() ? "True" : "False") << algorithm;
         worksheet_write_string(worksheet, 3, 12, oss.str().c_str(), styles["headerSmall"]);
     }
     void ReportExcel::header_notes(int row)

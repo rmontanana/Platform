@@ -23,8 +23,9 @@ namespace platform {
             + " random seeds. " + data["date"].get<std::string>() + " " + data["time"].get<std::string>()
         );
         sheader << headerLine(data["title"].get<std::string>());
+        std::string algorithm = data["discretized"].get<bool>() ? " (" + data["discretization_algorithm"].get<std::string>() + ")" : "";
         sheader << headerLine(
-            "Random seeds: " + fromVector("seeds") + " Discretized: " + (data["discretized"].get<bool>() ? "True" : "False")
+            "Random seeds: " + fromVector("seeds") + " Discretized: " + (data["discretized"].get<bool>() ? "True" : "False") + algorithm
             + " Stratified: " + (data["stratified"].get<bool>() ? "True" : "False")
         );
         oss << "Execution took  " << std::setprecision(2) << std::fixed << data["duration"].get<float>()

@@ -194,14 +194,6 @@ namespace platform {
                 //
                 // Train model
                 //
-                std::cout << "X_Train.dtype: " << X_train.dtype() << "\n";
-                std::cout << "y_Train.dtype: " << y_train.dtype() << "\n";
-                std::cout << "X_Test.dtype: " << X_test.dtype() << "\n";
-                std::cout << "y_Test.dtype: " << y_test.dtype() << "\n";
-                for (int i = 0; i < features.size(); i++) {
-                    std::cout << "Feature: " << features[i] << " states: " << states[features[i]].size() << "\n";
-                }
-                std::cout << "className: " << className << " states: " << states[className].size() << "\n";
                 clf->fit(X_train, y_train, features, className, states);
                 if (!quiet)
                     showProgress(nfold + 1, getColor(clf->getStatus()), "b");

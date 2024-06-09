@@ -29,7 +29,7 @@ namespace platform {
                 {"framework", {"bulma", "bootstrap"}},
                 {"margin", {"0.1", "0.2", "0.3"}},
                 {"n_folds", {"5", "10"}},
-                {"discretiz_algo", {"mdlp", "bin3u", "bin3q", "bin4u", "bin4q"}},
+                {"discretize_algo", {"mdlp", "bin3u", "bin3q", "bin4u", "bin4q"}},
                 {"platform", {"any"}},
                 {"model", {"any"}},
                 {"seeds", {"any"}},
@@ -96,6 +96,10 @@ namespace platform {
         }
         std::string get(const std::string& key)
         {
+            if (env.find(key) == env.end()) {
+                std::cerr << "Key not found in .env: " << key << std::endl;
+                exit(1);
+            }
             return env.at(key);
         }
         std::vector<int> getSeeds()

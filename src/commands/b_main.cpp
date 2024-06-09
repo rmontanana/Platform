@@ -47,6 +47,7 @@ void manageArguments(argparse::ArgumentParser& program)
         );
     program.add_argument("--title").default_value("").help("Experiment title");
     program.add_argument("--discretize").help("Discretize input dataset").default_value((bool)stoi(env.get("discretize"))).implicit_value(true);
+    program.add_argument("--discretize-algo").help("Discretize input dataset").default_value(env.get("discretize_algo"));
     program.add_argument("--generate-fold-files").help("generate fold information in datasets_experiment folder").default_value(false).implicit_value(true);
     program.add_argument("--no-train-score").help("Don't compute train score").default_value(false).implicit_value(true);
     program.add_argument("--quiet").help("Don't display detailed progress").default_value(false).implicit_value(true);
@@ -74,7 +75,7 @@ int main(int argc, char** argv)
 {
     argparse::ArgumentParser program("b_main", { platform_project_version.begin(), platform_project_version.end() });
     manageArguments(program);
-    std::string file_name, model_name, title, hyperparameters_file, datasets_file;
+    std::string file_name, model_name, title, hyperparameters_file, datasets_file, discretize_algo;
     json hyperparameters_json;
     bool discretize_dataset, stratified, saveResults, quiet, no_train_score, generate_fold_files;
     std::vector<int> seeds;
@@ -88,6 +89,7 @@ int main(int argc, char** argv)
         datasets_file = program.get<std::string>("datasets-file");
         model_name = program.get<std::string>("model");
         discretize_dataset = program.get<bool>("discretize");
+        discretize_algo = program.get<std::string>("discretize-algo");
         stratified = program.get<bool>("stratified");
         quiet = program.get<bool>("quiet");
         n_folds = program.get<int>("folds");
@@ -177,9 +179,8 @@ int main(int argc, char** argv)
      */
     auto env = platform::DotEnv();
     auto experiment = platform::Experiment();
-    std::string discretiz_algo = env.get("discretiz_algo");
-    experiment.setTitle(title).setLanguage("c++").setLanguageVersion("13.2.1");
-    experiment.setDiscretizationAlgorithm(discretiz_algo);
+    experiment.setTitle(title).setLanguage("c++").setLanguageVersion("gcc 14.1.1");
+    experiment.setDiscretizationAlgorithm(discretize_algo);
     experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform(env.get("platform"));
     experiment.setStratified(stratified).setNFolds(n_folds).setScoreName("accuracy");
     experiment.setHyperparameters(test_hyperparams);

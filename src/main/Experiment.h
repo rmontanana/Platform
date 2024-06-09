@@ -7,6 +7,7 @@
 #include "bayesnet/BaseClassifier.h"
 #include "HyperParameters.h"
 #include "results/Result.h"
+#include "bayesnet/network/Network.h"
 
 namespace platform {
     using json = nlohmann::ordered_json;
@@ -23,6 +24,17 @@ namespace platform {
         Experiment& setDiscretizationAlgorithm(const std::string& discretization_algo)
         {
             this->discretization_algo = discretization_algo; this->result.setDiscretizationAlgorithm(discretization_algo); return *this;
+        }
+        Experiment& setSmoothSrategy(const std::string& smooth_strategy)
+        {
+            this->smooth_strategy = smooth_strategy; this->result.setSmoothStrategy(smooth_strategy);
+            if (smooth_strategy == "OLD_LAPLACE")
+                smooth_type = bayesnet::Smoothing_t::OLD_LAPLACE;
+            else if (smooth_strategy == "LAPLACE")
+                smooth_type = bayesnet::Smoothing_t::LAPLACE;
+            else if (smooth_strategy == "CESTNIK")
+                smooth_type = bayesnet::Smoothing_t::CESTNIK;
+            return *this;
         }
         Experiment& setLanguageVersion(const std::string& language_version) { this->result.setLanguageVersion(language_version); return *this; }
         Experiment& setDiscretized(bool discretized) { this->discretized = discretized; result.setDiscretized(discretized); return *this; }
@@ -43,6 +55,8 @@ namespace platform {
         std::vector<PartialResult> results;
         std::vector<int> randomSeeds;
         std::string discretization_algo;
+        std::string smooth_strategy;
+        bayesnet::Smoothing_t smooth_type = bayesnet::Smoothing_t::OLD_LAPLACE;
         HyperParameters hyperparameters;
         int nfolds{ 0 };
         int max_name{ 7 }; // max length of dataset name for formatting (default 7)

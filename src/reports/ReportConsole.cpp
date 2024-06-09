@@ -23,10 +23,12 @@ namespace platform {
             + " random seeds. " + data["date"].get<std::string>() + " " + data["time"].get<std::string>()
         );
         sheader << headerLine(data["title"].get<std::string>());
-        std::string algorithm = data["discretized"].get<bool>() ? " (" + data["discretization_algorithm"].get<std::string>() + ")" : "";
+        std::string discretiz_algo = data.find("discretization_algorithm") != data.end() ? data["discretization_algorithm"].get<std::string>() : "OLD_LAPLACE";
+        std::string algorithm = data["discretized"].get<bool>() ? " (" + discretiz_algo + ")" : "";
+        std::string smooth = data.find("smooth_strategy") != data.end() ? data["smooth_strategy"].get<std::string>() : "OLD_LAPLACE";
         sheader << headerLine(
             "Random seeds: " + fromVector("seeds") + " Discretized: " + (data["discretized"].get<bool>() ? "True" : "False") + algorithm
-            + " Stratified: " + (data["stratified"].get<bool>() ? "True" : "False")
+            + " Stratified: " + (data["stratified"].get<bool>() ? "True" : "False") + " Smooth Strategy: " + smooth
         );
         oss << "Execution took  " << std::setprecision(2) << std::fixed << data["duration"].get<float>()
             << " seconds,   " << data["duration"].get<float>() / 3600 << " hours, on " << data["platform"].get<std::string>();

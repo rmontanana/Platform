@@ -32,6 +32,7 @@ namespace platform {
         json getData() const { return data; }
         // Setters
         void setTitle(const std::string& title) { data["title"] = title; };
+        void setSmoothStrategy(const std::string& smooth_strategy) { data["smooth_strategy"] = smooth_strategy; };
         void setDiscretizationAlgorithm(const std::string& discretization_algo) { data["discretization_algorithm"] = discretization_algo; };
         void setLanguage(const std::string& language) { data["language"] = language; };
         void setLanguageVersion(const std::string& language_version) { data["language_version"] = language_version; };
@@ -45,7 +46,6 @@ namespace platform {
         void setStratified(bool stratified) { data["stratified"] = stratified; };
         void setNFolds(int nfolds) { data["folds"] = nfolds; };
         void setPlatform(const std::string& platform_name) { data["platform"] = platform_name; };
-
     private:
         json data;
         bool complete;

@@ -28,6 +28,7 @@ namespace platform {
         Experiment& setSmoothSrategy(const std::string& smooth_strategy)
         {
             this->smooth_strategy = smooth_strategy; this->result.setSmoothStrategy(smooth_strategy);
+            std::cout << "Experiment: Smoothing strategy: [" << smooth_strategy << "]" << std::endl;
             if (smooth_strategy == "OLD_LAPLACE")
                 smooth_type = bayesnet::Smoothing_t::OLD_LAPLACE;
             else if (smooth_strategy == "LAPLACE")
@@ -38,6 +39,7 @@ namespace platform {
                 std::cerr << "Experiment: Unknown smoothing strategy: " << smooth_strategy << std::endl;
                 exit(1);
             }
+            std::cout << "Experiment: " << (smooth_type == bayesnet::Smoothing_t::CESTNIK) << " " << static_cast<int>(smooth_type) << std::endl;
             return *this;
         }
         Experiment& setLanguageVersion(const std::string& language_version) { this->result.setLanguageVersion(language_version); return *this; }
@@ -60,7 +62,7 @@ namespace platform {
         std::vector<int> randomSeeds;
         std::string discretization_algo;
         std::string smooth_strategy;
-        bayesnet::Smoothing_t smooth_type = bayesnet::Smoothing_t::OLD_LAPLACE;
+        bayesnet::Smoothing_t smooth_type{ bayesnet::Smoothing_t::NONE };
         HyperParameters hyperparameters;
         int nfolds{ 0 };
         int max_name{ 7 }; // max length of dataset name for formatting (default 7)

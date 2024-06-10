@@ -34,6 +34,10 @@ namespace platform {
                 smooth_type = bayesnet::Smoothing_t::LAPLACE;
             else if (smooth_strategy == "CESTNIK")
                 smooth_type = bayesnet::Smoothing_t::CESTNIK;
+            else {
+                std::cerr << "Experiment: Unknown smoothing strategy: " << smooth_strategy << std::endl;
+                exit(1);
+            }
             return *this;
         }
         Experiment& setLanguageVersion(const std::string& language_version) { this->result.setLanguageVersion(language_version); return *this; }

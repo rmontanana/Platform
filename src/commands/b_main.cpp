@@ -12,6 +12,7 @@
 
 using json = nlohmann::ordered_json;
 
+
 void manageArguments(argparse::ArgumentParser& program)
 {
     auto env = platform::DotEnv();
@@ -47,8 +48,16 @@ void manageArguments(argparse::ArgumentParser& program)
         );
     program.add_argument("--title").default_value("").help("Experiment title");
     program.add_argument("--discretize").help("Discretize input dataset").default_value((bool)stoi(env.get("discretize"))).implicit_value(true);
-    program.add_argument("--discretize-algo").help("Discretize input dataset").default_value(env.get("discretize_algo"));
-    program.add_argument("--smooth-strat").help("Discretize input dataset").default_value(env.get("smooth_strat"));
+    auto valid_choices = env.valid_tokens("discretize_algo");
+    auto& disc_arg = program.add_argument("--discretize-algo").help("Algorithm to use in discretization. Valid values: " + env.valid_values("discretize_algo")).default_value(env.get("discretize_algo"));
+    for (auto choice : valid_choices) {
+        disc_arg.choices(choice);
+    }
+    valid_choices = env.valid_tokens("smooth_strat");
+    auto& smooth_arg = program.add_argument("--smooth-strat").help("Smooth strategy used in Bayes Network node initialization. Valid values: " + env.valid_values("smooth_strat")).default_value(env.get("smooth_strat"));
+    for (auto choice : valid_choices) {
+        smooth_arg.choices(choice);
+    }
     program.add_argument("--generate-fold-files").help("generate fold information in datasets_experiment folder").default_value(false).implicit_value(true);
     program.add_argument("--no-train-score").help("Don't compute train score").default_value(false).implicit_value(true);
     program.add_argument("--quiet").help("Don't display detailed progress").default_value(false).implicit_value(true);

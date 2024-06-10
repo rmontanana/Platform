@@ -81,16 +81,30 @@ namespace platform {
                 exit(1);
             }
         }
+        std::vector<std::string> valid_tokens(const std::string& key)
+        {
+            if (valid.find(key) == valid.end()) {
+                return {};
+            }
+            return valid.at(key);
+        }
+        std::string valid_values(const std::string& key)
+        {
+            std::string valid_values = "{", sep = "";
+            if (valid.find(key) == valid.end()) {
+                return "{}";
+            }
+            for (const auto& value : valid.at(key)) {
+                valid_values += sep + value;
+                sep = ", ";
+            }
+            return valid_values + "}";
+        }
         void parseEnv()
         {
             for (auto& [key, values] : valid) {
                 if (env.find(key) == env.end()) {
-                    std::string valid_values = "", sep = "";
-                    for (const auto& value : values) {
-                        valid_values += sep + value;
-                        sep = ", ";
-                    }
-                    std::cerr << "Key not found in .env: " << key << ", valid values: " << valid_values << std::endl;
+                    std::cerr << "Key not found in .env: " << key << ", valid values: " << valid_values(key) << std::endl;
                     exit(1);
                 }
             }

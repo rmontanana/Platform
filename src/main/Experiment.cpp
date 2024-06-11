@@ -194,8 +194,7 @@ namespace platform {
                 //
                 // Train model
                 //
-                clf->setSmoothing(smooth_type);
-                clf->fit(X_train, y_train, features, className, states);
+                clf->fit(X_train, y_train, features, className, states, smooth_type);
                 if (!quiet)
                     showProgress(nfold + 1, getColor(clf->getStatus()), "b");
                 auto clf_notes = clf->getNotes();

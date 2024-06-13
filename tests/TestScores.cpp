@@ -128,7 +128,7 @@ TEST_CASE("Confusion Matrix JSON", "[Scores]")
     REQUIRE(res_json_str["Car"][1] == 2);
     REQUIRE(res_json_str["Car"][2] == 3);
 }
-TEST_CASE("Classification Report", "[Scores]") -
+TEST_CASE("Classification Report", "[Scores]")
 {
     std::vector<int> y_test = { 0, 2, 2, 2, 2, 0, 1, 2, 0, 2 };
     std::vector<int> y_pred = { 0, 1, 2, 2, 1, 1, 1, 0, 0, 2 };

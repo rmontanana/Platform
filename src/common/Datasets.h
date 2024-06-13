@@ -4,14 +4,7 @@
 namespace platform {
     class Datasets {
     public:
-        explicit Datasets(bool discretize, std::string sfileType, std::string discretizer_algorithm = "none") :
-            discretize(discretize), sfileType(sfileType), discretizer_algorithm(discretizer_algorithm)
-        {
-            if (discretizer_algorithm == "none" && discretize) {
-                throw std::runtime_error("Can't discretize without discretization algorithm");
-            }
-            load();
-        };
+        explicit Datasets(bool discretize, std::string sfileType, std::string discretizer_algorithm = "none");
         std::vector<std::string> getNames();
         bool isDataset(const std::string& name) const;
         Dataset& getDataset(const std::string& name) const { return *datasets.at(name); }

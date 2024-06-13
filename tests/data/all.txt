@@ -1,8 +1,8 @@
-diabetes,class, all
-ecoli,class, all
-glass,Type, all
-iris,class, all
-kdd_JapaneseVowels,speaker, [2,3,4,5,6,7,8,9,10,11,12,13]
-letter,class, all
-liver-disorders,selector, all
-mfeat-factors,class, all
+diabetes;class;all
+ecoli;class;all
+glass;Type,all
+iris;class;all
+kdd_JapaneseVowels;speaker;[2,3,4,5,6,7,8,9,10,11,12,13]
+letter;class;all
+liver-disorders;selector;all
+mfeat-factors;class;all

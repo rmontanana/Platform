@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 #include <tuple>
-#include "ArffFiles.h"
+#include <ArffFiles.hpp>
 #include "CPPFImdlp.h"
 
 bool file_exists(const std::string& name);

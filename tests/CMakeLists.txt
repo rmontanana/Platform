@@ -13,10 +13,10 @@ if(ENABLE_TESTING)
     )
     set(TEST_SOURCES_PLATFORM 
         TestUtils.cpp TestPlatform.cpp TestResult.cpp TestScores.cpp 
-        ${Platform_SOURCE_DIR}/src/common/Datasets.cpp ${Platform_SOURCE_DIR}/src/common/Dataset.cpp
+        ${Platform_SOURCE_DIR}/src/common/Datasets.cpp ${Platform_SOURCE_DIR}/src/common/Dataset.cpp ${Platform_SOURCE_DIR}/src/common/Discretization.cpp
         ${Platform_SOURCE_DIR}/src/main/Scores.cpp
     )
     add_executable(${TEST_PLATFORM} ${TEST_SOURCES_PLATFORM})
-    target_link_libraries(${TEST_PLATFORM} PUBLIC "${TORCH_LIBRARIES}" ArffFiles mdlp Catch2::Catch2WithMain BayesNet)
+    target_link_libraries(${TEST_PLATFORM} PUBLIC "${TORCH_LIBRARIES}" mdlp Catch2::Catch2WithMain BayesNet)
     add_test(NAME ${TEST_PLATFORM} COMMAND ${TEST_PLATFORM})
 endif(ENABLE_TESTING)

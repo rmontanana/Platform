@@ -7,6 +7,7 @@
 #include <string>
 #include "TestUtils.h"
 #include "folding.hpp"
+#include <ArffFiles.hpp>
 #include <bayesnet/classifiers/TAN.h>
 #include "config.h"
 
@@ -14,7 +15,7 @@
 TEST_CASE("Test Platform version", "[Platform]")
 {
     std::string version = { platform_project_version.begin(), platform_project_version.end() };
-    REQUIRE(version == "1.0.4");
+    REQUIRE(version == "1.1.0");
 }
 TEST_CASE("Test Folding library version", "[Folding]")
 {
@@ -24,10 +25,15 @@ TEST_CASE("Test Folding library version", "[Folding]")
 TEST_CASE("Test BayesNet version", "[BayesNet]")
 {
     std::string version = bayesnet::TAN().getVersion();
-    REQUIRE(version == "1.0.5.1");
+    REQUIRE(version == "1.0.6");
 }
 TEST_CASE("Test mdlp version", "[mdlp]")
 {
     std::string version = mdlp::CPPFImdlp::version();
-    REQUIRE(version == "1.1.2");
+    REQUIRE(version == "1.2.1");
+}
+TEST_CASE("Test Arff version", "[Arff]")
+{
+    std::string version = ArffFiles().version();
+    REQUIRE(version == "1.1.0");
 }

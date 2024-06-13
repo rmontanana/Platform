@@ -13,13 +13,14 @@
 TEST_CASE("ZeroR comparison in reports", "[Report]")
 {
     auto dotEnv = platform::DotEnv(true);
-    auto margin = 1e-2;
-    std::string dataset = "liver-disorders";
+    auto margin = 1e-4;
+    std::string dataset_name = "liver-disorders";
     auto dt = platform::Datasets(false, platform::Paths::datasets());
-    dt.loadDataset(dataset);
-    std::vector<int> distribution = dt.getClassesCounts(dataset);
-    double nSamples = dt.getNSamples(dataset);
+    auto& dataset = dt.getDataset(dataset_name);
+    dataset.load();
+    std::vector<int> distribution = dataset.getClassesCounts();
+    double nSamples = dataset.getNSamples();
     std::vector<int>::iterator maxValue = max_element(distribution.begin(), distribution.end());
     double mark = *maxValue / nSamples * (1 + margin);
-    REQUIRE(mark == Catch::Approx(0.585507f).epsilon(1e-5));
+    REQUIRE(mark == Catch::Approx(0.57976811f).epsilon(margin));
 }

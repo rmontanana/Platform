@@ -5,6 +5,14 @@
 namespace platform {
     using json = nlohmann::ordered_json;
     const std::string message_dataset_not_loaded = "dataset not loaded.";
+    Datasets::Datasets(bool discretize, std::string sfileType, std::string discretizer_algorithm) :
+        discretize(discretize), sfileType(sfileType), discretizer_algorithm(discretizer_algorithm)
+    {
+        if (discretizer_algorithm == "none" && discretize) {
+            throw std::runtime_error("Can't discretize without discretization algorithm");
+        }
+        load();
+    }
     void Datasets::load()
     {
         auto sd = SourceData(sfileType);

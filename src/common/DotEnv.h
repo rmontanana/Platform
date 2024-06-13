@@ -19,8 +19,8 @@ namespace platform {
         {
             valid =
             {
-                {"source_data", {"Arff", "Tanveer", "Surcov"}},
-                {"experiment", {"discretiz", "odte", "covid"}},
+                {"source_data", {"Arff", "Tanveer", "Surcov", "Test"}},
+                {"experiment", {"discretiz", "odte", "covid", "Test"}},
                 {"fit_features", {"0", "1"}},
                 {"discretize", {"0", "1"}},
                 {"ignore_nan", {"0", "1"}},
@@ -31,7 +31,7 @@ namespace platform {
                 {"n_folds", {"5", "10"}},
                 {"discretize_algo", {"mdlp", "bin3u", "bin3q", "bin4u", "bin4q"}},
                 {"smooth_strat", {"OLD_LAPLACE", "LAPLACE", "CESTNIK"}},
-                { "platform", {"any"} },
+                {"platform", {"any"}},
                 {"model", {"any"}},
                 {"seeds", {"any"}},
                 {"nodes", {"any"}},
@@ -41,8 +41,25 @@ namespace platform {
             if (create) {
                 // For testing purposes
                 std::ofstream file(".env");
-                file << "source_data = Test" << std::endl;
-                file << "margin = 0.1" << std::endl;
+                file << "experiment=Test" << std::endl;
+                file << "source_data=Test" << std::endl;
+                file << "margin=0.1" << std::endl;
+                file << "score=accuracy" << std::endl;
+                file << "platform=um790Linux" << std::endl;
+                file << "n_folds=5" << std::endl;
+                file << "discretize_algo=mdlp" << std::endl;
+                file << "smooth_strat=OLD_LAPLACE" << std::endl;
+                file << "stratified=0" << std::endl;
+                file << "model=TAN" << std::endl;
+                file << "seeds=[271]" << std::endl;
+                file << "discretize=0" << std::endl;
+                file << "ignore_nan=0" << std::endl;
+                file << "nodes=Nodes" << std::endl;
+                file << "leaves=Edges" << std::endl;
+                file << "depth=States" << std::endl;
+                file << "fit_features=0" << std::endl;
+                file << "framework=bulma" << std::endl;
+                file << "margin=0.1" << std::endl;
                 file.close();
             }
             std::ifstream file(".env");

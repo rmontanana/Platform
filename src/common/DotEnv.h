@@ -30,7 +30,7 @@ namespace platform {
                 {"margin", {"0.1", "0.2", "0.3"}},
                 {"n_folds", {"5", "10"}},
                 {"discretize_algo", {"mdlp", "bin3u", "bin3q", "bin4u", "bin4q"}},
-                {"smooth_strat", {"OLD_LAPLACE", "LAPLACE", "CESTNIK"}},
+                {"smooth_strat", {"ORIGINAL", "LAPLACE", "CESTNIK"}},
                 {"platform", {"any"}},
                 {"model", {"any"}},
                 {"seeds", {"any"}},
@@ -48,7 +48,7 @@ namespace platform {
                 file << "platform=um790Linux" << std::endl;
                 file << "n_folds=5" << std::endl;
                 file << "discretize_algo=mdlp" << std::endl;
-                file << "smooth_strat=OLD_LAPLACE" << std::endl;
+                file << "smooth_strat=ORIGINAL" << std::endl;
                 file << "stratified=0" << std::endl;
                 file << "model=TAN" << std::endl;
                 file << "seeds=[271]" << std::endl;

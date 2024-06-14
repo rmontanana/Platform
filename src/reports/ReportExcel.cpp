@@ -50,7 +50,7 @@ namespace platform {
         worksheet_merge_range(worksheet, 1, 0, 1, 12, data["title"].get<std::string>().c_str(), styles["headerRest"]);
         worksheet_merge_range(worksheet, 2, 0, 3, 0, ("Score is " + data["score_name"].get<std::string>()).c_str(), styles["headerRest"]);
         writeString(2, 1, "Smooth", "headerRest");
-        std::string smooth = data.find("smooth_strategy") != data.end() ? data["smooth_strategy"].get<std::string>() : "OLD_LAPLACE";
+        std::string smooth = data.find("smooth_strategy") != data.end() ? data["smooth_strategy"].get<std::string>() : "ORIGINAL";
         writeString(3, 1, smooth, "headerSmall");
         worksheet_merge_range(worksheet, 2, 2, 3, 3, "Execution time", styles["headerRest"]);
         oss << std::setprecision(2) << std::fixed << data["duration"].get<float>() << " s";

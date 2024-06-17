@@ -114,8 +114,8 @@ int main(int argc, char** argv)
             throw runtime_error("hyperparameters and hyper_file are mutually exclusive");
         }
         title = program.get<std::string>("title");
-        if (title == "" && file_name == "") {
-            throw runtime_error("title is mandatory if dataset is not provided");
+        if (title == "" && file_name == "all") {
+            throw runtime_error("title is mandatory if all datasets are to be tested");
         }
         saveResults = program.get<bool>("save");
     }

@@ -48,10 +48,11 @@ namespace platform {
         Experiment& addRandomSeed(int randomSeed) { randomSeeds.push_back(randomSeed); result.addSeed(randomSeed); return *this; }
         Experiment& setDuration(float duration) { this->result.setDuration(duration); return *this; }
         Experiment& setHyperparameters(const HyperParameters& hyperparameters_) { this->hyperparameters = hyperparameters_; return *this; }
-        void cross_validation(const std::string& fileName, bool quiet, bool no_train_score, bool generate_fold_files);
-        void go(std::vector<std::string> filesToProcess, bool quiet, bool no_train_score, bool generate_fold_files);
+        void cross_validation(const std::string& fileName, bool quiet, bool no_train_score, bool generate_fold_files, bool graph);
+        void go(std::vector<std::string> filesToProcess, bool quiet, bool no_train_score, bool generate_fold_files, bool graph);
         void saveResult();
         void show();
+        void saveGraph();
         void report(bool classification_report = false);
     private:
         Result result;

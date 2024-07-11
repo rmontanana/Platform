@@ -30,7 +30,7 @@ TEST_CASE("Test BayesNet version", "[BayesNet]")
 TEST_CASE("Test mdlp version", "[mdlp]")
 {
     std::string version = mdlp::CPPFImdlp::version();
-    REQUIRE(version == "1.2.1");
+    REQUIRE(version == "2.0.0");
 }
 TEST_CASE("Test Arff version", "[Arff]")
 {

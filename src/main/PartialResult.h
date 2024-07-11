@@ -15,6 +15,7 @@ namespace platform {
             data["times_train"] = json::array();
             data["times_test"] = json::array();
             data["notes"] = json::array();
+            data["graph"] = json::array();
             data["train_time"] = 0.0;
             data["train_time_std"] = 0.0;
             data["test_time"] = 0.0;
@@ -25,6 +26,12 @@ namespace platform {
         {
             json notes_ = notes;
             data["notes"].insert(data["notes"].end(), notes_.begin(), notes_.end());
+            return *this;
+        }
+        PartialResult& setGraph(const std::vector<std::string>& graph)
+        {
+            json graph_ = graph;
+            data["graph"].insert(data["graph"].end(), graph_.begin(), graph_.end());
             return *this;
         }
         PartialResult& setConfusionMatrices(const json& confusion_matrices) { data["confusion_matrices"] = confusion_matrices; return *this; }

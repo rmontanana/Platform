@@ -131,8 +131,7 @@ namespace platform {
         for (int i = 0; i < features.size(); ++i) {
             auto [max_value, idx] = torch::max(X_train.index({ i, "..." }), 0);
             states[features[i]] = std::vector<int>(max_value.item<int>() + 1);
-            auto item = states.at(features[i]);
-            iota(begin(item), end(item), 0);
+            iota(begin(states.at(features[i])), end(states.at(features[i])), 0);
         }
         auto [max_value, idx] = torch::max(y_train, 0);
         states[className] = std::vector<int>(max_value.item<int>() + 1);

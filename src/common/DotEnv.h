@@ -29,7 +29,7 @@ namespace platform {
                 {"framework", {"bulma", "bootstrap"}},
                 {"margin", {"0.1", "0.2", "0.3"}},
                 {"n_folds", {"5", "10"}},
-                {"discretize_algo", {"mdlp", "bin3u", "bin3q", "bin4u", "bin4q"}},
+                {"discretize_algo", {"mdlp", "bin3u", "bin3q", "bin4u", "bin4q", "bin5q", "bin5u", "bin6q", "bin6u", "bin7q", "bin7u", "bin8q", "bin8u", "bin9q", "bin9u", "bin10q", "bin10u"}},
                 {"smooth_strat", {"ORIGINAL", "LAPLACE", "CESTNIK"}},
                 {"platform", {"any"}},
                 {"model", {"any"}},

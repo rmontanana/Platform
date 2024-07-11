@@ -59,6 +59,7 @@ void manageArguments(argparse::ArgumentParser& program)
         smooth_arg.choices(choice);
     }
     program.add_argument("--generate-fold-files").help("generate fold information in datasets_experiment folder").default_value(false).implicit_value(true);
+    program.add_argument("--graph").help("generate graphviz dot files with the model").default_value(false).implicit_value(true);
     program.add_argument("--no-train-score").help("Don't compute train score").default_value(false).implicit_value(true);
     program.add_argument("--quiet").help("Don't display detailed progress").default_value(false).implicit_value(true);
     program.add_argument("--save").help("Save result (always save if no dataset is supplied)").default_value(false).implicit_value(true);
@@ -87,7 +88,7 @@ int main(int argc, char** argv)
     manageArguments(program);
     std::string file_name, model_name, title, hyperparameters_file, datasets_file, discretize_algo, smooth_strat;
     json hyperparameters_json;
-    bool discretize_dataset, stratified, saveResults, quiet, no_train_score, generate_fold_files;
+    bool discretize_dataset, stratified, saveResults, quiet, no_train_score, generate_fold_files, graph;
     std::vector<int> seeds;
     std::vector<std::string> file_names;
     std::vector<std::string> filesToTest;
@@ -103,6 +104,7 @@ int main(int argc, char** argv)
         smooth_strat = program.get<std::string>("smooth-strat");
         stratified = program.get<bool>("stratified");
         quiet = program.get<bool>("quiet");
+        graph = program.get<bool>("graph");
         n_folds = program.get<int>("folds");
         seeds = program.get<std::vector<int>>("seeds");
         auto hyperparameters = program.get<std::string>("hyperparameters");
@@ -200,7 +202,7 @@ int main(int argc, char** argv)
     }
     platform::Timer timer;
     timer.start();
-    experiment.go(filesToTest, quiet, no_train_score, generate_fold_files);
+    experiment.go(filesToTest, quiet, no_train_score, generate_fold_files, graph);
     experiment.setDuration(timer.getDuration());
     if (!quiet) {
         // Classification report if only one dataset is tested
@@ -208,6 +210,9 @@ int main(int argc, char** argv)
     }
     if (saveResults) {
         experiment.saveResult();
+    }
+    if (graph) {
+        experiment.saveGraph();
     }
     std::cout << "Done!" << std::endl;
     return 0;

@@ -3,7 +3,7 @@ if(ENABLE_TESTING)
     include_directories(
         ${Platform_SOURCE_DIR}/src
         ${Platform_SOURCE_DIR}/lib/argparse/include
-        ${Platform_SOURCE_DIR}/lib/mdlp
+        ${Platform_SOURCE_DIR}/lib/mdlp/src
         ${Platform_SOURCE_DIR}/lib/Files
         ${Platform_SOURCE_DIR}/lib/json/include
         ${Platform_SOURCE_DIR}/lib/folding

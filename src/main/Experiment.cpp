@@ -3,6 +3,7 @@
 #include "common/Paths.h"
 #include "Models.h"
 #include "Scores.h"
+#include "RocAuc.h"
 #include "Experiment.h"
 namespace platform {
     using json = nlohmann::ordered_json;
@@ -160,6 +161,8 @@ namespace platform {
         int nResults = nfolds * static_cast<int>(randomSeeds.size());
         auto accuracy_test = torch::zeros({ nResults }, torch::kFloat64);
         auto accuracy_train = torch::zeros({ nResults }, torch::kFloat64);
+        auto auc_test = torch::zeros({ nResults }, torch::kFloat64);
+        auto auc_train = torch::zeros({ nResults }, torch::kFloat64);
         auto train_time = torch::zeros({ nResults }, torch::kFloat64);
         auto test_time = torch::zeros({ nResults }, torch::kFloat64);
         auto nodes = torch::zeros({ nResults }, torch::kFloat64);
@@ -228,10 +231,13 @@ namespace platform {
                 //
                 // Score train
                 //
+                double auc_train_value = 0;
                 if (!no_train_score) {
-                    auto y_predict = clf->predict(X_train);
-                    Scores scores(y_train, y_predict, num_classes, labels);
+                    auto roc_auc = RocAuc();
+                    auto y_proba_train = clf->predict_proba(X_train);
+                    Scores scores(y_train, y_proba_train, num_classes, labels);
                     accuracy_train_value = scores.accuracy();
+                    auc_train_value = roc_auc.compute(y_proba_train, y_train);
                     confusion_matrices_train.push_back(scores.get_confusion_matrix_json(true));
                 }
                 //
@@ -240,10 +246,15 @@ namespace platform {
                 if (!quiet)
                     showProgress(nfold + 1, getColor(clf->getStatus()), "c");
                 test_timer.start();
-                auto y_predict = clf->predict(X_test);
-                Scores scores(y_test, y_predict, num_classes, labels);
+                // auto y_predict = clf->predict(X_test);
+                auto y_proba_test = clf->predict_proba(X_test);
+                Scores scores(y_test, y_proba_test, num_classes, labels);
                 auto accuracy_test_value = scores.accuracy();
+                auto roc_auc = RocAuc();
+                double auc_test_value = roc_auc.compute(y_proba_test, y_test);
                 test_time[item] = test_timer.getDuration();
+                auc_train[item] = auc_train_value;
+                auc_test[item] = auc_test_value;
                 accuracy_train[item] = accuracy_train_value;
                 accuracy_test[item] = accuracy_test_value;
                 confusion_matrices.push_back(scores.get_confusion_matrix_json(true));
@@ -252,6 +263,8 @@ namespace platform {
                 //
                 // Store results and times in std::vector
                 //
+                partial_result.addAucTrain(auc_train_value);
+                partial_result.addAucTest(auc_test_value);
                 partial_result.addScoreTrain(accuracy_train_value);
                 partial_result.addScoreTest(accuracy_test_value);
                 partial_result.addTimeTrain(train_time[item].item<double>());
@@ -275,6 +288,8 @@ namespace platform {
         partial_result.setGraph(graphs);
         partial_result.setScoreTest(torch::mean(accuracy_test).item<double>()).setScoreTrain(torch::mean(accuracy_train).item<double>());
         partial_result.setScoreTestStd(torch::std(accuracy_test).item<double>()).setScoreTrainStd(torch::std(accuracy_train).item<double>());
+        partial_result.setAucTest(torch::mean(auc_test).item<double>()).setAucTrain(torch::mean(auc_train).item<double>());
+        partial_result.setAucTestStd(torch::std(auc_test).item<double>()).setAucTrainStd(torch::std(auc_train).item<double>());
         partial_result.setTrainTime(torch::mean(train_time).item<double>()).setTestTime(torch::mean(test_time).item<double>());
         partial_result.setTestTimeStd(torch::std(test_time).item<double>()).setTrainTimeStd(torch::std(train_time).item<double>());
         partial_result.setNodes(torch::mean(nodes).item<double>()).setLeaves(torch::mean(edges).item<double>()).setDepth(torch::mean(num_states).item<double>());

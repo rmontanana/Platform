@@ -2,12 +2,13 @@
 #include "Scores.h"
 #include "common/Colors.h"
 namespace platform {
-    Scores::Scores(torch::Tensor& y_test, torch::Tensor& y_pred, int num_classes, std::vector<std::string> labels) : num_classes(num_classes), labels(labels)
+    Scores::Scores(torch::Tensor& y_test, torch::Tensor& y_proba, int num_classes, std::vector<std::string> labels) : num_classes(num_classes), labels(labels)
     {
         if (labels.size() == 0) {
             init_default_labels();
         }
         total = y_test.size(0);
+        auto y_pred = y_proba.argmax(1);
         accuracy_value = (y_pred == y_test).sum().item<float>() / total;
         init_confusion_matrix();
         for (int i = 0; i < total; i++) {

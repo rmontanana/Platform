@@ -65,9 +65,9 @@ namespace platform {
             maxHyper = std::max(maxHyper, (int)r["hyperparameters"].dump().size());
             maxDataset = std::max(maxDataset, (int)r["dataset"].get<std::string>().size());
         }
-        std::vector<std::string> header_labels = { " #", "Dataset", "Sampl.", "Feat.", "Cls", nodes_label, leaves_label, depth_label, "Score", "Time", "Hyperparameters" };
+        std::vector<std::string> header_labels = { " #", "Dataset", "Sampl.", "Feat.", "Cls", nodes_label, leaves_label, depth_label, "Score", "ROC-AUC ovr", "Time", "Hyperparameters" };
         sheader << Colors::GREEN();
-        std::vector<int> header_lengths = { 3, maxDataset, 6, 5, 3, 9, 9, 9, 15, 20, maxHyper };
+        std::vector<int> header_lengths = { 3, maxDataset, 6, 5, 3, 9, 9, 9, 15, 15, 20, maxHyper };
         for (int i = 0; i < header_labels.size(); i++) {
             sheader << std::setw(header_lengths[i]) << std::left << header_labels[i] << " ";
         }
@@ -99,6 +99,7 @@ namespace platform {
             line << std::setw(8) << std::right << std::setprecision(6) << std::fixed << r["score"].get<double>() << "±" << std::setw(6) << std::setprecision(4) << std::fixed << r["score_std"].get<double>();
             const std::string status = compareResult(r["dataset"].get<std::string>(), r["score"].get<double>());
             line << status;
+            line << std::setw(8) << std::right << std::setprecision(6) << std::fixed << r["auc"].get<double>() << "±" << std::setw(6) << std::setprecision(4) << std::fixed << r["auc_std"].get<double>() << " ";
             line << std::setw(12) << std::right << std::setprecision(6) << std::fixed << r["time"].get<double>() << "±" << std::setw(7) << std::setprecision(4) << std::fixed << r["time_std"].get<double>() << " ";
             line << r["hyperparameters"].dump();
             line << std::endl;
@@ -127,6 +128,10 @@ namespace platform {
             line.str(""); line << headerLine(fVector("Train scores: ", lastResult["scores_train"], 14, 12));
             vbody.push_back(line.str()); sbody << line.str();
             line.str(""); line << headerLine(fVector("Test  scores: ", lastResult["scores_test"], 14, 12));
+            vbody.push_back(line.str()); sbody << line.str();
+            line.str(""); line << headerLine(fVector("Train auc   : ", lastResult["aucs_train"], 14, 12));
+            vbody.push_back(line.str()); sbody << line.str();
+            line.str(""); line << headerLine(fVector("Test  auc   : ", lastResult["aucs_test"], 14, 12));
             vbody.push_back(line.str()); sbody << line.str();
             line.str(""); line << headerLine(fVector("Train  times: ", lastResult["times_train"], 10, 3));
             vbody.push_back(line.str()); sbody << line.str();

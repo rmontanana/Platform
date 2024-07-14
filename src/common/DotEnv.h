@@ -19,24 +19,24 @@ namespace platform {
         {
             valid =
             {
-                {"source_data", {"Arff", "Tanveer", "Surcov", "Test"}},
+                {"depth", {"any"}},
+                {"discretize", {"0", "1"}},
+                {"discretize_algo", {"mdlp", "bin3u", "bin3q", "bin4u", "bin4q", "bin5q", "bin5u", "bin6q", "bin6u", "bin7q", "bin7u", "bin8q", "bin8u", "bin9q", "bin9u", "bin10q", "bin10u"}},
                 {"experiment", {"discretiz", "odte", "covid", "Test"}},
                 {"fit_features", {"0", "1"}},
-                {"discretize", {"0", "1"}},
-                {"ignore_nan", {"0", "1"}},
-                {"stratified", {"0", "1"}},
-                {"score", {"accuracy"}},
                 {"framework", {"bulma", "bootstrap"}},
-                {"margin", {"0.1", "0.2", "0.3"}},
-                {"n_folds", {"5", "10"}},
-                {"discretize_algo", {"mdlp", "bin3u", "bin3q", "bin4u", "bin4q", "bin5q", "bin5u", "bin6q", "bin6u", "bin7q", "bin7u", "bin8q", "bin8u", "bin9q", "bin9u", "bin10q", "bin10u"}},
-                {"smooth_strat", {"ORIGINAL", "LAPLACE", "CESTNIK"}},
-                {"platform", {"any"}},
-                {"model", {"any"}},
-                {"seeds", {"any"}},
-                {"nodes", {"any"}},
+                {"ignore_nan", {"0", "1"}},
                 {"leaves", {"any"}},
-                {"depth", {"any"}},
+                {"margin", {"0.1", "0.2", "0.3"}},
+                {"model", {"any"}},
+                {"n_folds", {"5", "10"}},
+                {"nodes", {"any"}},
+                {"platform", {"any"}},
+                {"stratified", {"0", "1"}},
+                {"score", {"accuracy", "roc-auc-ovr"}},
+                {"seeds", {"any"}},
+                {"smooth_strat", {"ORIGINAL", "LAPLACE", "CESTNIK"}},
+                {"source_data", {"Arff", "Tanveer", "Surcov", "Test"}},
             };
             if (create) {
                 // For testing purposes

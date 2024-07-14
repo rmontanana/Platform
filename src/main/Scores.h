@@ -9,10 +9,11 @@ namespace platform {
     using json = nlohmann::ordered_json;
     class Scores {
     public:
-        Scores(torch::Tensor& y_test, torch::Tensor& y_pred, int num_classes, std::vector<std::string> labels = {});
+        Scores(torch::Tensor& y_test, torch::Tensor& y_proba, int num_classes, std::vector<std::string> labels = {});
         explicit Scores(const json& confusion_matrix_);
         static Scores create_aggregate(const json& data, const std::string key);
         float accuracy();
+        float auc();
         float f1_score(int num_class);
         float f1_weighted();
         float f1_macro();
@@ -34,6 +35,9 @@ namespace platform {
         int total;
         std::vector<std::string> labels;
         torch::Tensor confusion_matrix; // Rows ar actual, columns are predicted
+        torch::Tensor null_t; // Covenient null tensor needed when confusion_matrix constructor is used
+        torch::Tensor& y_test = null_t; // for ROC AUC
+        torch::Tensor& y_proba = null_t; // for ROC AUC
         int label_len = 16;
         int dlen = 9;
         int ndec = 7;

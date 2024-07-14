@@ -58,6 +58,11 @@ void manageArguments(argparse::ArgumentParser& program)
     for (auto choice : valid_choices) {
         smooth_arg.choices(choice);
     }
+    auto& score_arg = program.add_argument("-s", "--score").help("Score to use. Valid values: " + env.valid_values("score")).default_value(env.get("score"));
+    valid_choices = env.valid_tokens("score");
+    for (auto choice : valid_choices) {
+        score_arg.choices(choice);
+    }
     program.add_argument("--generate-fold-files").help("generate fold information in datasets_experiment folder").default_value(false).implicit_value(true);
     program.add_argument("--graph").help("generate graphviz dot files with the model").default_value(false).implicit_value(true);
     program.add_argument("--no-train-score").help("Don't compute train score").default_value(false).implicit_value(true);
@@ -79,14 +84,14 @@ void manageArguments(argparse::ArgumentParser& program)
             throw std::runtime_error("Number of folds must be an integer");
         }});
         auto seed_values = env.getSeeds();
-        program.add_argument("-s", "--seeds").nargs(1, 10).help("Random seeds. Set to -1 to have pseudo random").scan<'i', int>().default_value(seed_values);
+        program.add_argument("--seeds").nargs(1, 10).help("Random seeds. Set to -1 to have pseudo random").scan<'i', int>().default_value(seed_values);
 }
 
 int main(int argc, char** argv)
 {
     argparse::ArgumentParser program("b_main", { platform_project_version.begin(), platform_project_version.end() });
     manageArguments(program);
-    std::string file_name, model_name, title, hyperparameters_file, datasets_file, discretize_algo, smooth_strat;
+    std::string file_name, model_name, title, hyperparameters_file, datasets_file, discretize_algo, smooth_strat, score;
     json hyperparameters_json;
     bool discretize_dataset, stratified, saveResults, quiet, no_train_score, generate_fold_files, graph;
     std::vector<int> seeds;
@@ -106,6 +111,7 @@ int main(int argc, char** argv)
         quiet = program.get<bool>("quiet");
         graph = program.get<bool>("graph");
         n_folds = program.get<int>("folds");
+        score = program.get<std::string>("score");
         seeds = program.get<std::vector<int>>("seeds");
         auto hyperparameters = program.get<std::string>("hyperparameters");
         hyperparameters_json = json::parse(hyperparameters);
@@ -195,7 +201,7 @@ int main(int argc, char** argv)
     experiment.setTitle(title).setLanguage("c++").setLanguageVersion("gcc 14.1.1");
     experiment.setDiscretizationAlgorithm(discretize_algo).setSmoothSrategy(smooth_strat);
     experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform(env.get("platform"));
-    experiment.setStratified(stratified).setNFolds(n_folds).setScoreName("accuracy");
+    experiment.setStratified(stratified).setNFolds(n_folds).setScoreName(score);
     experiment.setHyperparameters(test_hyperparams);
     for (auto seed : seeds) {
         experiment.addRandomSeed(seed);

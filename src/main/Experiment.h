@@ -11,7 +11,7 @@
 
 namespace platform {
     using json = nlohmann::ordered_json;
-
+    enum class score_t { NONE, ACCURACY, ROC_AUC_OVR };
     class Experiment {
     public:
         Experiment() = default;
@@ -55,6 +55,7 @@ namespace platform {
         void saveGraph();
         void report(bool classification_report = false);
     private:
+        score_t parse_score() const;
         Result result;
         bool discretized{ false }, stratified{ false };
         std::vector<PartialResult> results;

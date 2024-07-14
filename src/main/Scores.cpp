@@ -1,8 +1,9 @@
 #include <sstream>
 #include "Scores.h"
+#include "common/Utils.h" // tensorToVector
 #include "common/Colors.h"
 namespace platform {
-    Scores::Scores(torch::Tensor& y_test, torch::Tensor& y_proba, int num_classes, std::vector<std::string> labels) : num_classes(num_classes), labels(labels)
+    Scores::Scores(torch::Tensor& y_test, torch::Tensor& y_proba, int num_classes, std::vector<std::string> labels) : num_classes(num_classes), labels(labels), y_test(y_test), y_proba(y_proba)
     {
         if (labels.size() == 0) {
             init_default_labels();
@@ -40,6 +41,44 @@ namespace platform {
             i++;
         }
         compute_accuracy_value();
+    }
+    float Scores::auc()
+    {
+        size_t nSamples = y_test.numel();
+        if (nSamples == 0) return 0;
+        // In binary classification problem there's no need to calculate the average of the AUCs
+        auto nClasses = num_classes;
+        if (num_classes == 2)
+            nClasses = 1;
+        auto y_testv = tensorToVector<int>(y_test);
+        std::vector<double> aucScores(nClasses, 0.0);
+        std::vector<std::pair<double, int>> scoresAndLabels;
+        for (size_t classIdx = 0; classIdx < nClasses; ++classIdx) {
+            scoresAndLabels.clear();
+            for (size_t i = 0; i < nSamples; ++i) {
+                scoresAndLabels.emplace_back(y_proba[i][classIdx].item<float>(), y_testv[i] == classIdx ? 1 : 0);
+            }
+            std::sort(scoresAndLabels.begin(), scoresAndLabels.end(), std::greater<>());
+            std::vector<double> tpr, fpr;
+            double tp = 0, fp = 0;
+            double totalPos = std::count(y_testv.begin(), y_testv.end(), classIdx);
+            double totalNeg = nSamples - totalPos;
+            for (const auto& [score, label] : scoresAndLabels) {
+                if (label == 1) {
+                    tp += 1;
+                } else {
+                    fp += 1;
+                }
+                tpr.push_back(tp / totalPos);
+                fpr.push_back(fp / totalNeg);
+            }
+            double auc = 0.0;
+            for (size_t i = 1; i < tpr.size(); ++i) {
+                auc += 0.5 * (fpr[i] - fpr[i - 1]) * (tpr[i] + tpr[i - 1]);
+            }
+            aucScores[classIdx] = auc;
+        }
+        return std::accumulate(aucScores.begin(), aucScores.end(), 0.0) / nClasses;
     }
     Scores Scores::create_aggregate(const json& data, const std::string key)
     {

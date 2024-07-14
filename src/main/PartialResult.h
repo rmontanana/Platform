@@ -44,10 +44,6 @@ namespace platform {
         PartialResult& setScoreTrainStd(double score_std) { data["score_train_std"] = score_std; return *this; }
         PartialResult& setScoreTest(double score) { data["score"] = score; return *this; }
         PartialResult& setScoreTestStd(double score_std) { data["score_std"] = score_std; return *this; }
-        PartialResult& setAucTrain(double score) { data["auc_train"] = score; return *this; }
-        PartialResult& setAucTrainStd(double score_std) { data["auc_train_std"] = score_std; return *this; }
-        PartialResult& setAucTest(double score) { data["auc"] = score; return *this; }
-        PartialResult& setAucTestStd(double score_std) { data["auc_std"] = score_std; return *this; }
         PartialResult& setTrainTime(double train_time)
         {
             data["train_time"] = train_time;
@@ -75,8 +71,6 @@ namespace platform {
         PartialResult& setNodes(float nodes) { data["nodes"] = nodes; return *this; }
         PartialResult& setLeaves(float leaves) { data["leaves"] = leaves; return *this; }
         PartialResult& setDepth(float depth) { data["depth"] = depth; return *this; }
-        PartialResult& addAucTrain(double score) { data["aucs_train"].push_back(score); return *this; }
-        PartialResult& addAucTest(double score) { data["aucs_test"].push_back(score); return *this; }
         PartialResult& addScoreTrain(double score) { data["scores_train"].push_back(score); return *this; }
         PartialResult& addScoreTest(double score) { data["scores_test"].push_back(score); return *this; }
         PartialResult& addTimeTrain(double time) { data["times_train"].push_back(time); return *this; }

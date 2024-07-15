@@ -54,6 +54,10 @@ namespace platform {
         std::vector<double> aucScores(nClasses, 0.0);
         std::vector<std::pair<double, int>> scoresAndLabels;
         for (size_t classIdx = 0; classIdx < nClasses; ++classIdx) {
+            if (classIdx >= y_proba.size(1)) {
+                std::cerr << "AUC warning - class index out of range" << std::endl;
+                return 0;
+            }
             scoresAndLabels.clear();
             for (size_t i = 0; i < nSamples; ++i) {
                 scoresAndLabels.emplace_back(y_proba[i][classIdx].item<float>(), y_testv[i] == classIdx ? 1 : 0);

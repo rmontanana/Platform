@@ -6,6 +6,7 @@
 #include "common/DotEnv.h"
 #include "common/CLocale.h"
 #include "common/Paths.h"
+#include "common/Symbols.h"
 #include "Result.h"
 
 namespace platform {
@@ -78,7 +79,7 @@ namespace platform {
     }
 
 
-    std::string Result::to_string(int maxModel) const
+    std::string Result::to_string(int maxModel, int maxTitle) const
     {
         auto tmp = ConfigLocale();
         std::stringstream oss;
@@ -97,7 +98,11 @@ namespace platform {
         auto completeString = isComplete() ? "C" : "P";
         oss << std::setw(1) << " " << completeString << "  ";
         oss << std::setw(5) << std::right << std::setprecision(2) << std::fixed << durationShow << " " << durationUnit << " ";
-        oss << std::setw(50) << std::left << data["title"].get<std::string>() << " ";
+        auto title = data["title"].get<std::string>();
+        if (title.size() > maxTitle) {
+            title = title.substr(0, maxTitle - 1) + Symbols::ellipsis;
+        }
+        oss << std::setw(maxTitle) << std::left << title;
         return  oss.str();
     }
 }

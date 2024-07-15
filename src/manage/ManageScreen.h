@@ -2,6 +2,7 @@
 #define MANAGE_SCREEN_H
 #include <xlsxwriter.h>
 #include "ResultsManager.h"
+#include "common/Colors.h"
 #include "Paginator.hpp"
 
 namespace platform {
@@ -43,6 +44,10 @@ namespace platform {
         bool complete;
         bool partial;
         bool compare;
+        int maxModel, maxTitle;
+        std::vector<std::string> header_labels;
+        std::vector<int> header_lengths;
+        std::vector<std::string> sort_fields;
         SortField sort_field = SortField::DATE;
         SortType sort_type = SortType::DESC;
         std::vector<Paginator> paginator;

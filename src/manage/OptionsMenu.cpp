@@ -1,30 +1,46 @@
-#include "CommandParser.h"
+#include "OptionsMenu.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include "common/Colors.h"
 #include "common/Utils.h"
 
 namespace platform {
-
-    std::tuple<char, int, bool> CommandParser::parse(const std::string& color, const std::vector<std::tuple<std::string, char, bool>>& options, const char defaultCommand, const int minIndex, const int maxIndex)
+    std::string OptionsMenu::to_string()
+    {
+        bool first = true;
+        size_t size = 0;
+        std::string result = color_normal + "Options: (";
+        for (auto& option : options) {
+            if (!first) {
+                result += ", ";
+                size += 2;
+            }
+            std::string title = std::get<0>(option);
+            auto pos = title.find(std::get<1>(option));
+            result += color_normal + title.substr(0, pos) + color_bold + title.substr(pos, 1) + color_normal + title.substr(pos + 1);
+            size += title.size();
+            first = false;
+        }
+        if (size + 3 > cols) { // 3 is the size of the "): " at the end
+            result = "";
+            first = true;
+            for (auto& option : options) {
+                if (!first) {
+                    result += color_normal + ", ";
+                }
+                result += color_bold + std::get<1>(option);
+                first = false;
+            }
+        }
+        result += "): ";
+        return result;
+    }
+    std::tuple<char, int, bool> OptionsMenu::parse(char defaultCommand, int minIndex, int maxIndex)
     {
         bool finished = false;
         while (!finished) {
-            std::stringstream oss;
+            std::cout << to_string();
             std::string line;
-            oss << color << "Options (";
-            bool first = true;
-            for (auto& option : options) {
-                if (first) {
-                    first = false;
-                } else {
-                    oss << ", ";
-                }
-                oss << std::get<char>(option) << "=" << std::get<std::string>(option);
-            }
-            oss << "): ";
-            std::cout << oss.str();
             getline(std::cin, line);
             line = trim(line);
             if (line.size() == 0) {

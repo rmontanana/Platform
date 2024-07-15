@@ -57,7 +57,7 @@ add_executable(b_main commands/b_main.cpp ${main_sources}
 target_link_libraries(b_main "${PyClassifiers}" "${BayesNet}" mdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 
 # b_manage
-set(manage_sources ManageScreen.cpp CommandParser.cpp ResultsManager.cpp)
+set(manage_sources ManageScreen.cpp OptionsMenu.cpp ResultsManager.cpp)
 list(TRANSFORM manage_sources PREPEND manage/)
 add_executable(
     b_manage commands/b_manage.cpp ${manage_sources} 

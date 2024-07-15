@@ -18,7 +18,7 @@ namespace platform {
         void save();
         // Getters
         json getJson();
-        std::string to_string(int maxModel) const;
+        std::string to_string(int maxModel, int maxTitle) const;
         std::string getFilename() const;
         std::string getDate() const { return data["date"].get<std::string>(); };
         std::string getTime() const { return data["time"].get<std::string>(); };

@@ -3,10 +3,9 @@
 #include <string>
 #include <algorithm>
 #include "folding.hpp"
-#include "common/Colors.h"
 #include "common/CLocale.h"
 #include "common/Paths.h"
-#include "CommandParser.h"
+#include "OptionsMenu.h"
 #include "ManageScreen.h"
 #include "reports/DatasetsConsole.h"
 #include "reports/ReportConsole.h"
@@ -18,6 +17,7 @@
 namespace platform {
     const std::string STATUS_OK = "Ok.";
     const std::string STATUS_COLOR = Colors::GREEN();
+
     ManageScreen::ManageScreen(int rows, int cols, const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial, bool compare) :
         rows{ rows }, cols{ cols }, complete{ complete }, partial{ partial }, compare{ compare }, didExcel(false), results(ResultsManager(model, score, platform, complete, partial))
     {
@@ -25,7 +25,20 @@ namespace platform {
         openExcel = false;
         workbook = NULL;
         this->rows = std::max(0, rows - 6); // 6 is the number of lines used by the menu & header
-        cols = std::max(cols, 140);
+        maxModel = results.maxModelSize();
+        maxTitle = results.maxTitleSize();
+        header_lengths = { 3, 10, maxModel, 11, 10, 12, 2, 3, 7, maxTitle };
+        header_labels = { " #", "Date", "Model", "Score Name", "Score", "Platform", "SD", "C/P", "Time", "Title" };
+        sort_fields = { "Date", "Model", "Score", "Time" };
+        int minTitle = 10;
+        // set 10 chars as minimum for Title
+        int columns = std::accumulate(header_lengths.begin(), header_lengths.end(), 0) + header_lengths.size() - maxTitle + minTitle;
+        if (columns > cols) {
+            throw std::runtime_error("Make screen bigger to fit the results! " + std::to_string(columns - cols) + " columns needed! ");
+        }
+        maxTitle = minTitle + cols - columns;
+        header_lengths[header_lengths.size() - 1] = maxTitle;
+        cols = std::min(cols, columns + maxTitle);
         // Initializes the paginator for each output type (experiments, datasets, result)
         for (int i = 0; i < static_cast<int>(OutputType::Count); i++) {
             paginator.push_back(Paginator(this->rows, results.size()));
@@ -115,7 +128,6 @@ namespace platform {
     }
     void ManageScreen::list_result(const std::string& status_message, const std::string& status_color)
     {
-
         auto data = results.at(index).getJson();
         ReportConsole report(data, compare);
         auto header_text = report.getHeader();
@@ -140,11 +152,9 @@ namespace platform {
         // Status Area
         //
         footer(status_message, status_color);
-
     }
     void ManageScreen::list_detail(const std::string& status_message, const std::string& status_color)
     {
-
         auto data = results.at(index).getJson();
         ReportConsole report(data, compare, subIndex);
         auto header_text = report.getHeader();
@@ -169,7 +179,6 @@ namespace platform {
         // Status Area
         //
         footer(status_message, status_color);
-
     }
     void ManageScreen::list_datasets(const std::string& status_message, const std::string& status_color)
     {
@@ -193,7 +202,6 @@ namespace platform {
         // Status Area
         //
         footer(status_message, status_color);
-
     }
     void ManageScreen::list_experiments(const std::string& status_message, const std::string& status_color)
     {
@@ -201,17 +209,10 @@ namespace platform {
         // header
         //
         header();
-        //
-        // Field names
-        //
-        int maxModel = results.maxModelSize();
-        int maxTitle = results.maxTitleSize();
-        std::vector<int> header_lengths = { 3, 10, maxModel, 11, 10, 12, 2, 3, 7, maxTitle };
         std::cout << Colors::RESET();
         std::string arrow_dn = Symbols::down_arrow + " ";
         std::string arrow_up = Symbols::up_arrow + " ";
-        std::vector<std::string> header_labels = { " #", "Date", "Model", "Score Name", "Score", "Platform", "SD", "C/P", "Time", "Title" };
-        std::vector<std::string> sort_fields = { "Date", "Model", "Score", "Time" };
+
         for (int i = 0; i < header_labels.size(); i++) {
             std::string suffix = "", color = Colors::GREEN();
             int diff = 0;
@@ -234,7 +235,7 @@ namespace platform {
         for (int i = index_from; i <= index_to; i++) {
             auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
             std::cout << color << std::setw(3) << std::fixed << std::right << i << " ";
-            std::cout << results.at(i).to_string(maxModel) << std::endl;
+            std::cout << results.at(i).to_string(maxModel, maxTitle) << std::endl;
         }
         //
         // Status Area
@@ -290,7 +291,6 @@ namespace platform {
     std::pair<std::string, std::string> ManageScreen::sortList()
     {
         std::cout << Colors::YELLOW() << "Choose sorting field (date='d', score='s', time='t', model='m', ascending='+', descending='-'): ";
-        std::vector<std::string> fields = { "Date", "Model", "Score", "Time" };
         std::string invalid_option = "Invalid sorting option";
         std::string line;
         char option;
@@ -322,7 +322,7 @@ namespace platform {
                 return { Colors::RED(), invalid_option };
         }
         results.sortResults(sort_field, sort_type);
-        return { Colors::GREEN(), "Sorted by " + fields[static_cast<int>(sort_field)] + " " + (sort_type == SortType::ASC ? "ascending" : "descending") };
+        return { Colors::GREEN(), "Sorted by " + sort_fields[static_cast<int>(sort_field)] + " " + (sort_type == SortType::ASC ? "ascending" : "descending") };
     }
     void ManageScreen::menu()
     {
@@ -333,17 +333,17 @@ namespace platform {
         std::vector<std::tuple<std::string, char, bool>>  mainOptions = {
             {"quit", 'q', false},
             {"list", 'l', false},
-            {"delete", 'D', true},
+            {"Delete", 'D', true},
             {"datasets", 'd', false},
             {"hide", 'h', true},
             {"sort", 's', false},
             {"report", 'r', true},
             {"excel", 'e', true},
             {"title", 't', true},
-            {"set A", 'a', true},
-            {"set B", 'b', true},
+            {"set A", 'A', true},
+            {"set B", 'B', true},
             {"compare A~B", 'c', false},
-            {"Page", 'p', true},
+            {"page", 'p', true},
             {"Page+", '+', false },
             {"Page-", '-', false}
         };
@@ -354,23 +354,20 @@ namespace platform {
             {"list", 'l', false},
             {"excel", 'e', false},
             {"back", 'b', false},
-            {"Page", 'p', true},
+            {"page", 'p', true},
             {"Page+", '+', false},
             {"Page-", '-', false}
         };
-
-        auto parser = CommandParser();
+        auto main_menu = OptionsMenu(mainOptions, Colors::IGREEN(), Colors::YELLOW(), cols);
+        auto list_menu = OptionsMenu(listOptions, Colors::IBLUE(), Colors::YELLOW(), cols);
         while (!finished) {
+            OptionsMenu& menu = output_type == OutputType::EXPERIMENTS ? main_menu : list_menu;
             bool parserError = true; // force the first iteration
             while (parserError) {
                 auto [min_index, max_index] = paginator[static_cast<int>(output_type)].getOffset();
-                if (output_type == OutputType::EXPERIMENTS) {
-                    std::tie(option, index, parserError) = parser.parse(Colors::IGREEN(), mainOptions, 'r', min_index, max_index);
-                } else {
-                    std::tie(option, subIndex, parserError) = parser.parse(Colors::IBLUE(), listOptions, 'r', min_index, max_index);
-                }
+                std::tie(option, index, parserError) = menu.parse('r', min_index, max_index);
                 if (parserError) {
-                    list(parser.getErrorMessage(), Colors::RED());
+                    list(menu.getErrorMessage(), Colors::RED());
                 }
             }
             switch (option) {
@@ -405,7 +402,7 @@ namespace platform {
                 case 'q':
                     finished = true;
                     break;
-                case 'a':
+                case 'A':
                     if (index == index_B) {
                         list("A and B cannot be the same!", Colors::RED());
                         break;
@@ -413,7 +410,7 @@ namespace platform {
                     index_A = index;
                     list("A set to " + std::to_string(index), Colors::GREEN());
                     break;
-                case 'b': // set_b or back to list
+                case 'B': // set_b or back to list
                     if (output_type == OutputType::EXPERIMENTS) {
                         if (index == index_A) {
                             list("A and B cannot be the same!", Colors::RED());

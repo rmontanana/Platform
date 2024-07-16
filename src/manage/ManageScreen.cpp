@@ -30,9 +30,6 @@ namespace platform {
         header_labels = { " #", "Date", "Model", "Score Name", "Score", "Platform", "SD", "C/P", "Time", "Title" };
         sort_fields = { "Date", "Model", "Score", "Time" };
         updateSize(rows, cols);
-        if (min_columns > cols) {
-            throw std::runtime_error("Make screen bigger to fit the results! " + std::to_string(min_columns - cols) + " columns needed! ");
-        }
         // Initializes the paginator for each output type (experiments, datasets, result)
         for (int i = 0; i < static_cast<int>(OutputType::Count); i++) {
             paginator.push_back(Paginator(this->rows, results.size()));
@@ -56,6 +53,14 @@ namespace platform {
             paginator_.setPageSize(rows);
         }
     }
+    bool ManageScreen::checkWrongColumns()
+    {
+        if (min_columns > cols) {
+            std::cerr << Colors::MAGENTA() << "Make screen bigger to fit the results! " + std::to_string(min_columns - cols) + " columns needed! " << std::endl;
+            return true;
+        }
+        return false;
+    }
     void ManageScreen::updateSize(int rows_, int cols_)
     {
         rows = std::max(6, rows_ - 6); // 6 is the number of lines used by the menu & header
@@ -65,9 +70,11 @@ namespace platform {
     void ManageScreen::doMenu()
     {
         if (results.empty()) {
-            std::cout << Colors::MAGENTA() << "No results found!" << Colors::RESET() << std::endl;
+            std::cerr << Colors::MAGENTA() << "No results found!" << Colors::RESET() << std::endl;
             return;
         }
+        if (checkWrongColumns())
+            return;
         results.sortResults(sort_field, sort_type);
         list(STATUS_OK, STATUS_COLOR);
         menu();
@@ -302,15 +309,28 @@ namespace platform {
     }
     std::pair<std::string, std::string> ManageScreen::sortList()
     {
-        std::cout << Colors::YELLOW() << "Choose sorting field (date='d', score='s', time='t', model='m', ascending='+', descending='-'): ";
+        std::vector<std::tuple<std::string, char, bool>>  sortOptions = {
+            {"date", 'd', false},
+            {"score", 's', false},
+            {"time", 't', false},
+            {"model", 'm', false},
+            {"ascending+", '+', false},
+            {"descending-", '-', false}
+        };
+        auto sortMenu = OptionsMenu(sortOptions, Colors::YELLOW(), Colors::RED(), cols);
         std::string invalid_option = "Invalid sorting option";
-        std::string line;
         char option;
-        getline(std::cin, line);
-        if (line.size() == 0 || line.size() > 1) {
-            return { Colors::RED(), invalid_option };
+        bool parserError = true; // force the first iteration
+        while (parserError) {
+            if (checkWrongColumns())
+                return { Colors::RED(), "Invalid column size" };
+            auto [min_index, max_index] = paginator[static_cast<int>(output_type)].getOffset();
+            std::tie(option, index, parserError) = sortMenu.parse(' ', 0, 0);
+            sortMenu.updateColumns(cols);
+            if (parserError) {
+                return { Colors::RED(), invalid_option };
+            }
         }
-        option = line[0];
         switch (option) {
             case 'd':
                 sort_field = SortField::DATE;
@@ -364,7 +384,7 @@ namespace platform {
             {"quit", 'q', false},
             {"report", 'r', true},
             {"list", 'l', false},
-            {"excel", 'e', false},
+            {"excel", 'e', true},
             {"back", 'b', false},
             {"page", 'p', true},
             {"Page+", '+', false},
@@ -376,11 +396,12 @@ namespace platform {
             OptionsMenu& menu = output_type == OutputType::EXPERIMENTS ? main_menu : list_menu;
             bool parserError = true; // force the first iteration
             while (parserError) {
-                if (min_columns > cols) {
-                    throw std::runtime_error("Make screen bigger to fit the results! " + std::to_string(min_columns - cols) + " columns needed! ");
-                }
                 auto [min_index, max_index] = paginator[static_cast<int>(output_type)].getOffset();
                 std::tie(option, index, parserError) = menu.parse('r', min_index, max_index);
+                if (min_columns > cols) {
+                    std::cerr << "Make screen bigger to fit the results! " + std::to_string(min_columns - cols) + " columns needed! " << std::endl;
+                    return;
+                }
                 menu.updateColumns(cols);
                 if (parserError) {
                     list(menu.getErrorMessage(), Colors::RED());

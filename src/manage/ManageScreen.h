@@ -31,6 +31,7 @@ namespace platform {
         std::pair<std::string, std::string> sortList();
         std::string getVersions();
         void computeSizes();
+        bool checkWrongColumns();
         void menu();
         void header();
         void footer(const std::string& status, const std::string& color);

@@ -13,6 +13,7 @@ namespace platform {
         char getCommand() const { return command; };
         int getIndex() const { return index; };
         std::string getErrorMessage() const { return errorMessage; };
+        void updateColumns(int cols) { this->cols = cols; }
     private:
         std::vector<std::tuple<std::string, char, bool>>& options;
         std::string color_normal, color_bold;

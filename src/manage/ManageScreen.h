@@ -18,6 +18,7 @@ namespace platform {
         ManageScreen(int rows, int cols, const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial, bool compare);
         ~ManageScreen() = default;
         void doMenu();
+        void updateSize(int rows, int cols);
     private:
         void list(const std::string& status, const std::string& color);
         void list_experiments(const std::string& status, const std::string& color);
@@ -29,12 +30,14 @@ namespace platform {
         std::string report_compared();
         std::pair<std::string, std::string> sortList();
         std::string getVersions();
+        void computeSizes();
         void menu();
         void header();
         void footer(const std::string& status, const std::string& color);
         OutputType output_type;
         int rows;
         int cols;
+        int min_columns;
         int index;
         int subIndex;
         int index_A, index_B; // used for comparison of experiments
@@ -44,6 +47,7 @@ namespace platform {
         bool complete;
         bool partial;
         bool compare;
+        bool resize = false;
         int maxModel, maxTitle;
         std::vector<std::string> header_labels;
         std::vector<int> header_lengths;

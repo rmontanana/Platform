@@ -24,21 +24,16 @@ namespace platform {
         results.load();
         openExcel = false;
         workbook = NULL;
-        this->rows = std::max(0, rows - 6); // 6 is the number of lines used by the menu & header
+        this->rows = std::max(6, rows - 6); // 6 is the number of lines used by the menu & header
         maxModel = results.maxModelSize();
         maxTitle = results.maxTitleSize();
         header_lengths = { 3, 10, maxModel, 11, 10, 12, 2, 3, 7, maxTitle };
         header_labels = { " #", "Date", "Model", "Score Name", "Score", "Platform", "SD", "C/P", "Time", "Title" };
         sort_fields = { "Date", "Model", "Score", "Time" };
-        int minTitle = 10;
-        // set 10 chars as minimum for Title
-        int columns = std::accumulate(header_lengths.begin(), header_lengths.end(), 0) + header_lengths.size() - maxTitle + minTitle;
-        if (columns > cols) {
-            throw std::runtime_error("Make screen bigger to fit the results! " + std::to_string(columns - cols) + " columns needed! ");
+        computeSizes();
+        if (min_columns > cols) {
+            throw std::runtime_error("Make screen bigger to fit the results! " + std::to_string(min_columns - cols) + " columns needed! ");
         }
-        maxTitle = minTitle + cols - columns;
-        header_lengths[header_lengths.size() - 1] = maxTitle;
-        cols = std::min(cols, columns + maxTitle);
         // Initializes the paginator for each output type (experiments, datasets, result)
         for (int i = 0; i < static_cast<int>(OutputType::Count); i++) {
             paginator.push_back(Paginator(this->rows, results.size()));
@@ -48,6 +43,27 @@ namespace platform {
         index = -1;
         subIndex = -1;
         output_type = OutputType::EXPERIMENTS;
+    }
+    void ManageScreen::computeSizes()
+    {
+        int minTitle = 10;
+        // set 10 chars as minimum for Title
+        auto header_title = header_lengths[header_lengths.size() - 1];
+        min_columns = std::accumulate(header_lengths.begin(), header_lengths.end(), 0) + header_lengths.size() - header_title + minTitle;
+        maxTitle = minTitle + cols - min_columns;
+        header_lengths[header_lengths.size() - 1] = maxTitle;
+        cols = std::min(cols, min_columns + maxTitle);
+        for (auto& paginator_ : paginator) {
+            paginator_.setPageSize(rows);
+        }
+        resize = false;
+    }
+    void ManageScreen::updateSize(int rows_, int cols_)
+    {
+        rows = std::max(6, rows_ - 6); // 6 is the number of lines used by the menu & header
+        cols = cols_;
+        resize = true;
+        computeSizes();
     }
     void ManageScreen::doMenu()
     {
@@ -212,7 +228,6 @@ namespace platform {
         std::cout << Colors::RESET();
         std::string arrow_dn = Symbols::down_arrow + " ";
         std::string arrow_up = Symbols::up_arrow + " ";
-
         for (int i = 0; i < header_labels.size(); i++) {
             std::string suffix = "", color = Colors::GREEN();
             int diff = 0;
@@ -358,14 +373,19 @@ namespace platform {
             {"Page+", '+', false},
             {"Page-", '-', false}
         };
-        auto main_menu = OptionsMenu(mainOptions, Colors::IGREEN(), Colors::YELLOW(), cols);
-        auto list_menu = OptionsMenu(listOptions, Colors::IBLUE(), Colors::YELLOW(), cols);
+
         while (!finished) {
+            auto main_menu = OptionsMenu(mainOptions, Colors::IGREEN(), Colors::YELLOW(), cols);
+            auto list_menu = OptionsMenu(listOptions, Colors::IBLUE(), Colors::YELLOW(), cols);
             OptionsMenu& menu = output_type == OutputType::EXPERIMENTS ? main_menu : list_menu;
             bool parserError = true; // force the first iteration
             while (parserError) {
+                if (min_columns > cols) {
+                    throw std::runtime_error("Make screen bigger to fit the results! " + std::to_string(min_columns - cols) + " columns needed! ");
+                }
                 auto [min_index, max_index] = paginator[static_cast<int>(output_type)].getOffset();
                 std::tie(option, index, parserError) = menu.parse('r', min_index, max_index);
+                menu.updateColumns(cols);
                 if (parserError) {
                     list(menu.getErrorMessage(), Colors::RED());
                 }

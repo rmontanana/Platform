@@ -54,4 +54,6 @@ private:
     int page;
     int numPages;
 };
+//Options: (quit, list, Delete, datasets, hide, sort, report, excel, title, set A, set B, compare A~B, page, Page+, Page-
+//123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456798012345678901234567890(120)
 #endif

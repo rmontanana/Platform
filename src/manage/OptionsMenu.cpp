@@ -8,8 +8,8 @@ namespace platform {
     std::string OptionsMenu::to_string()
     {
         bool first = true;
-        size_t size = 0;
         std::string result = color_normal + "Options: (";
+        size_t size = 10; // Size of "Options: ("
         for (auto& option : options) {
             if (!first) {
                 result += ", ";

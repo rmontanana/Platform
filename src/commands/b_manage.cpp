@@ -4,7 +4,10 @@
 #include <unistd.h>
 #include <argparse/argparse.hpp>
 #include "manage/ManageScreen.h"
+#include <signal.h>
 #include "config.h"
+
+platform::ManageScreen* manager = nullptr;
 
 void manageArguments(argparse::ArgumentParser& program, int argc, char** argv)
 {
@@ -42,6 +45,11 @@ std::pair<int, int> numRowsCols()
     return { ts.ws_row, ts.ws_col };
 #endif /* TIOCGSIZE */
 }
+void handleResize(int sig)
+{
+    auto [rows, cols] = numRowsCols();
+    manager->updateSize(rows, cols);
+}
 
 int main(int argc, char** argv)
 {
@@ -50,13 +58,15 @@ int main(int argc, char** argv)
     std::string model = program.get<std::string>("model");
     std::string score = program.get<std::string>("score");
     std::string platform = program.get<std::string>("platform");
-    auto complete = program.get<bool>("complete");
-    auto partial = program.get<bool>("partial");
-    auto compare = program.get<bool>("compare");
-    auto [rows, cols] = numRowsCols();
+    bool complete = program.get<bool>("complete");
+    bool partial = program.get<bool>("partial");
+    bool compare = program.get<bool>("compare");
     if (complete)
         partial = false;
-    auto manager = platform::ManageScreen(rows, cols, model, score, platform, complete, partial, compare);
-    manager.doMenu();
+    signal(SIGWINCH, handleResize);
+    auto [rows, cols] = numRowsCols();
+    manager = new platform::ManageScreen(rows, cols, model, score, platform, complete, partial, compare);
+    manager->doMenu();
+    delete manager;
     return 0;
 }

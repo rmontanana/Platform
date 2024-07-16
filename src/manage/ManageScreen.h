@@ -47,7 +47,6 @@ namespace platform {
         bool complete;
         bool partial;
         bool compare;
-        bool resize = false;
         int maxModel, maxTitle;
         std::vector<std::string> header_labels;
         std::vector<int> header_lengths;

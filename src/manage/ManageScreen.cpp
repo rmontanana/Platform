@@ -24,13 +24,12 @@ namespace platform {
         results.load();
         openExcel = false;
         workbook = NULL;
-        this->rows = std::max(6, rows - 6); // 6 is the number of lines used by the menu & header
         maxModel = results.maxModelSize();
         maxTitle = results.maxTitleSize();
         header_lengths = { 3, 10, maxModel, 11, 10, 12, 2, 3, 7, maxTitle };
         header_labels = { " #", "Date", "Model", "Score Name", "Score", "Platform", "SD", "C/P", "Time", "Title" };
         sort_fields = { "Date", "Model", "Score", "Time" };
-        computeSizes();
+        updateSize(rows, cols);
         if (min_columns > cols) {
             throw std::runtime_error("Make screen bigger to fit the results! " + std::to_string(min_columns - cols) + " columns needed! ");
         }
@@ -56,13 +55,11 @@ namespace platform {
         for (auto& paginator_ : paginator) {
             paginator_.setPageSize(rows);
         }
-        resize = false;
     }
     void ManageScreen::updateSize(int rows_, int cols_)
     {
         rows = std::max(6, rows_ - 6); // 6 is the number of lines used by the menu & header
         cols = cols_;
-        resize = true;
         computeSizes();
     }
     void ManageScreen::doMenu()
@@ -373,7 +370,6 @@ namespace platform {
             {"Page+", '+', false},
             {"Page-", '-', false}
         };
-
         while (!finished) {
             auto main_menu = OptionsMenu(mainOptions, Colors::IGREEN(), Colors::YELLOW(), cols);
             auto list_menu = OptionsMenu(listOptions, Colors::IBLUE(), Colors::YELLOW(), cols);

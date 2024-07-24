@@ -396,8 +396,14 @@ namespace platform {
             OptionsMenu& menu = output_type == OutputType::EXPERIMENTS ? main_menu : list_menu;
             bool parserError = true; // force the first iteration
             while (parserError) {
+                int index_menu;
                 auto [min_index, max_index] = paginator[static_cast<int>(output_type)].getOffset();
-                std::tie(option, index, parserError) = menu.parse('r', min_index, max_index);
+                std::tie(option, index_menu, parserError) = menu.parse('r', min_index, max_index);
+                if (output_type == OutputType::EXPERIMENTS) {
+                    index = index_menu;
+                } else {
+                    subIndex = index_menu;
+                }
                 if (min_columns > cols) {
                     std::cerr << "Make screen bigger to fit the results! " + std::to_string(min_columns - cols) + " columns needed! " << std::endl;
                     return;

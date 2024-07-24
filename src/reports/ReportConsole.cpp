@@ -2,6 +2,7 @@
 #include <locale>
 #include "best/BestScore.h"
 #include "common/CLocale.h"
+#include "common/Timer.h"
 #include "ReportConsole.h"
 #include "main/Scores.h"
 
@@ -30,8 +31,9 @@ namespace platform {
             "Random seeds: " + fromVector("seeds") + " Discretized: " + (data["discretized"].get<bool>() ? "True" : "False") + algorithm
             + " Stratified: " + (data["stratified"].get<bool>() ? "True" : "False") + " Smooth Strategy: " + smooth
         );
-        oss << "Execution took  " << std::setprecision(2) << std::fixed << data["duration"].get<float>()
-            << " seconds,   " << data["duration"].get<float>() / 3600 << " hours, on " << data["platform"].get<std::string>();
+        Timer timer;
+        oss << "Execution took  " << timer.translate2String(data["duration"].get<float>())
+            << " on " << data["platform"].get<std::string>() << " Language: " << data["language"].get<std::string>();
         sheader << headerLine(oss.str());
         sheader << headerLine("Score is " + data["score_name"].get<std::string>());
         sheader << std::string(MAXL, '*') << std::endl;

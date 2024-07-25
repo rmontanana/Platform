@@ -27,9 +27,23 @@ namespace platform {
         std::string discretiz_algo = data.find("discretization_algorithm") != data.end() ? data["discretization_algorithm"].get<std::string>() : "ORIGINAL";
         std::string algorithm = data["discretized"].get<bool>() ? " (" + discretiz_algo + ")" : "";
         std::string smooth = data.find("smooth_strategy") != data.end() ? data["smooth_strategy"].get<std::string>() : "ORIGINAL";
+        std::string stratified;
+        try {
+            stratified = data["stratified"].get<bool>() ? "True" : "False";
+        }
+        catch (nlohmann::json::type_error) {
+            stratified = data["stratified"].get<int>() == 1 ? "True" : "False";
+        }
+        std::string discretized;
+        try {
+            discretized = data["discretized"].get<bool>() ? "True" : "False";
+        }
+        catch (nlohmann::json::type_error) {
+            discretized = data["discretized"].get<int>() == 1 ? "True" : "False";
+        }
         sheader << headerLine(
-            "Random seeds: " + fromVector("seeds") + " Discretized: " + (data["discretized"].get<bool>() ? "True" : "False") + algorithm
-            + " Stratified: " + (data["stratified"].get<bool>() ? "True" : "False") + " Smooth Strategy: " + smooth
+            "Random seeds: " + fromVector("seeds") + " Discretized: " + discretized + " " + algorithm
+            + " Stratified: " + stratified + " Smooth Strategy: " + smooth
         );
         Timer timer;
         oss << "Execution took  " << timer.translate2String(data["duration"].get<float>())

@@ -72,20 +72,39 @@ namespace platform {
     std::string Result::getFilename() const
     {
         std::ostringstream oss;
-        oss << "results_" << data.at("score_name").get<std::string>() << "_" << data.at("model").get<std::string>() << "_"
-            << data.at("platform").get<std::string>() << "_" << data["date"].get<std::string>() << "_"
-            << data["time"].get<std::string>() << "_" << (data["stratified"] ? "1" : "0") << ".json";
+        std::string stratified;
+        try {
+            stratified = data["stratified"].get<bool>() ? "1" : "0";
+        }
+        catch (nlohmann::json_abi_v3_11_3::detail::type_error) {
+            stratified = data["stratified"].get<int>() == 1 ? "1" : "0";
+        }
+        oss << "results_"
+            << data.at("score_name").get<std::string>() << "_"
+            << data.at("model").get<std::string>() << "_"
+            << data.at("platform").get<std::string>() << "_"
+            << data["date"].get<std::string>() << "_"
+            << data["time"].get<std::string>() << "_"
+            << stratified << ".json";
         return oss.str();
     }
-
-
     std::string Result::to_string(int maxModel, int maxTitle) const
     {
         auto tmp = ConfigLocale();
         std::stringstream oss;
-        std::string s = data["stratified"].get<bool>() ? "S" : "";
-        std::string d = data["discretized"].get<bool>() ? "D" : "";
-        std::string sd = s + d;
+        std::string s, d;
+        try {
+            s = data["stratified"].get<bool>() ? "S" : " ";
+        }
+        catch (nlohmann::json_abi_v3_11_3::detail::type_error) {
+            s = data["stratified"].get<int>() == 1 ? "S" : " ";
+        }
+        try {
+            d = data["discretized"].get<bool>() ? "D" : " ";
+        }
+        catch (nlohmann::json_abi_v3_11_3::detail::type_error) {
+            d = data["discretized"].get<int>() == 1 ? "D" : " ";
+        }
         auto duration = data["duration"].get<double>();
         double durationShow = duration > 3600 ? duration / 3600 : duration > 60 ? duration / 60 : duration;
         std::string durationUnit = duration > 3600 ? "h" : duration > 60 ? "m" : "s";
@@ -94,7 +113,7 @@ namespace platform {
         oss << std::setw(11) << std::left << data["score_name"].get<std::string>() << " ";
         oss << std::right << std::setw(10) << std::setprecision(7) << std::fixed << score << " ";
         oss << std::left << std::setw(12) << data["platform"].get<std::string>() << " ";
-        oss << std::left << std::setw(2) << sd << " ";
+        oss << s << d << " ";
         auto completeString = isComplete() ? "C" : "P";
         oss << std::setw(1) << " " << completeString << "  ";
         oss << std::setw(5) << std::right << std::setprecision(2) << std::fixed << durationShow << " " << durationUnit << " ";

@@ -250,6 +250,10 @@ namespace platform {
         //
         // Results
         //
+        if (results.empty()) {
+            std::cout << "No results found!" << std::endl;
+            return;
+        }
         auto [index_from, index_to] = paginator[static_cast<int>(output_type)].getOffset();
         for (int i = index_from; i <= index_to; i++) {
             auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();

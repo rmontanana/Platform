@@ -32,6 +32,10 @@ namespace platform {
                 throw std::runtime_error("Could not create directory " + path);
             }
         }
+        static std::string bestResultsFile(const std::string& score, const std::string& model)
+        {
+            return "best_results_" + score + "_" + model + ".json";
+        }
         static std::string excelResults() { return "some_results.xlsx"; }
         static std::string grid_input(const std::string& model)
         {

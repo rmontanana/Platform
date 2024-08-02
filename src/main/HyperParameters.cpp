@@ -19,7 +19,7 @@ namespace platform {
             std::ostream_iterator<std::string>(ss, delim.c_str()));
         return ss.str();
     }
-    HyperParameters::HyperParameters(const std::vector<std::string>& datasets, const std::string& hyperparameters_file)
+    HyperParameters::HyperParameters(const std::vector<std::string>& datasets, const std::string& hyperparameters_file, bool best)
     {
         // Check if file exists
         std::ifstream file(hyperparameters_file);
@@ -28,7 +28,14 @@ namespace platform {
         }
         // Check if file is a json
         json file_hyperparameters = json::parse(file);
-        auto input_hyperparameters = file_hyperparameters["results"];
+        json input_hyperparameters;
+        if (best) {
+            for (const auto& [key, value] : file_hyperparameters.items()) {
+                input_hyperparameters[key] = value[1];
+            }
+        } else {
+            input_hyperparameters = file_hyperparameters["results"];
+        }
         // Check if hyperparameters are valid
         for (const auto& dataset : datasets) {
             if (!input_hyperparameters.contains(dataset)) {

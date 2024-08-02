@@ -36,6 +36,7 @@ void manageArguments(argparse::ArgumentParser& program)
     program.add_argument("--hyperparameters").default_value("{}").help("Hyperparameters passed to the model in Experiment");
     program.add_argument("--hyper-file").default_value("").help("Hyperparameters file name." \
         "Mutually exclusive with hyperparameters. This file should contain hyperparameters for each dataset in json format.");
+    program.add_argument("--hyper-best").default_value(false).help("Use best results of the model as source of hyperparameters").implicit_value(true);
     program.add_argument("-m", "--model")
         .help("Model to use: " + platform::Models::instance()->toString())
         .action([](const std::string& value) {
@@ -93,7 +94,7 @@ int main(int argc, char** argv)
     manageArguments(program);
     std::string file_name, model_name, title, hyperparameters_file, datasets_file, discretize_algo, smooth_strat, score;
     json hyperparameters_json;
-    bool discretize_dataset, stratified, saveResults, quiet, no_train_score, generate_fold_files, graph;
+    bool discretize_dataset, stratified, saveResults, quiet, no_train_score, generate_fold_files, graph, hyper_best;
     std::vector<int> seeds;
     std::vector<std::string> file_names;
     std::vector<std::string> filesToTest;
@@ -117,9 +118,17 @@ int main(int argc, char** argv)
         hyperparameters_json = json::parse(hyperparameters);
         hyperparameters_file = program.get<std::string>("hyper-file");
         no_train_score = program.get<bool>("no-train-score");
+        hyper_best = program.get<bool>("hyper-best");
         generate_fold_files = program.get<bool>("generate-fold-files");
-        if (hyperparameters_file != "" && hyperparameters != "{}") {
-            throw runtime_error("hyperparameters and hyper_file are mutually exclusive");
+        if (hyper_best) {
+            // Build the best results file_name
+            hyperparameters_file = platform::Paths::results() + platform::Paths::bestResultsFile(score, model_name);
+            // ignore this parameter
+            hyperparameters = "{}";
+        } else {
+            if (hyperparameters_file != "" && hyperparameters != "{}") {
+                throw runtime_error("hyperparameters and hyper_file are mutually exclusive");
+            }
         }
         title = program.get<std::string>("title");
         if (title == "" && file_name == "all") {
@@ -188,7 +197,7 @@ int main(int argc, char** argv)
 
     platform::HyperParameters test_hyperparams;
     if (hyperparameters_file != "") {
-        test_hyperparams = platform::HyperParameters(datasets.getNames(), hyperparameters_file);
+        test_hyperparams = platform::HyperParameters(datasets.getNames(), hyperparameters_file, hyper_best);
     } else {
         test_hyperparams = platform::HyperParameters(datasets.getNames(), hyperparameters_json);
     }

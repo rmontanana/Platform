@@ -22,7 +22,6 @@ namespace platform {
         void messageExcelFile(const std::string& fileName);
         json buildTableResults(std::vector<std::string> models);
         void printTableResults(std::vector<std::string> models, json table);
-        std::string bestResultFile();
         json loadFile(const std::string& fileName);
         void listFile();
         std::string path;

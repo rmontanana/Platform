@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "common/Colors.h"
 #include "common/CLocale.h"
+#include "common/Paths.h"
 #include "results/Result.h"
 #include "BestResultsExcel.h"
 #include "best/Statistics.h"
@@ -59,15 +60,11 @@ namespace platform {
             std::cerr << Colors::MAGENTA() << "No results found for model " << model << " and score " << score << Colors::RESET() << std::endl;
             exit(1);
         }
-        std::string bestFileName = path + bestResultFile();
+        std::string bestFileName = path + Paths::bestResultsFile(score, model);
         std::ofstream file(bestFileName);
         file << bests;
         file.close();
         return bestFileName;
-    }
-    std::string BestResults::bestResultFile()
-    {
-        return "best_results_" + score + "_" + model + ".json";
     }
     std::pair<std::string, std::string> getModelScore(std::string name)
     {
@@ -150,7 +147,7 @@ namespace platform {
     }
     void BestResults::listFile()
     {
-        std::string bestFileName = path + bestResultFile();
+        std::string bestFileName = path + Paths::bestResultsFile(score, model);
         if (FILE* fileTest = fopen(bestFileName.c_str(), "r")) {
             fclose(fileTest);
         } else {
@@ -196,7 +193,7 @@ namespace platform {
         auto maxDate = std::filesystem::file_time_type::max();
         for (const auto& model : models) {
             this->model = model;
-            std::string bestFileName = path + bestResultFile();
+            std::string bestFileName = path + Paths::bestResultsFile(score, model);
             if (FILE* fileTest = fopen(bestFileName.c_str(), "r")) {
                 fclose(fileTest);
             } else {
@@ -306,7 +303,7 @@ namespace platform {
             json table = buildTableResults(models);
             std::vector<std::string> datasets = getDatasets(table.begin().value());
             BestResultsExcel excel_report(score, datasets);
-            excel_report.reportSingle(model, path + bestResultFile());
+            excel_report.reportSingle(model, path + Paths::bestResultsFile(score, model));
             messageExcelFile(excel_report.getFileName());
         }
     }
@@ -346,7 +343,7 @@ namespace platform {
                     }
                 }
                 model = models.at(idx);
-                excel.reportSingle(model, path + bestResultFile());
+                excel.reportSingle(model, path + Paths::bestResultsFile(score, model));
             }
             messageExcelFile(excel.getFileName());
         }

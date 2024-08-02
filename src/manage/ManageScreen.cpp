@@ -509,6 +509,7 @@ namespace platform {
                         std::cout << "Hiding " << filename << std::endl;
                         results.hideResult(index, Paths::hiddenResults());
                         status_message = filename + " hidden! (moved to " + Paths::hiddenResults() + ")";
+                        paginator[static_cast<int>(OutputType::EXPERIMENTS)].setTotal(results.size());
                         list(status_message, Colors::YELLOW());
                     }
                     break;

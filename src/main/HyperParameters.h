@@ -19,6 +19,7 @@ namespace platform {
         void check(const std::vector<std::string>& valid, const std::string& fileName);
         json get(const std::string& fileName);
     private:
+        void normalize_nested(const std::vector<std::string>& datasets);
         std::map<std::string, json> hyperparameters;
         bool best = false; // Used to separate grid/best hyperparameters as the format of those files are different
     };

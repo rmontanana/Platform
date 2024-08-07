@@ -42,12 +42,12 @@ namespace platform {
     }
     void HyperParameters::normalize_nested(const std::vector<std::string>& datasets)
     {
-        for (const auto& dataset : datasets) {
-            if (hyperparameters[dataset].contains("be_hyperparams")) {
-                // Odte has base estimator hyperparameters set this way
-                hyperparameters[dataset]["be_hyperparams"] = hyperparameters[dataset]["be_hyperparams"].dump();
-            }
-        }
+        // for (const auto& dataset : datasets) {
+        //     if (hyperparameters[dataset].contains("be_hyperparams")) {
+        //         // Odte has base estimator hyperparameters set this way
+        //         hyperparameters[dataset]["be_hyperparams"] = hyperparameters[dataset]["be_hyperparams"].dump();
+        //     }
+        // }
     }
     // https://www.techiedelight.com/implode-a-vector-of-strings-into-a-comma-separated-string-in-cpp/
     std::string join(std::vector<std::string> const& strings, std::string delim)

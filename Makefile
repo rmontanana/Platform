@@ -6,7 +6,6 @@ f_release = build_release
 f_debug = build_debug
 app_targets = b_best b_list b_main b_manage b_grid
 test_targets = unit_tests_platform
-n_procs = -j 16
 
 define ClearTests
 	@for t in $(test_targets); do \
@@ -56,10 +55,10 @@ dependency: ## Create a dependency graph diagram of the project (build/dependenc
 	cd $(f_debug) && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
 
 buildd: ## Build the debug targets
-	cmake --build $(f_debug) -t $(app_targets) PlatformSample $(n_procs)
+	cmake --build $(f_debug) -t $(app_targets) PlatformSample --parallel
 
 buildr: ## Build the release targets
-	cmake --build $(f_release) -t $(app_targets) $(n_procs)
+	cmake --build $(f_release) -t $(app_targets) --parallel
 
 clean: ## Clean the tests info
 	@echo ">>> Cleaning Debug Platform tests...";
@@ -87,7 +86,7 @@ opt = ""
 test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
 	@echo ">>> Running Platform tests...";
 	@$(MAKE) clean
-	@cmake --build $(f_debug) -t $(test_targets) $(n_procs)
+	@cmake --build $(f_debug) -t $(test_targets) --parallel
 	@for t in $(test_targets); do \
 		if [ -f $(f_debug)/tests/$$t ]; then \
 			cd $(f_debug)/tests ; \

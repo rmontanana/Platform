@@ -161,7 +161,8 @@ int main(int argc, char** argv)
         }
         states[className] = std::vector<int>(maxes[className]);
         auto clf = platform::Models::instance()->create(model_name);
-        clf->fit(Xd, y, features, className, states);
+        bayesnet::Smoothing_t smoothing = bayesnet::Smoothing_t::ORIGINAL;
+        clf->fit(Xd, y, features, className, states, smoothing);
         if (dump_cpt) {
             std::cout << "--- CPT Tables ---" << std::endl;
             clf->dump_cpt();
@@ -210,14 +211,14 @@ int main(int argc, char** argv)
                 torch::Tensor ytraint = yt.index({ ttrain });
                 torch::Tensor Xtestt = torch::index_select(Xt, 1, ttest);
                 torch::Tensor ytestt = yt.index({ ttest });
-                clf->fit(Xtraint, ytraint, features, className, states);
+                clf->fit(Xtraint, ytraint, features, className, states, smoothing);
                 auto temp = clf->predict(Xtraint);
                 score_train = clf->score(Xtraint, ytraint);
                 score_test = clf->score(Xtestt, ytestt);
             } else {
                 auto [Xtrain, ytrain] = extract_indices(train, Xd, y);
                 auto [Xtest, ytest] = extract_indices(test, Xd, y);
-                clf->fit(Xtrain, ytrain, features, className, states);
+                clf->fit(Xtrain, ytrain, features, className, states, smoothing);
                 std::cout << "Nodes: " << clf->getNumberOfNodes() << std::endl;
                 nodes += clf->getNumberOfNodes();
                 score_train = clf->score(Xtrain, ytrain);

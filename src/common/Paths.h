@@ -6,12 +6,19 @@
 namespace platform {
     class Paths {
     public:
-        static std::string results() { return "results/"; }
-        static std::string hiddenResults() { return "hidden_results/"; }
-        static std::string excel() { return "excel/"; }
-        static std::string grid() { return "grid/"; }
-        static std::string graphs() { return "graphs/"; }
-        static std::string tex() { return "tex/"; }
+        static std::string createIfNotExists(const std::string& folder)
+        {
+            if (!std::filesystem::exists(folder)) {
+                std::filesystem::create_directory(folder);
+            }
+            return folder;
+        }
+        static std::string results() { return createIfNotExists("results/"); }
+        static std::string hiddenResults() { return createIfNotExists("hidden_results/"); }
+        static std::string excel() { return createIfNotExists("excel/"); }
+        static std::string grid() { return createIfNotExists("grid/"); }
+        static std::string graphs() { return createIfNotExists("graphs/"); }
+        static std::string tex() { return createIfNotExists("tex/"); }
         static std::string datasets()
         {
             auto env = platform::DotEnv();

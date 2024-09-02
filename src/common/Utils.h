@@ -36,5 +36,15 @@ namespace platform {
         }
         return result;
     }
+    double compute_std(std::vector<double> values, double mean)
+    {
+        // Compute standard devation of the values
+        double sum = 0.0;
+        for (const auto& value : values) {
+            sum += std::pow(value - mean, 2);
+        }
+        double variance = sum / values.size();
+        return std::sqrt(variance);
+    }
 }
 #endif

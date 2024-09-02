@@ -11,6 +11,7 @@ namespace platform {
         static std::string excel() { return "excel/"; }
         static std::string grid() { return "grid/"; }
         static std::string graphs() { return "graphs/"; }
+        static std::string tex() { return "tex/"; }
         static std::string datasets()
         {
             auto env = platform::DotEnv();
@@ -36,6 +37,10 @@ namespace platform {
         {
             return "best_results_" + score + "_" + model + ".json";
         }
+        static std::string bestResultsExcel()
+        {
+            return "BestResults.excel";
+        }
         static std::string excelResults() { return "some_results.xlsx"; }
         static std::string grid_input(const std::string& model)
         {
@@ -44,6 +49,10 @@ namespace platform {
         static std::string grid_output(const std::string& model)
         {
             return grid() + "grid_" + model + "_output.json";
+        }
+        static std::string tex_output()
+        {
+            return "results.tex";
         }
     };
 }

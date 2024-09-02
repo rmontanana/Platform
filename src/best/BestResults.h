@@ -13,15 +13,15 @@ namespace platform {
         }
         std::string build();
         void reportSingle(bool excel);
-        void reportAll(bool excel);
+        void reportAll(bool excel, bool tex);
         void buildAll();
     private:
         std::vector<std::string> getModels();
         std::vector<std::string> getDatasets(json table);
         std::vector<std::string> loadResultFiles();
-        void messageExcelFile(const std::string& fileName);
+        void messageOutputFile(const std::string& title, const std::string& fileName);
         json buildTableResults(std::vector<std::string> models);
-        void printTableResults(std::vector<std::string> models, json table);
+        void printTableResults(std::vector<std::string> models, json table, bool tex);
         json loadFile(const std::string& fileName);
         void listFile();
         std::string path;

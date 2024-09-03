@@ -78,7 +78,7 @@ namespace platform {
             const char* bold = model == best_model ? "\\bfseries" : "";
             handler << "& " << bold << std::setprecision(4) << std::fixed << value << "±" << std::setprecision(3) << std::fixed << std_value;
         }
-        handler << "\\" << std::endl;
+        handler << "\\\\" << std::endl;
         handler << "\\hline " << std::endl;
         handler << "\\end{tabular}" << std::endl;
         handler << "\\end{table}" << std::endl;

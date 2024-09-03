@@ -105,7 +105,7 @@ namespace platform {
             if (line.model == holmResult.model) {
                 handler << line.model << " & - & " << std::fixed << std::setprecision(2) << line.rank << " & - & - & - \\\\" << std::endl;
             } else {
-                handler << line.model << " & " << std::scientific << std::setprecision(4) << line.pvalue << " & ";
+                handler << line.model << " & " << textStatus << std::scientific << std::setprecision(4) << line.pvalue << " & ";
                 handler << std::fixed << std::setprecision(2) << line.rank << " & " << line.wtl.win << " & " << line.wtl.tie << " & " << line.wtl.loss << "\\\\" << std::endl;
             }
         }

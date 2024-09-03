@@ -4,6 +4,7 @@
 #include "common/Colors.h"
 #include "common/Symbols.h"
 #include "common/CLocale.h"
+#include "BestResultsTex.h"
 #include "Statistics.h"
 
 
@@ -113,7 +114,7 @@ namespace platform {
         }
     }
 
-    void Statistics::postHocHolmTest(bool friedmanResult)
+    void Statistics::postHocHolmTest(bool friedmanResult, bool tex)
     {
         if (!fitted) {
             fit();
@@ -194,6 +195,10 @@ namespace platform {
         oss << Colors::RESET();
         if (output) {
             std::cout << oss.str();
+        }
+        if (tex) {
+            BestResultsTex bestResultsTex;
+            bestResultsTex.holm_test(holmResult, get_date() + " " + get_time());
         }
     }
     bool Statistics::friedmanTest()

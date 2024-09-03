@@ -34,7 +34,7 @@ namespace platform {
     public:
         Statistics(const std::vector<std::string>& models, const std::vector<std::string>& datasets, const json& data, double significance = 0.05, bool output = true);
         bool friedmanTest();
-        void postHocHolmTest(bool friedmanResult);
+        void postHocHolmTest(bool friedmanResult, bool tex=false);
         FriedmanResult& getFriedmanResult();
         HolmResult& getHolmResult();
         std::map<std::string, std::map<std::string, float>>& getRanks();

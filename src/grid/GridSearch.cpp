@@ -5,29 +5,11 @@
 #include "main/Models.h"
 #include "common/Paths.h"
 #include "common/Colors.h"
+#include "common/Utils.h"
 #include "GridSearch.h"
 
 namespace platform {
-    std::string get_date()
-    {
-        time_t rawtime;
-        tm* timeinfo;
-        time(&rawtime);
-        timeinfo = std::localtime(&rawtime);
-        std::ostringstream oss;
-        oss << std::put_time(timeinfo, "%Y-%m-%d");
-        return oss.str();
-    }
-    std::string get_time()
-    {
-        time_t rawtime;
-        tm* timeinfo;
-        time(&rawtime);
-        timeinfo = std::localtime(&rawtime);
-        std::ostringstream oss;
-        oss << std::put_time(timeinfo, "%H:%M:%S");
-        return oss.str();
-    }
+    
     std::string get_color_rank(int rank)
     {
         auto colors = { Colors::WHITE(), Colors::RED(), Colors::GREEN(),  Colors::BLUE(), Colors::MAGENTA(), Colors::CYAN() };

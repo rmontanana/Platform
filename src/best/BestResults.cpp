@@ -220,9 +220,9 @@ namespace platform {
         std::cout << oss.str();
         std::cout << std::string(oss.str().size() - 8, '-') << std::endl;
         std::cout << Colors::GREEN() << " #  " << std::setw(maxDatasetName + 1) << std::left << std::string("Dataset");
-        auto bestResultsTex = BestResultsTex(models, table.at("dateTable").get<std::string>());
+        auto bestResultsTex = BestResultsTex();
         if (tex) {
-            bestResultsTex.results_header();
+            bestResultsTex.results_header(models, table.at("dateTable").get<std::string>());
         }
         for (const auto& model : models) {
             std::cout << std::setw(maxModelName) << std::left << model << " ";
@@ -333,11 +333,14 @@ namespace platform {
         if (friedman) {
             Statistics stats(models, datasets, table, significance);
             auto result = stats.friedmanTest();
-            stats.postHocHolmTest(result);
+            stats.postHocHolmTest(result, tex);
             ranksModels = stats.getRanks();
         }
         if (tex) {
             messageOutputFile("TeX", Paths::tex() + Paths::tex_output());
+            if (friedman) {
+                messageOutputFile("TeX", Paths::tex() + Paths::tex_post_hoc());
+            }
         }
         if (excel) {
             BestResultsExcel excel(score, datasets);

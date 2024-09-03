@@ -36,7 +36,7 @@ namespace platform {
         }
         return result;
     }
-    double compute_std(std::vector<double> values, double mean)
+    inline double compute_std(std::vector<double> values, double mean)
     {
         // Compute standard devation of the values
         double sum = 0.0;
@@ -45,6 +45,26 @@ namespace platform {
         }
         double variance = sum / values.size();
         return std::sqrt(variance);
+    }
+    inline std::string get_date()
+    {
+        time_t rawtime;
+        tm* timeinfo;
+        time(&rawtime);
+        timeinfo = std::localtime(&rawtime);
+        std::ostringstream oss;
+        oss << std::put_time(timeinfo, "%Y-%m-%d");
+        return oss.str();
+    }
+    inline std::string get_time()
+    {
+        time_t rawtime;
+        tm* timeinfo;
+        time(&rawtime);
+        timeinfo = std::localtime(&rawtime);
+        std::ostringstream oss;
+        oss << std::put_time(timeinfo, "%H:%M:%S");
+        return oss.str();
     }
 }
 #endif

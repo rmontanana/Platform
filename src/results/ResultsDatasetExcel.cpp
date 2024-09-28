@@ -20,7 +20,7 @@ namespace platform {
         // Body header
         row = 2;
         int col = 0;
-        for (const auto& name : { "Nº", "Model", "Date", "Time", "Score", "Hyperparameters" }) {
+        for (const auto& name : { "#", "Model", "Date", "Time", "Score", "Hyperparameters" }) {
             writeString(row, col++, name, "bodyHeader");
         }
         // Body

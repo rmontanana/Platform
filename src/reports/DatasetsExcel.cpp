@@ -21,7 +21,7 @@ namespace platform {
         // Body header
         row = 2;
         int col = 0;
-        for (const auto& name : { "Nº", "Dataset", "Samples", "Features", "#Numer.", "Classes", "Balance" }) {
+        for (const auto& name : { "#", "Dataset", "Samples", "Features", "#Numer.", "Classes", "Balance" }) {
             writeString(row, col++, name, "bodyHeader");
         }
         // Body

@@ -68,7 +68,7 @@ namespace platform {
         // Body header
         row = 3;
         int col = 1;
-        writeString(row, 0, "Nº", "bodyHeader");
+        writeString(row, 0, "#", "bodyHeader");
         writeString(row, 1, "Dataset", "bodyHeader");
         writeString(row, 2, "Score", "bodyHeader");
         writeString(row, 3, "File", "bodyHeader");
@@ -184,7 +184,7 @@ namespace platform {
         // Body header
         row = 3;
         int col = 1;
-        writeString(row, 0, "Nº", "bodyHeader");
+        writeString(row, 0, "#", "bodyHeader");
         writeString(row, 1, "Dataset", "bodyHeader");
         for (const auto& model : models) {
             writeString(row, ++col, model.c_str(), "bodyHeader");

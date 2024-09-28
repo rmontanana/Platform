@@ -32,7 +32,7 @@ namespace platform {
     }
     BestResultsExcel::BestResultsExcel(const std::string& score, const std::vector<std::string>& datasets) : score(score), datasets(datasets)
     {
-        file_name = Paths::bestResultsExcel();
+        file_name = Paths::bestResultsExcel(score);
         workbook = workbook_new(getFileName().c_str());
         setProperties("Best Results");
         int maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();

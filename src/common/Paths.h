@@ -44,9 +44,9 @@ namespace platform {
         {
             return "best_results_" + score + "_" + model + ".json";
         }
-        static std::string bestResultsExcel()
+        static std::string bestResultsExcel(const std::string& score)
         {
-            return "BestResults.excel";
+            return "BestResults_" + score + ".xlsx";
         }
         static std::string excelResults() { return "some_results.xlsx"; }
         static std::string grid_input(const std::string& model)

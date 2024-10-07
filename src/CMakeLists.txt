@@ -20,7 +20,7 @@ include_directories(
 # b_best
 add_executable(
     b_best commands/b_best.cpp best/Statistics.cpp
-    best/BestResultsExcel.cpp best/BestResultsTex.cpp best/BestResults.cpp
+    best/BestResultsExcel.cpp best/BestResultsTex.cpp best/BestResultsMd.cpp best/BestResults.cpp
     common/Datasets.cpp common/Dataset.cpp common/Discretization.cpp 
     main/Models.cpp main/Scores.cpp
     reports/ReportExcel.cpp reports/ReportBase.cpp reports/ExcelFile.cpp

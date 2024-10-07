@@ -11,6 +11,7 @@
 #include "results/Result.h"
 #include "BestResultsExcel.h"
 #include "BestResultsTex.h"
+#include "BestResultsMd.h"
 #include "best/Statistics.h"
 #include "BestResults.h"
 
@@ -221,8 +222,10 @@ namespace platform {
         std::cout << std::string(oss.str().size() - 8, '-') << std::endl;
         std::cout << Colors::GREEN() << " #  " << std::setw(maxDatasetName + 1) << std::left << std::string("Dataset");
         auto bestResultsTex = BestResultsTex();
+        auto bestResultsMd = BestResultsMd();
         if (tex) {
             bestResultsTex.results_header(models, table.at("dateTable").get<std::string>());
+            bestResultsMd.results_header(models, table.at("dateTable").get<std::string>());
         }
         for (const auto& model : models) {
             std::cout << std::setw(maxModelName) << std::left << model << " ";
@@ -239,6 +242,7 @@ namespace platform {
         auto datasets = getDatasets(table.begin().value());
         if (tex) {
             bestResultsTex.results_body(datasets, table);
+            bestResultsMd.results_body(datasets, table);
         }
         for (auto const& dataset_ : datasets) {
             auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
@@ -297,6 +301,7 @@ namespace platform {
         }
         if (tex) {
             bestResultsTex.results_footer(totals, best_model);
+            bestResultsMd.results_footer(totals, best_model);
         }
         for (const auto& model : models) {
             std::string efectiveColor = model == best_model ? Colors::RED() : Colors::GREEN();
@@ -338,8 +343,10 @@ namespace platform {
         }
         if (tex) {
             messageOutputFile("TeX", Paths::tex() + Paths::tex_output());
+            messageOutputFile("MarkDown", Paths::tex() + Paths::md_output());
             if (friedman) {
                 messageOutputFile("TeX", Paths::tex() + Paths::tex_post_hoc());
+                messageOutputFile("MarkDown", Paths::tex() + Paths::md_post_hoc());
             }
         }
         if (excel) {

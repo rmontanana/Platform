@@ -27,7 +27,7 @@ namespace platform {
         handler << "\\tiny " << std::endl;
         handler << "\\renewcommand{\\arraystretch }{1.2} " << std::endl;
         handler << "\\renewcommand{\\tabcolsep }{0.07cm} " << std::endl;
-        handler << "\\caption{Accuracy results(mean ± std) for all the algorithms and datasets} " << std::endl;
+        handler << "\\caption{Accuracy results(mean $\pm$ std) for all the algorithms and datasets} " << std::endl;
         handler << "\\label{tab:results_accuracy}" << std::endl;
         handler << "\\begin{tabular} {{r" << std::string(models.size(), 'c').c_str() << "}}" << std::endl;
         handler << "\\hline " << std::endl;
@@ -62,7 +62,7 @@ namespace platform {
                 double value = table[model].at(dataset).at(0).get<double>();
                 double std_value = table[model].at(dataset).at(3).get<double>();
                 const char* bold = value == max_value ? "\\bfseries" : "";
-                handler << "& " << bold << std::setprecision(4) << std::fixed << value << "±" << std::setprecision(3) << std_value;
+                handler << "& " << bold << std::setprecision(4) << std::fixed << value << "$\pm$" << std::setprecision(3) << std_value;
             }
             handler << "\\\\" << std::endl;
         }
@@ -76,7 +76,7 @@ namespace platform {
             double value = std::reduce(totals.at(model).begin(), totals.at(model).end()) / nDatasets;
             double std_value = compute_std(totals.at(model), value);
             const char* bold = model == best_model ? "\\bfseries" : "";
-            handler << "& " << bold << std::setprecision(4) << std::fixed << value << "±" << std::setprecision(3) << std::fixed << std_value;
+            handler << "& " << bold << std::setprecision(4) << std::fixed << value << "$\pm$" << std::setprecision(3) << std::fixed << std_value;
         }
         handler << "\\\\" << std::endl;
         handler << "\\hline " << std::endl;

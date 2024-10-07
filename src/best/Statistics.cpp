@@ -5,6 +5,7 @@
 #include "common/Symbols.h"
 #include "common/CLocale.h"
 #include "BestResultsTex.h"
+#include "BestResultsMd.h"
 #include "Statistics.h"
 
 
@@ -198,7 +199,9 @@ namespace platform {
         }
         if (tex) {
             BestResultsTex bestResultsTex;
+            BestResultsMd bestResultsMd;
             bestResultsTex.holm_test(holmResult, get_date() + " " + get_time());
+            bestResultsMd.holm_test(holmResult, get_date() + " " + get_time());
         }
     }
     bool Statistics::friedmanTest()

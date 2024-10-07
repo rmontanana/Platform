@@ -61,9 +61,17 @@ namespace platform {
         {
             return "results.tex";
         }
+        static std::string md_output()
+        {
+            return "results.md";
+        }
         static std::string tex_post_hoc()
         {
             return "post_hoc.tex";
+        }
+        static std::string md_post_hoc()
+        {
+            return "post_hoc.md";
         }
     };
 }

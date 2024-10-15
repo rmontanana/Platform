@@ -9,7 +9,7 @@
 #include "GridSearch.h"
 
 namespace platform {
-    
+
     std::string get_color_rank(int rank)
     {
         auto colors = { Colors::WHITE(), Colors::RED(), Colors::GREEN(),  Colors::BLUE(), Colors::MAGENTA(), Colors::CYAN() };
@@ -85,11 +85,11 @@ namespace platform {
         std::mt19937 g{ 271 }; // Use fixed seed to obtain the same shuffle
         std::shuffle(tasks.begin(), tasks.end(), g);
         std::cout << get_color_rank(rank) << "* Number of tasks: " << tasks.size() << std::endl;
-        std::cout << "|";
+        std::cout << separator;
         for (int i = 0; i < tasks.size(); ++i) {
             std::cout << (i + 1) % 10;
         }
-        std::cout << "|" << std::endl << "|" << std::flush;
+        std::cout << separator << std::endl << separator << std::flush;
         return tasks;
     }
     void process_task_mpi_consumer(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result)
@@ -360,7 +360,7 @@ namespace platform {
             //
             auto datasets_names = filterDatasets(datasets);
             json all_results = producer(datasets_names, tasks, config_mpi, MPI_Result);
-            std::cout << get_color_rank(config_mpi.rank) << "|" << std::endl;
+            std::cout << get_color_rank(config_mpi.rank) << separator << std::endl;
             //
             // 3. Manager select the bests sccores for each dataset
             //

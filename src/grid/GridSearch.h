@@ -55,6 +55,7 @@ namespace platform {
         struct ConfigGrid config;
         json build_tasks_mpi(int rank);
         Timer timer; // used to measure the time of the whole process
+        const std::string separator = "|";
     };
 } /* namespace platform */
 #endif

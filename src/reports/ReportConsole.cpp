@@ -140,11 +140,34 @@ namespace platform {
                     }
                 }
             }
+            line.str("");
+            if (lastResult.find("score_train") == lastResult.end()) {
+                line << headerLine("Train  score: -");
+            } else {
+                line << headerLine("Train  score: " + std::to_string(lastResult["score_train"].get<double>()));
+            }
+            vbody.push_back(line.str()); sbody << line.str();
             line.str(""); line << headerLine(fVector("Train scores: ", lastResult["scores_train"], 14, 12));
+            vbody.push_back(line.str()); sbody << line.str();
+            line.str(""); line << headerLine("Test   score: " + std::to_string(lastResult["score"].get<double>()));
             vbody.push_back(line.str()); sbody << line.str();
             line.str(""); line << headerLine(fVector("Test  scores: ", lastResult["scores_test"], 14, 12));
             vbody.push_back(line.str()); sbody << line.str();
+            line.str("");
+            if (lastResult.find("train_time") == lastResult.end()) {
+                line << headerLine("Train  time: -");
+            } else {
+                line << headerLine("Train  time: " + std::to_string(lastResult["train_time"].get<double>()));
+            }
+            vbody.push_back(line.str()); sbody << line.str();
             line.str(""); line << headerLine(fVector("Train  times: ", lastResult["times_train"], 10, 3));
+            vbody.push_back(line.str()); sbody << line.str();
+            line.str("");
+            if (lastResult.find("test_time") == lastResult.end()) {
+                line << headerLine("Test  time: -");
+            } else {
+                line << headerLine("Test  time: " + std::to_string(lastResult["test_time"].get<double>()));
+            }
             vbody.push_back(line.str()); sbody << line.str();
             line.str(""); line << headerLine(fVector("Test   times: ", lastResult["times_test"], 10, 3));
             vbody.push_back(line.str()); sbody << line.str();

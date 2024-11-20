@@ -20,7 +20,7 @@ In Linux sometimes the library libstdc++ is mistaken from the miniconda installa
 libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by b_xxxx)
 ```
 
-The solution is to erase the libstdc++ library from the miniconda installation:
+The solution is to erase the libstdc++ library from the miniconda installation and no further compilation is needed.
 
 ### MPI
 

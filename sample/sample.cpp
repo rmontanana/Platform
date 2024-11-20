@@ -6,7 +6,7 @@
 #include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>
 #include <ArffFiles.hpp>
-#include <CPPFImdlp.h>
+#include <fimdlp/CPPFImdlp.h>
 #include <folding.hpp>
 #include <bayesnet/utils/BayesMetrics.h>
 #include "Models.h"

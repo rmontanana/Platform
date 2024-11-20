@@ -1,8 +1,3 @@
-[submodule "lib/mdlp"]
-	path = lib/mdlp
-	url = https://github.com/rmontanana/mdlp
-	main = main
-	update = merge
 [submodule "lib/catch2"]
 	path = lib/catch2
         main  = v2.x

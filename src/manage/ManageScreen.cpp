@@ -12,7 +12,7 @@
 #include "reports/ReportExcel.h"
 #include "reports/ReportExcelCompared.h"
 #include <bayesnet/classifiers/TAN.h>
-#include "CPPFImdlp.h"
+#include <fimdlp/CPPFImdlp.h>
 
 namespace platform {
     const std::string STATUS_OK = "Ok.";

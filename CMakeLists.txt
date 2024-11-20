@@ -68,7 +68,6 @@ endif (ENABLE_CLANG_TIDY)
 # External libraries - dependencies of Platform
 # ---------------------------------------------
 add_git_submodule("lib/argparse")
-add_git_submodule("lib/mdlp")
 
 find_library(XLSXWRITER_LIB NAMES libxlsxwriter.dylib libxlsxwriter.so PATHS ${Platform_SOURCE_DIR}/lib/libxlsxwriter/lib)
 message("XLSXWRITER_LIB=${XLSXWRITER_LIB}")
@@ -77,7 +76,11 @@ find_library(PyClassifiers NAMES libPyClassifiers PyClassifiers libPyClassifiers
 find_path(PyClassifiers_INCLUDE_DIRS REQUIRED NAMES pyclassifiers PATHS ${Platform_SOURCE_DIR}/../lib/include)
 find_library(BayesNet NAMES libBayesNet BayesNet libBayesNet.a PATHS ${Platform_SOURCE_DIR}/../lib/lib REQUIRED)
 find_path(Bayesnet_INCLUDE_DIRS REQUIRED NAMES bayesnet PATHS ${Platform_SOURCE_DIR}/../lib/include)
+find_library(FImdlp NAMES libfimdlp.a REQUIRED)
+find_path(FImdlp_INCLUDE_DIRS REQUIRED NAMES fimdlp)
 
+message(STATUS "FImdlp=${FImdlp}")
+message(STATUS "FImdlp_INCLUDE_DIRS=${FImdlp_INCLUDE_DIRS}")
 message(STATUS "PyClassifiers=${PyClassifiers}")
 message(STATUS "PyClassifiers_INCLUDE_DIRS=${PyClassifiers_INCLUDE_DIRS}")
 message(STATUS "BayesNet=${BayesNet}")

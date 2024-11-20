@@ -10,10 +10,6 @@
 [submodule "lib/libxlsxwriter"]
 	path = lib/libxlsxwriter
 	url = https://github.com/jmcnamara/libxlsxwriter.git
-[submodule "lib/mdlp"]
-	path = lib/mdlp
-	url = https://github.com/rmontanana/mdlp
-        update = merge
 [submodule "lib/folding"]
 	path = lib/folding
 	url = https://github.com/rmontanana/folding

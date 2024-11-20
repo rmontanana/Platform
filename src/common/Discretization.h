@@ -5,8 +5,8 @@
 #include <string>
 #include <functional>
 #include <vector>
-#include <Discretizer.h>
-#include <BinDisc.h>
+#include <fimdlp/Discretizer.h>
+#include <fimdlp/BinDisc.h>
 #include <fimdlp/CPPFImdlp.h>
 namespace platform {
     class Discretization {

@@ -176,7 +176,7 @@ namespace platform {
         json confusion_matrices_train = json::array();
         std::vector<std::string> notes;
         std::vector<std::string> graphs;
-        Timer train_timer, test_timer;
+        Timer train_timer, test_timer, seed_timer;
         int item = 0;
         bool first_seed = true;
         //
@@ -184,6 +184,7 @@ namespace platform {
         //
         auto score = parse_score();
         for (auto seed : randomSeeds) {
+            seed_timer.start();
             if (!quiet) {
                 string prefix = " ";
                 if (!first_seed) {
@@ -274,8 +275,10 @@ namespace platform {
                     graphs.push_back(result);
                 }
             }
-            if (!quiet)
-                std::cout << "end. " << flush;
+            if (!quiet) {
+                seed_timer.stop();
+                std::cout << "end. [" << seed_timer.getDurationString() << "]" << std::endl;
+            }
             delete fold;
         }
         //

@@ -93,8 +93,10 @@ void list_dump(std::string& model)
         if (item.first.size() > max_dataset) {
             max_dataset = item.first.size();
         }
-        if (item.second.dump().size() > max_hyper) {
-            max_hyper = item.second.dump().size();
+        for (auto const& [key, value] : item.second.items()) {
+            if (value.dump().size() > max_hyper) {
+                max_hyper = value.dump().size();
+            }
         }
     }
     std::cout << Colors::GREEN() << left << " #  " << left << setw(max_dataset) << "Dataset" << " #Com. "
@@ -106,7 +108,12 @@ void list_dump(std::string& model)
         std::cout << color;
         auto num_combinations = data.getNumCombinations(item.first);
         std::cout << setw(3) << fixed << right << ++index << left << " " << setw(max_dataset) << item.first
-            << " " << setw(5) << right << num_combinations << " " << setw(max_hyper) << left << item.second.dump() << std::endl;
+            << " " << setw(5) << right << num_combinations << " ";
+        std::string prefix = "";
+        for (auto const& [key, value] : item.second.items()) {
+            std::cout << prefix << setw(max_hyper) << std::left << value.dump() << std::endl;
+            prefix = string(11 + max_dataset, ' ');
+        }
     }
     std::cout << Colors::RESET() << std::endl;
 }

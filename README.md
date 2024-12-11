@@ -24,7 +24,14 @@ The solution is to erase the libstdc++ library from the miniconda installation a
 
 ### MPI
 
-In Linux just install openmpi & openmpi-devel packages. Only if cmake can't find openmpi installation (like in Oracle Linux) set the following variable:
+In Linux just install openmpi & openmpi-devel packages.
+
+```bash
+source /etc/profile.d/modules.sh
+module load mpi/openmpi-x86_64
+```
+
+If cmake can't find openmpi installation (like in Oracle Linux) set the following variable:
 
 ```bash
 export MPI_HOME="/usr/lib64/openmpi"

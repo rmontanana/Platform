@@ -68,8 +68,8 @@ namespace platform {
         worksheet_merge_range(worksheet, 3, 10, 3, 11, oss.str().c_str(), styles["headerSmall"]);
         oss.str("");
         oss.clear();
-        std::string discretiz_algo = data.find("discretization_algorithm") != data.end() ? data["discretization_algorithm"].get<std::string>() : "mdlp";
-        std::string algorithm = data["discretized"].get<bool>() ? " (" + discretiz_algo + ")" : "";
+        std::string discretize_algo = data.find("discretization_algorithm") != data.end() ? data["discretization_algorithm"].get<std::string>() : "mdlp";
+        std::string algorithm = data["discretized"].get<bool>() ? " (" + discretize_algo + ")" : "";
         oss << "Discretized: " << (data["discretized"].get<bool>() ? "True" : "False") << algorithm;
         worksheet_write_string(worksheet, 3, 12, oss.str().c_str(), styles["headerSmall"]);
     }

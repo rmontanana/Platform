@@ -8,7 +8,7 @@ namespace platform {
     Datasets::Datasets(bool discretize, std::string sfileType, std::string discretizer_algorithm) :
         discretize(discretize), sfileType(sfileType), discretizer_algorithm(discretizer_algorithm)
     {
-        if (discretizer_algorithm == "none" && discretize) {
+        if ((discretizer_algorithm == "none" || discretizer_algorithm == "") && discretize) {
             throw std::runtime_error("Can't discretize without discretization algorithm");
         }
         load();

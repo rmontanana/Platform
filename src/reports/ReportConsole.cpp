@@ -24,8 +24,8 @@ namespace platform {
             + " random seeds. " + data["date"].get<std::string>() + " " + data["time"].get<std::string>()
         );
         sheader << headerLine(data["title"].get<std::string>());
-        std::string discretiz_algo = data.find("discretization_algorithm") != data.end() ? data["discretization_algorithm"].get<std::string>() : "ORIGINAL";
-        std::string algorithm = data["discretized"].get<bool>() ? " (" + discretiz_algo + ")" : "";
+        std::string discretize_algo = data.find("discretization_algorithm") != data.end() ? data["discretization_algorithm"].get<std::string>() : "ORIGINAL";
+        std::string algorithm = data["discretized"].get<bool>() ? " (" + discretize_algo + ")" : "";
         std::string smooth = data.find("smooth_strategy") != data.end() ? data["smooth_strategy"].get<std::string>() : "ORIGINAL";
         std::string stratified;
         try {

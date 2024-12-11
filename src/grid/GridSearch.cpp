@@ -108,6 +108,7 @@ namespace platform {
         // Generate the hyperparamters combinations
         auto& dataset = datasets.getDataset(dataset_name);
         auto combinations = grid.getGrid(dataset_name);
+        dataset.load();
         auto [X, y] = dataset.getTensors();
         auto features = dataset.getFeatures();
         auto className = dataset.getClassName();
@@ -353,7 +354,8 @@ namespace platform {
         tasks = json::parse(msg);
         delete[] msg;
         auto env = platform::DotEnv();
-        auto datasets = Datasets(config.discretize, Paths::datasets(), env.get("discretiz_algo"));
+        auto datasets = Datasets(config.discretize, Paths::datasets(), env.get("discretize_algo"));
+
         if (config_mpi.rank == config_mpi.manager) {
             //
             // 2a. Producer delivers the tasks to the consumers

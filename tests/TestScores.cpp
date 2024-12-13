@@ -9,7 +9,7 @@
 #include "common/Paths.h"
 #include "common/Colors.h"
 #include "main/Scores.h"
-#include "config.h"
+#include "config_platform.h"
 
 using json = nlohmann::ordered_json;
 auto epsilon = 1e-4;

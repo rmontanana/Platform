@@ -9,7 +9,7 @@
 #include "folding.hpp"
 #include <ArffFiles.hpp>
 #include <bayesnet/classifiers/TAN.h>
-#include "config.h"
+#include "config_platform.h"
 
 
 TEST_CASE("Test Platform version", "[Platform]")

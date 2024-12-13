@@ -7,7 +7,7 @@
 #include "common/DotEnv.h"
 #include "common/Datasets.h"
 #include "common/Paths.h"
-#include "config.h"
+#include "config_platform.h"
 
 
 TEST_CASE("ZeroR comparison in reports", "[Report]")

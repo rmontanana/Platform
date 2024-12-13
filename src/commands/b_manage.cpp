@@ -5,7 +5,7 @@
 #include <argparse/argparse.hpp>
 #include "manage/ManageScreen.h"
 #include <signal.h>
-#include "config.h"
+#include "config_platform.h"
 
 platform::ManageScreen* manager = nullptr;
 

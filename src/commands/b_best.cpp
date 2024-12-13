@@ -5,7 +5,7 @@
 #include "common/Paths.h"
 #include "common/Colors.h"
 #include "best/BestResults.h"
-#include "config.h"
+#include "config_platform.h"
 
 void manageArguments(argparse::ArgumentParser& program)
 {

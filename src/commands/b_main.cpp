@@ -7,7 +7,7 @@
 #include "common/Paths.h"
 #include "main/Models.h"
 #include "main/modelRegister.h"
-#include "config.h"
+#include "config_platform.h"
 
 
 using json = nlohmann::ordered_json;

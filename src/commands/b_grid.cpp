@@ -11,7 +11,7 @@
 #include "common/Colors.h"
 #include "common/DotEnv.h"
 #include "grid/GridSearch.h"
-#include "config.h"
+#include "config_platform.h"
 
 using json = nlohmann::ordered_json;
 const int MAXL = 133;

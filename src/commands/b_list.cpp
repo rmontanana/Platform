@@ -13,7 +13,7 @@
 #include "results/ResultsDatasetConsole.h"
 #include "results/ResultsDataset.h"
 #include "results/ResultsDatasetExcel.h"
-#include "config.h"
+#include "config_platform.h"
 
 
 void list_datasets(argparse::ArgumentParser& program)

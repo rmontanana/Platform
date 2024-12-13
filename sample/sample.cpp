@@ -11,7 +11,7 @@
 #include <bayesnet/utils/BayesMetrics.h>
 #include "Models.h"
 #include "modelRegister.h"
-#include "config.h"
+#include "config_platform.h"
 
 const std::string PATH = { platform_data_path.begin(), platform_data_path.end() };
 

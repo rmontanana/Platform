@@ -1,5 +1,5 @@
 #include "TestUtils.h"
-#include "config.h"
+#include "config_platform.h"
 
 class Paths {
 public:

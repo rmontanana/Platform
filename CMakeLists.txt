@@ -90,7 +90,7 @@ cmake_path(SET TEST_DATA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tests/data")
 configure_file(src/common/SourceData.h.in "${CMAKE_BINARY_DIR}/configured_files/include/SourceData.h")
 add_subdirectory(config)
 add_subdirectory(src)
-add_subdirectory(sample)
+# add_subdirectory(sample)
 file(GLOB Platform_SOURCES CONFIGURE_DEPENDS ${Platform_SOURCE_DIR}/src/*.cpp)
 
 # Testing

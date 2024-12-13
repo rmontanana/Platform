@@ -68,6 +68,7 @@ endif (ENABLE_CLANG_TIDY)
 # External libraries - dependencies of Platform
 # ---------------------------------------------
 add_git_submodule("lib/argparse")
+add_git_submodule("lib/mdlp")
 
 find_library(XLSXWRITER_LIB NAMES libxlsxwriter.dylib libxlsxwriter.so PATHS ${Platform_SOURCE_DIR}/lib/libxlsxwriter/lib)
 message("XLSXWRITER_LIB=${XLSXWRITER_LIB}")

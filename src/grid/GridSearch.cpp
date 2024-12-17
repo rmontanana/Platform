@@ -12,8 +12,10 @@ namespace platform {
 
     std::string get_color_rank(int rank)
     {
-        auto colors = { Colors::WHITE(), Colors::RED(), Colors::GREEN(),  Colors::BLUE(), Colors::MAGENTA(), Colors::CYAN() };
-        return *(colors.begin() + rank % colors.size());
+        auto colors = { Colors::WHITE(), Colors::RED(), Colors::GREEN(),  Colors::BLUE(), Colors::MAGENTA(), Colors::CYAN(), Colors::YELLOW(), Colors::BLACK() };
+        std::string id = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        auto idx = rank % id.size();
+        return *(colors.begin() + rank % colors.size()) + id[idx];
     }
     GridSearch::GridSearch(struct ConfigGrid& config) : config(config)
     {
@@ -81,10 +83,10 @@ namespace platform {
                 }
             }
         }
-        // Shuffle the array so heavy datasets are spread across the workers
+        // Shuffle the array so heavy datasets are eas  ier spread across the workers
         std::mt19937 g{ 271 }; // Use fixed seed to obtain the same shuffle
         std::shuffle(tasks.begin(), tasks.end(), g);
-        std::cout << get_color_rank(rank) << "* Number of tasks: " << tasks.size() << std::endl;
+        std::cout << "* Number of tasks: " << tasks.size() << std::endl;
         std::cout << separator;
         for (int i = 0; i < tasks.size(); ++i) {
             std::cout << (i + 1) % 10;
@@ -179,7 +181,7 @@ namespace platform {
         result->n_fold = n_fold;
         result->time = timer.getDuration();
         // Update progress bar
-        std::cout << get_color_rank(config_mpi.rank) << "*" << std::flush;
+        std::cout << get_color_rank(config_mpi.rank) << std::flush;
     }
     json store_result(std::vector<std::string>& names, Task_Result& result, json& results)
     {
@@ -290,10 +292,12 @@ namespace platform {
         * {
         *   "dataset": "dataset_name",
         *   "idx_dataset": idx_dataset, // used to identify the dataset in the results
-        *    // this index is relative to the used datasets in the actual run not to the whole datasets
+        *    // this index is relative to the list of used datasets in the actual run not to the whole datasets list
         *   "seed": # of seed to use,
         *   "Fold": # of fold to process
         * }
+        *
+        * This way a task consists in process all combinations of hyperparameters for a dataset, seed and fold
         *
         * The overall process consists in these steps:
            * 0. Create the MPI result type & tasks
@@ -310,7 +314,7 @@ namespace platform {
            * 2b.1 Consumers announce to the producer that they are ready to receive a task
            * 2b.2 Consumers receive the task from the producer and process it
            * 2b.3 Consumers send the result to the producer
-           * 3. Manager select the bests sccores for each dataset
+           * 3. Manager select the bests scores for each dataset
            * 3.1 Loop thru all the results obtained from each outer fold (task) and select the best
            * 3.2 Save the results
         */
@@ -362,7 +366,7 @@ namespace platform {
             //
             auto datasets_names = filterDatasets(datasets);
             json all_results = producer(datasets_names, tasks, config_mpi, MPI_Result);
-            std::cout << get_color_rank(config_mpi.rank) << separator << std::endl;
+            std::cout << separator << std::endl;
             //
             // 3. Manager select the bests sccores for each dataset
             //

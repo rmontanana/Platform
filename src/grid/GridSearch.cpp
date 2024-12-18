@@ -19,6 +19,16 @@ namespace platform {
     }
     GridSearch::GridSearch(struct ConfigGrid& config) : config(config)
     {
+        if (config.smooth_strategy == "ORIGINAL")
+            smooth_type = bayesnet::Smoothing_t::ORIGINAL;
+        else if (config.smooth_strategy == "LAPLACE")
+            smooth_type = bayesnet::Smoothing_t::LAPLACE;
+        else if (config.smooth_strategy == "CESTNIK")
+            smooth_type = bayesnet::Smoothing_t::CESTNIK;
+        else {
+            std::cerr << "GridSearch: Unknown smoothing strategy: " << config.smooth_strategy << std::endl;
+            exit(1);
+        }
     }
     json GridSearch::loadResults()
     {
@@ -87,16 +97,21 @@ namespace platform {
         std::mt19937 g{ 271 }; // Use fixed seed to obtain the same shuffle
         std::shuffle(tasks.begin(), tasks.end(), g);
         std::cout << "* Number of tasks: " << tasks.size() << std::endl;
-        std::cout << separator;
+        std::cout << separator << std::flush;
         for (int i = 0; i < tasks.size(); ++i) {
-            std::cout << (i + 1) % 10;
+            if ((i + 1) % 10 == 0)
+                std::cout << separator;
+            else
+                std::cout << (i + 1) % 10;
         }
         std::cout << separator << std::endl << separator << std::flush;
         return tasks;
     }
     void process_task_mpi_consumer(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result)
     {
+        //
         // initialize
+        //
         Timer timer;
         timer.start();
         json task = tasks[n_task];
@@ -107,7 +122,16 @@ namespace platform {
         auto seed = task["seed"].get<int>();
         auto n_fold = task["fold"].get<int>();
         bool stratified = config.stratified;
-        // Generate the hyperparamters combinations
+        bayesnet::Smoothing_t smooth;
+        if (config.smooth_strategy == "ORIGINAL")
+            smooth = bayesnet::Smoothing_t::ORIGINAL;
+        else if (config.smooth_strategy == "LAPLACE")
+            smooth = bayesnet::Smoothing_t::LAPLACE;
+        else if (config.smooth_strategy == "CESTNIK")
+            smooth = bayesnet::Smoothing_t::CESTNIK;
+        //
+        // Generate the hyperparameters combinations
+        //
         auto& dataset = datasets.getDataset(dataset_name);
         auto combinations = grid.getGrid(dataset_name);
         dataset.load();
@@ -125,9 +149,8 @@ namespace platform {
         auto [train, test] = fold->getFold(n_fold);
         auto [X_train, X_test, y_train, y_test] = dataset.getTrainTestTensors(train, test);
         auto states = dataset.getStates(); // Get the states of the features Once they are discretized
-        double best_fold_score = 0.0;
+        float best_fold_score = 0.0;
         int best_idx_combination = -1;
-        bayesnet::Smoothing_t smoothing = bayesnet::Smoothing_t::NONE;
         json best_fold_hyper;
         for (int idx_combination = 0; idx_combination < combinations.size(); ++idx_combination) {
             auto hyperparam_line = combinations[idx_combination];
@@ -139,7 +162,9 @@ namespace platform {
                 nested_fold = new folding::KFold(config.nested, y_train.size(0), seed);
             double score = 0.0;
             for (int n_nested_fold = 0; n_nested_fold < config.nested; n_nested_fold++) {
+                //
                 // Nested level fold
+                //
                 auto [train_nested, test_nested] = nested_fold->getFold(n_nested_fold);
                 auto train_nested_t = torch::tensor(train_nested);
                 auto test_nested_t = torch::tensor(test_nested);
@@ -147,14 +172,20 @@ namespace platform {
                 auto y_nested_train = y_train.index({ train_nested_t });
                 auto X_nested_test = X_train.index({ "...", test_nested_t });
                 auto y_nested_test = y_train.index({ test_nested_t });
+                //
                 // Build Classifier with selected hyperparameters
+                //
                 auto clf = Models::instance()->create(config.model);
                 auto valid = clf->getValidHyperparameters();
                 hyperparameters.check(valid, dataset_name);
                 clf->setHyperparameters(hyperparameters.get(dataset_name));
+                //
                 // Train model
-                clf->fit(X_nested_train, y_nested_train, features, className, states, smoothing);
+                //
+                clf->fit(X_nested_train, y_nested_train, features, className, states, smooth);
+                //
                 // Test model
+                //
                 score += clf->score(X_nested_test, y_nested_test);
             }
             delete nested_fold;
@@ -166,21 +197,27 @@ namespace platform {
             }
         }
         delete fold;
+        //
         // Build Classifier with the best hyperparameters to obtain the best score
+        //
         auto hyperparameters = platform::HyperParameters(datasets.getNames(), best_fold_hyper);
         auto clf = Models::instance()->create(config.model);
         auto valid = clf->getValidHyperparameters();
         hyperparameters.check(valid, dataset_name);
         clf->setHyperparameters(best_fold_hyper);
-        clf->fit(X_train, y_train, features, className, states, smoothing);
+        clf->fit(X_train, y_train, features, className, states, smooth);
         best_fold_score = clf->score(X_test, y_test);
+        //
         // Return the result
+        //
         result->idx_dataset = task["idx_dataset"].get<int>();
         result->idx_combination = best_idx_combination;
         result->score = best_fold_score;
         result->n_fold = n_fold;
         result->time = timer.getDuration();
+        //
         // Update progress bar
+        //
         std::cout << get_color_rank(config_mpi.rank) << std::flush;
     }
     json store_result(std::vector<std::string>& names, Task_Result& result, json& results)
@@ -294,7 +331,7 @@ namespace platform {
         *   "idx_dataset": idx_dataset, // used to identify the dataset in the results
         *    // this index is relative to the list of used datasets in the actual run not to the whole datasets list
         *   "seed": # of seed to use,
-        *   "Fold": # of fold to process
+        *   "fold": # of fold to process
         * }
         *
         * This way a task consists in process all combinations of hyperparameters for a dataset, seed and fold

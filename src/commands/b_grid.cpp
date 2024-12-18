@@ -40,6 +40,11 @@ void add_compute_args(argparse::ArgumentParser& program)
     program.add_argument("--continue").help("Continue computing from that dataset").default_value(platform::GridSearch::NO_CONTINUE());
     program.add_argument("--only").help("Used with continue to compute that dataset only").default_value(false).implicit_value(true);
     program.add_argument("--exclude").default_value("[]").help("Datasets to exclude in json format, e.g. [\"dataset1\", \"dataset2\"]");
+    auto valid_choices = env.valid_tokens("smooth_strat");
+    auto& smooth_arg = program.add_argument("--smooth-strat").help("Smooth strategy used in Bayes Network node initialization. Valid values: " + env.valid_values("smooth_strat")).default_value(env.get("smooth_strat"));
+    for (auto choice : valid_choices) {
+        smooth_arg.choices(choice);
+    }
     program.add_argument("--nested").help("Set the double/nested cross validation number of folds").default_value(5).scan<'i', int>().action([](const std::string& value) {
         try {
             auto k = stoi(value);
@@ -188,6 +193,7 @@ void compute(argparse::ArgumentParser& program)
     config.score = program.get<std::string>("score");
     config.discretize = program.get<bool>("discretize");
     config.stratified = program.get<bool>("stratified");
+    config.smooth_strategy = program.get<std::string>("smooth-strat");
     config.n_folds = program.get<int>("folds");
     config.quiet = program.get<bool>("quiet");
     config.only = program.get<bool>("only");

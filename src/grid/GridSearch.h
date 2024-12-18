@@ -8,6 +8,8 @@
 #include "common/Timer.h"
 #include "main/HyperParameters.h"
 #include "GridData.h"
+#include "bayesnet/network/Network.h"
+
 
 namespace platform {
     using json = nlohmann::ordered_json;
@@ -16,6 +18,7 @@ namespace platform {
         std::string score;
         std::string continue_from;
         std::string platform;
+        std::string smooth_strategy;
         bool quiet;
         bool only; // used with continue_from to only compute that dataset
         bool discretize;
@@ -56,6 +59,7 @@ namespace platform {
         json build_tasks_mpi(int rank);
         Timer timer; // used to measure the time of the whole process
         const std::string separator = "|";
+        bayesnet::Smoothing_t smooth_type{ bayesnet::Smoothing_t::NONE };
     };
 } /* namespace platform */
 #endif

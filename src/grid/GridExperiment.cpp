@@ -6,10 +6,11 @@
 #include "common/Paths.h"
 #include "common/Colors.h"
 #include "common/Utils.h"
-#include "GridSearch.h"
+#include "GridExperiment.h"
 
 namespace platform {
-    GridSearch::GridSearch(struct ConfigGrid& config) : config(config)
+
+    GridExperiment::GridExperiment(struct ConfigGrid& config) : config(config)
     {
         if (config.smooth_strategy == "ORIGINAL")
             smooth_type = bayesnet::Smoothing_t::ORIGINAL;
@@ -22,7 +23,7 @@ namespace platform {
             exit(1);
         }
     }
-    json GridSearch::loadResults()
+    json GridExperiment::loadResults()
     {
         std::ifstream file(Paths::grid_output(config.model));
         if (file.is_open()) {
@@ -30,7 +31,7 @@ namespace platform {
         }
         return json();
     }
-    std::vector<std::string> GridSearch::filterDatasets(Datasets& datasets) const
+    std::vector<std::string> GridExperiment::filterDatasets(Datasets& datasets) const
     {
         // Load datasets
         auto datasets_names = datasets.getNames();
@@ -63,7 +64,7 @@ namespace platform {
         }
         return datasets_names;
     }
-    json GridSearch::build_tasks_mpi(int rank)
+    json GridExperiment::build_tasks_mpi(int rank)
     {
         auto tasks = json::array();
         auto grid = GridData(Paths::grid_input(config.model));
@@ -99,7 +100,7 @@ namespace platform {
         std::cout << separator << std::endl << separator << std::flush;
         return tasks;
     }
-    void GridSearch::go(struct ConfigMPI& config_mpi)
+    void GridExperiment::go(struct ConfigMPI& config_mpi)
     {
         /*
         * Each task is a json object with the following structure:
@@ -197,7 +198,7 @@ namespace platform {
             mpi_search_consumer(datasets, tasks, config, config_mpi, MPI_Result);
         }
     }
-    json GridSearch::initializeResults()
+    json GridExperiment::initializeResults()
     {
         // Load previous results if continue is set
         json results;
@@ -219,7 +220,7 @@ namespace platform {
         }
         return results;
     }
-    void GridSearch::save(json& results)
+    void GridExperiment::save(json& results)
     {
         std::ofstream file(Paths::grid_output(config.model));
         json output = {
@@ -238,4 +239,5 @@ namespace platform {
         };
         file << output.dump(4);
     }
+
 } /* namespace platform */

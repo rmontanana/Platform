@@ -1,5 +1,5 @@
-#ifndef GRIDSEARCH_H
-#define GRIDSEARCH_H
+#ifndef GRIDEXPERIMENT_H
+#define GRIDEXPERIMENT_H
 #include <string>
 #include <map>
 #include <mpi.h>
@@ -14,11 +14,11 @@
 
 namespace platform {
     using json = nlohmann::ordered_json;
-    class GridSearch {
+    class GridExperiment {
     public:
-        explicit GridSearch(struct ConfigGrid& config);
+        explicit GridExperiment(struct ConfigGrid& config);
         void go(struct ConfigMPI& config_mpi);
-        ~GridSearch() = default;
+        ~GridExperiment() = default;
         json loadResults();
         static inline std::string NO_CONTINUE() { return "NO_CONTINUE"; }
     private:

@@ -11,6 +11,7 @@
 #include "common/Colors.h"
 #include "common/DotEnv.h"
 #include "grid/GridSearch.h"
+#include "grid/GridExperiment.h"
 #include "config_platform.h"
 
 using json = nlohmann::ordered_json;

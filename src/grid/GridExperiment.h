@@ -23,22 +23,15 @@ namespace platform {
     private:
         void save(json& results);
         json initializeResults();
-        json build_tasks_mpi();
+        json build_tasks();
     };
     /* *************************************************************************************************************
     //
     // MPI Search Functions
     //
     ************************************************************************************************************* */
-    class MPI_EXPERIMENT {
+    class MPI_EXPERIMENT :public MPI_Base {
     public:
-        static std::string get_color_rank(int rank)
-        {
-            auto colors = { Colors::WHITE(), Colors::RED(), Colors::GREEN(),  Colors::BLUE(), Colors::MAGENTA(), Colors::CYAN(), Colors::YELLOW(), Colors::BLACK() };
-            std::string id = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-            auto idx = rank % id.size();
-            return *(colors.begin() + rank % colors.size()) + id[idx];
-        }
         static json producer(std::vector<std::string>& names, json& tasks, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result)
         {
             Task_Result result;
@@ -53,7 +46,7 @@ namespace platform {
                 MPI_Recv(&result, 1, MPI_Result, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
                 if (status.MPI_TAG == TAG_RESULT) {
                     //Store result
-                    store_search_result(names, result, results);
+                    store_result(names, result, results);
                 }
                 MPI_Send(&i, 1, MPI_INT, status.MPI_SOURCE, TAG_TASK, MPI_COMM_WORLD);
             }
@@ -65,7 +58,7 @@ namespace platform {
                 MPI_Recv(&result, 1, MPI_Result, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
                 if (status.MPI_TAG == TAG_RESULT) {
                     //Store result
-                    store_search_result(names, result, results);
+                    store_result(names, result, results);
                 }
                 MPI_Send(&i, 1, MPI_INT, status.MPI_SOURCE, TAG_END, MPI_COMM_WORLD);
             }
@@ -88,7 +81,7 @@ namespace platform {
                 if (status.MPI_TAG == TAG_END) {
                     break;
                 }
-                mpi_experiment_consumer_go(config, config_mpi, tasks, task, datasets, &result);
+                consumer_go(config, config_mpi, tasks, task, datasets, &result);
                 //
                 // 2b.3 Consumers send the result to the producer
                 //
@@ -125,7 +118,7 @@ namespace platform {
                 results[dataset] = json_best;
             }
         }
-        static json store_search_result(std::vector<std::string>& names, Task_Result& result, json& results)
+        static json store_result(std::vector<std::string>& names, Task_Result& result, json& results)
         {
             json json_result = {
                 { "score", result.score },

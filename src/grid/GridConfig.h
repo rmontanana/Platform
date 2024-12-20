@@ -45,31 +45,5 @@ namespace platform {
     const int TAG_RESULT = 2;
     const int TAG_TASK = 3;
     const int TAG_END = 4;
-    /* *************************************************************************************************************
-    //
-    // MPI Common Functions
-    //
-    ************************************************************************************************************* */
-    std::string get_color_rank(int rank);
-    /* *************************************************************************************************************
-    //
-    // MPI Experiment Functions
-    //
-    ************************************************************************************************************* */
-    json mpi_experiment_producer(std::vector<std::string>& names, json& tasks, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result);
-    void mpi_experiment_consumer(Datasets& datasets, json& tasks, struct ConfigGrid& config, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result);
-    void join_results_folds(json& results, json& all_results, std::string& model);
-    json store_experiment_result(std::vector<std::string>& names, Task_Result& result, json& results);
-    void mpi_experiment_consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tass, int n_task, Datasets& datasets, Task_Result* result);
-    /* *************************************************************************************************************
-    //
-    // MPI Search Functions
-    //
-    ************************************************************************************************************* */
-    json mpi_search_producer(std::vector<std::string>& names, json& tasks, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result);
-    void mpi_search_consumer(Datasets& datasets, json& tasks, struct ConfigGrid& config, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result);
-    void select_best_results_folds(json& results, json& all_results, std::string& model);
-    json store_search_result(std::vector<std::string>& names, Task_Result& result, json& results);
-    void mpi_search_consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result);
 } /* namespace platform */
 #endif

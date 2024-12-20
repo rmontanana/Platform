@@ -53,7 +53,7 @@ namespace platform {
         }
         return datasets_names;
     }
-    json GridSearch::build_tasks_mpi()
+    json GridSearch::build_tasks()
     {
         auto tasks = json::array();
         auto grid = GridData(Paths::grid_input(config.model));
@@ -145,7 +145,7 @@ namespace platform {
         json tasks;
         if (config_mpi.rank == config_mpi.manager) {
             timer.start();
-            tasks = build_tasks_mpi();
+            tasks = build_tasks();
             auto tasks_str = tasks.dump();
             tasks_size = tasks_str.size();
             msg = new char[tasks_size + 1];

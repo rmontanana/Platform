@@ -32,12 +32,22 @@ namespace platform {
         };
         ~GridBase() = default;
         virtual void go(struct ConfigMPI& config_mpi) = 0;
-        virtual json build_tasks_mpi() = 0;
     protected:
+        virtual json build_tasks() = 0;
         struct ConfigGrid config;
         Timer timer; // used to measure the time of the whole process
         const std::string separator = "|";
         bayesnet::Smoothing_t smooth_type{ bayesnet::Smoothing_t::NONE };
+    };
+    class MPI_Base {
+    public:
+        static std::string get_color_rank(int rank)
+        {
+            auto colors = { Colors::WHITE(), Colors::RED(), Colors::GREEN(),  Colors::BLUE(), Colors::MAGENTA(), Colors::CYAN(), Colors::YELLOW(), Colors::BLACK() };
+            std::string id = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+            auto idx = rank % id.size();
+            return *(colors.begin() + rank % colors.size()) + id[idx];
+        }
     };
 } /* namespace platform */
 #endif

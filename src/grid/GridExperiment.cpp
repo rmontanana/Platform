@@ -21,7 +21,7 @@ namespace platform {
         }
         return json();
     }
-    json GridExperiment::build_tasks_mpi()
+    json GridExperiment::build_tasks()
     {
         auto tasks = json::array();
         auto grid = GridData(Paths::grid_input(config.model));
@@ -113,7 +113,7 @@ namespace platform {
         json tasks;
         if (config_mpi.rank == config_mpi.manager) {
             timer.start();
-            tasks = build_tasks_mpi();
+            tasks = build_tasks();
             auto tasks_str = tasks.dump();
             tasks_size = tasks_str.size();
             msg = new char[tasks_size + 1];
@@ -137,7 +137,7 @@ namespace platform {
             // 2a. Producer delivers the tasks to the consumers
             //
             auto datasets_names = std::vector<std::string>();
-            json all_results = mpi_experiment_producer(datasets_names, tasks, config_mpi, MPI_Result);
+            json all_results = MPI_EXPERIMENT::producer(datasets_names, tasks, config_mpi, MPI_Result);
             std::cout << separator << std::endl;
             //
             // 3. Manager select the bests sccores for each dataset
@@ -152,7 +152,7 @@ namespace platform {
             //
             // 2b. Consumers prostore_search_resultcess the tasks and send the results to the producer
             //
-            mpi_experiment_consumer(datasets, tasks, config, config_mpi, MPI_Result);
+            MPI_EXPERIMENT::consumer(datasets, tasks, config, config_mpi, MPI_Result);
         }
     }
     json GridExperiment::initializeResults()

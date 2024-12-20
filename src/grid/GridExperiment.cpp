@@ -10,18 +10,8 @@
 
 namespace platform {
 
-    GridExperiment::GridExperiment(struct ConfigGrid& config) : config(config)
+    GridExperiment::GridExperiment(struct ConfigGrid& config) : GridBase(config)
     {
-        if (config.smooth_strategy == "ORIGINAL")
-            smooth_type = bayesnet::Smoothing_t::ORIGINAL;
-        else if (config.smooth_strategy == "LAPLACE")
-            smooth_type = bayesnet::Smoothing_t::LAPLACE;
-        else if (config.smooth_strategy == "CESTNIK")
-            smooth_type = bayesnet::Smoothing_t::CESTNIK;
-        else {
-            std::cerr << "GridSearch: Unknown smoothing strategy: " << config.smooth_strategy << std::endl;
-            exit(1);
-        }
     }
     json GridExperiment::loadResults()
     {
@@ -31,46 +21,13 @@ namespace platform {
         }
         return json();
     }
-    std::vector<std::string> GridExperiment::filterDatasets(Datasets& datasets) const
-    {
-        // Load datasets
-        auto datasets_names = datasets.getNames();
-        if (config.continue_from != NO_CONTINUE()) {
-            // Continue previous execution:
-            if (std::find(datasets_names.begin(), datasets_names.end(), config.continue_from) == datasets_names.end()) {
-                throw std::invalid_argument("Dataset " + config.continue_from + " not found");
-            }
-            // Remove datasets already processed
-            std::vector<string>::iterator it = datasets_names.begin();
-            while (it != datasets_names.end()) {
-                if (*it != config.continue_from) {
-                    it = datasets_names.erase(it);
-                } else {
-                    if (config.only)
-                        ++it;
-                    else
-                        break;
-                }
-            }
-        }
-        // Exclude datasets
-        for (const auto& name : config.excluded) {
-            auto dataset = name.get<std::string>();
-            auto it = std::find(datasets_names.begin(), datasets_names.end(), dataset);
-            if (it == datasets_names.end()) {
-                throw std::invalid_argument("Dataset " + dataset + " already excluded or doesn't exist!");
-            }
-            datasets_names.erase(it);
-        }
-        return datasets_names;
-    }
-    json GridExperiment::build_tasks_mpi(int rank)
+    json GridExperiment::build_tasks_mpi()
     {
         auto tasks = json::array();
         auto grid = GridData(Paths::grid_input(config.model));
         auto datasets = Datasets(false, Paths::datasets());
         auto all_datasets = datasets.getNames();
-        auto datasets_names = filterDatasets(datasets);
+        auto datasets_names = all_datasets;
         for (int idx_dataset = 0; idx_dataset < datasets_names.size(); ++idx_dataset) {
             auto dataset = datasets_names[idx_dataset];
             for (const auto& seed : config.seeds) {
@@ -156,7 +113,7 @@ namespace platform {
         json tasks;
         if (config_mpi.rank == config_mpi.manager) {
             timer.start();
-            tasks = build_tasks_mpi(config_mpi.rank);
+            tasks = build_tasks_mpi();
             auto tasks_str = tasks.dump();
             tasks_size = tasks_str.size();
             msg = new char[tasks_size + 1];
@@ -179,45 +136,29 @@ namespace platform {
             //
             // 2a. Producer delivers the tasks to the consumers
             //
-            auto datasets_names = filterDatasets(datasets);
-            json all_results = mpi_search_producer(datasets_names, tasks, config_mpi, MPI_Result);
+            auto datasets_names = std::vector<std::string>();
+            json all_results = mpi_experiment_producer(datasets_names, tasks, config_mpi, MPI_Result);
             std::cout << separator << std::endl;
             //
             // 3. Manager select the bests sccores for each dataset
             //
             auto results = initializeResults();
-            select_best_results_folds(results, all_results, config.model);
+            //select_best_results_folds(results, all_results, config.model);
             //
             // 3.2 Save the results
             //
             save(results);
         } else {
             //
-            // 2b. Consumers process the tasks and send the results to the producer
+            // 2b. Consumers prostore_search_resultcess the tasks and send the results to the producer
             //
-            mpi_search_consumer(datasets, tasks, config, config_mpi, MPI_Result);
+            mpi_experiment_consumer(datasets, tasks, config, config_mpi, MPI_Result);
         }
     }
     json GridExperiment::initializeResults()
     {
         // Load previous results if continue is set
         json results;
-        if (config.continue_from != NO_CONTINUE()) {
-            if (!config.quiet)
-                std::cout << "* Loading previous results" << std::endl;
-            try {
-                std::ifstream file(Paths::grid_output(config.model));
-                if (file.is_open()) {
-                    results = json::parse(file);
-                    results = results["results"];
-                }
-            }
-            catch (const std::exception& e) {
-                std::cerr << "* There were no previous results" << std::endl;
-                std::cerr << "* Initizalizing new results" << std::endl;
-                results = json();
-            }
-        }
         return results;
     }
     void GridExperiment::save(json& results)

@@ -8,6 +8,7 @@
 #include "common/Timer.h"
 #include "main/HyperParameters.h"
 #include "GridData.h"
+#include "GridConfig.h"
 #include "bayesnet/network/Network.h"
 
 
@@ -69,6 +70,6 @@ namespace platform {
     void mpi_search_consumer(Datasets& datasets, json& tasks, struct ConfigGrid& config, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result);
     void select_best_results_folds(json& results, json& all_results, std::string& model);
     json store_search_result(std::vector<std::string>& names, Task_Result& result, json& results);
-    void mpi_experiment_consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result);
+    void mpi_search_consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result);
 } /* namespace platform */
 #endif

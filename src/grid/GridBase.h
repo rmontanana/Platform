@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 #include "common/Datasets.h"
 #include "common/Timer.h"
+#include "common/Colors.h"
 #include "main/HyperParameters.h"
 #include "GridData.h"
 #include "GridConfig.h"
@@ -16,24 +17,11 @@ namespace platform {
     using json = nlohmann::ordered_json;
     class GridBase {
     public:
-        explicit GridBase(struct ConfigGrid& config)
-        {
-            this->config = config;
-            if (config.smooth_strategy == "ORIGINAL")
-                smooth_type = bayesnet::Smoothing_t::ORIGINAL;
-            else if (config.smooth_strategy == "LAPLACE")
-                smooth_type = bayesnet::Smoothing_t::LAPLACE;
-            else if (config.smooth_strategy == "CESTNIK")
-                smooth_type = bayesnet::Smoothing_t::CESTNIK;
-            else {
-                std::cerr << "GridBase: Unknown smoothing strategy: " << config.smooth_strategy << std::endl;
-                exit(1);
-            }
-        };
+        explicit GridBase(struct ConfigGrid& config);
         ~GridBase() = default;
-        virtual void go(struct ConfigMPI& config_mpi) = 0;
     protected:
         virtual json build_tasks() = 0;
+        virtual void save(json& results) = 0;
         struct ConfigGrid config;
         Timer timer; // used to measure the time of the whole process
         const std::string separator = "|";

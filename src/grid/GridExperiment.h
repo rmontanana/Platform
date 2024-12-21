@@ -5,7 +5,6 @@
 #include <mpi.h>
 #include <nlohmann/json.hpp>
 #include "common/Datasets.h"
-#include "common/Timer.h"
 #include "main/HyperParameters.h"
 #include "GridData.h"
 #include "GridBase.h"
@@ -17,9 +16,9 @@ namespace platform {
     class GridExperiment : public GridBase {
     public:
         explicit GridExperiment(struct ConfigGrid& config);
-        void go(struct ConfigMPI& config_mpi);
         ~GridExperiment() = default;
         json loadResults();
+        void go(struct ConfigMPI& config_mpi);
     private:
         void save(json& results);
         json initializeResults();
@@ -27,7 +26,7 @@ namespace platform {
     };
     /* *************************************************************************************************************
     //
-    // MPI Search Functions
+    // MPI Experiment Functions
     //
     ************************************************************************************************************* */
     class MPI_EXPERIMENT :public MPI_Base {

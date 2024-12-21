@@ -18,10 +18,10 @@ namespace platform {
     class GridSearch : public GridBase {
     public:
         explicit GridSearch(struct ConfigGrid& config);
-        void go(struct ConfigMPI& config_mpi);
         ~GridSearch() = default;
         json loadResults();
         static inline std::string NO_CONTINUE() { return "NO_CONTINUE"; }
+        void go(struct ConfigMPI& config_mpi);
     private:
         void save(json& results);
         json initializeResults();

@@ -4,7 +4,6 @@
 #include <folding.hpp>
 #include "main/Models.h"
 #include "common/Paths.h"
-#include "common/Colors.h"
 #include "common/Utils.h"
 #include "GridSearch.h"
 
@@ -55,6 +54,16 @@ namespace platform {
     }
     json GridSearch::build_tasks()
     {
+        /*
+        * Each task is a json object with the following structure:
+        * {
+        *   "dataset": "dataset_name",
+        *   "idx_dataset": idx_dataset, // used to identify the dataset in the results
+        *    // this index is relative to the list of used datasets in the actual run not to the whole datasets list
+        *   "seed": # of seed to use,
+        *   "fold": # of fold to process
+        * }
+        */
         auto tasks = json::array();
         auto grid = GridData(Paths::grid_input(config.model));
         auto datasets = Datasets(false, Paths::datasets());

@@ -28,10 +28,8 @@ namespace platform {
 
             std::vector<std::string> errors;
 
-            // Validate all fields defined in the schema
-            for (const auto& [key, value] : schema["properties"].items()) {
-                validateField(key, value, data, errors);
-            }
+            // Validate the top-level object
+            validateObject("", schema, data, errors);
 
             return errors;
         }
@@ -68,13 +66,11 @@ namespace platform {
                         data[key] = nullptr;
                     }
                 }
-
                 // Fix const fields to match the schema value
                 if (value.contains("const")) {
                     data[key] = value["const"];
                 }
             }
-
             // Save fixed JSON
             std::ofstream outFile(fileName);
             if (!outFile.is_open()) {
@@ -85,45 +81,72 @@ namespace platform {
             outFile << data.dump(4);
             outFile.close();
         }
+
     private:
         json schema;
 
-        void validateField(const std::string& field, const json& value, const json& data, std::vector<std::string>& errors)
+        void validateObject(const std::string& path, const json& schema, const json& data, std::vector<std::string>& errors)
         {
-            // Check if the field is present
-            if (!data.contains(field)) {
-                errors.push_back("Missing required field: " + field);
-                return;
-            }
-
-            // Check for type constraints
-            if (value.contains("type")) {
-                const std::string type = value["type"];
-                if (type == "string" && !data[field].is_string()) {
-                    errors.push_back("Field '" + field + "' should be a string.");
-                } else if (type == "number" && !data[field].is_number()) {
-                    errors.push_back("Field '" + field + "' should be a number.");
-                } else if (type == "integer" && !data[field].is_number_integer()) {
-                    errors.push_back("Field '" + field + "' should be an integer.");
-                } else if (type == "boolean" && !data[field].is_boolean()) {
-                    errors.push_back("Field '" + field + "' should be a boolean.");
-                } else if (type == "array" && !data[field].is_array()) {
-                    errors.push_back("Field '" + field + "' should be an array.");
-                } else if (type == "object" && !data[field].is_object()) {
-                    errors.push_back("Field '" + field + "' should be an object.");
+            if (schema.contains("required")) {
+                for (const auto& requiredField : schema["required"]) {
+                    if (!data.contains(requiredField)) {
+                        std::string fullPath = path.empty() ? requiredField.get<std::string>() : path + "." + requiredField.get<std::string>();
+                        errors.push_back("Missing required field: " + fullPath);
+                    }
                 }
             }
-
-            // Check for const constraints
-            if (value.contains("const")) {
-                const auto& expectedValue = value["const"];
-                if (data[field] != expectedValue) {
-                    errors.push_back("Field '" + field + "' has an invalid value. Expected: " +
-                        expectedValue.dump() + ", Found: " + data[field].dump());
+            if (schema.contains("properties")) {
+                for (const auto& [key, value] : schema["properties"].items()) {
+                    if (data.contains(key)) {
+                        std::string fullPath = path.empty() ? key : path + "." + key;
+                        validateField(fullPath, value, data[key], errors);  // Pass data[key] for nested validation
+                    } else if (value.contains("required")) {
+                        errors.push_back("Missing required field: " + (path.empty() ? key : path + "." + key));
+                    }
                 }
             }
         }
 
+        void validateField(const std::string& field, const json& value, const json& data, std::vector<std::string>& errors)
+        {
+            if (value.contains("type")) {
+                const std::string& type = value["type"];
+                if (type == "array") {
+                    if (!data.is_array()) {
+                        errors.push_back("Field '" + field + "' should be an array.");
+                        return;
+                    }
+
+                    if (value.contains("items")) {
+                        for (size_t i = 0; i < data.size(); ++i) {
+                            validateObject(field + "[" + std::to_string(i) + "]", value["items"], data[i], errors);
+                        }
+                    }
+                } else if (type == "object") {
+                    if (!data.is_object()) {
+                        errors.push_back("Field '" + field + "' should be an object.");
+                        return;
+                    }
+
+                    validateObject(field, value, data, errors);
+                } else if (type == "string" && !data.is_string()) {
+                    errors.push_back("Field '" + field + "' should be a string.");
+                } else if (type == "number" && !data.is_number()) {
+                    errors.push_back("Field '" + field + "' should be a number.");
+                } else if (type == "integer" && !data.is_number_integer()) {
+                    errors.push_back("Field '" + field + "' should be an integer.");
+                } else if (type == "boolean" && !data.is_boolean()) {
+                    errors.push_back("Field '" + field + "' should be a boolean.");
+                }
+            }
+            if (value.contains("const")) {
+                const auto& expectedValue = value["const"];
+                if (data != expectedValue) {
+                    errors.push_back("Field '" + field + "' has an invalid value. Expected: " +
+                        expectedValue.dump() + ", Found: " + data.dump());
+                }
+            }
+        }
     };
 }
 #endif

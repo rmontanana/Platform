@@ -85,10 +85,10 @@ namespace platform {
                     }},
                     {"required", {
                         "scores_train", "scores_test", "times_train", "times_test",
-                        "notes", "train_time", "train_time_std", "test_time", "test_time_std",
+                        "train_time", "train_time_std", "test_time", "test_time_std",
                         "samples", "features", "classes", "hyperparameters", "score", "score_train",
                         "score_std", "score_train_std", "time", "time_std", "nodes", "leaves",
-                        "depth", "dataset", "confusion_matrices"
+                        "depth", "dataset"
                     }}
                 }}
             }}

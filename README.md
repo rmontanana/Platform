@@ -40,7 +40,7 @@ export MPI_HOME="/usr/lib64/openmpi"
 In Mac OS X, install mpich with brew and if cmake doesn't find it, edit mpicxx wrapper to remove the ",-commons,use_dylibs" from final_ldflags
 
 ```bash
-vi /opt/homebrew/bin/mpicx
+vi /opt/homebrew/bin/mpicxx
 ```
 
 ### boost library

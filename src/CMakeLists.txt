@@ -67,3 +67,6 @@ add_executable(
     main/Scores.cpp
 )
 target_link_libraries(b_manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" fimdlp "${BayesNet}")
+
+# b_results
+add_executable(b_results commands/b_results.cpp)

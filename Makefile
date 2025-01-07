@@ -4,7 +4,7 @@ SHELL := /bin/bash
 
 f_release = build_release
 f_debug = build_debug
-app_targets = b_best b_list b_main b_manage b_grid
+app_targets = b_best b_list b_main b_manage b_grid b_results
 test_targets = unit_tests_platform
 
 define ClearTests

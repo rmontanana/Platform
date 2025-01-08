@@ -215,7 +215,7 @@ namespace platform {
         return table;
     }
 
-    void BestResults::printTableResults(std::vector<std::string> models, json table, bool tex)
+    void BestResults::printTableResults(std::vector<std::string> models, json table, bool tex, bool index)
     {
         std::stringstream oss;
         oss << Colors::GREEN() << "Best results for " << score << " as of " << table.at("dateTable").get<std::string>() << std::endl;
@@ -225,7 +225,7 @@ namespace platform {
         auto bestResultsTex = BestResultsTex();
         auto bestResultsMd = BestResultsMd();
         if (tex) {
-            bestResultsTex.results_header(models, table.at("dateTable").get<std::string>());
+            bestResultsTex.results_header(models, table.at("dateTable").get<std::string>(), index);
             bestResultsMd.results_header(models, table.at("dateTable").get<std::string>());
         }
         for (const auto& model : models) {
@@ -242,7 +242,7 @@ namespace platform {
         int nDatasets = table.begin().value().size();
         auto datasets = getDatasets(table.begin().value());
         if (tex) {
-            bestResultsTex.results_body(datasets, table);
+            bestResultsTex.results_body(datasets, table, index);
             bestResultsMd.results_body(datasets, table);
         }
         for (auto const& dataset_ : datasets) {
@@ -326,14 +326,14 @@ namespace platform {
             messageOutputFile("Excel", excel_report.getFileName());
         }
     }
-    void BestResults::reportAll(bool excel, bool tex)
+    void BestResults::reportAll(bool excel, bool tex, bool index)
     {
         auto models = getModels();
         // Build the table of results
         json table = buildTableResults(models);
         std::vector<std::string> datasets = getDatasets(table.begin().value());
         // Print the table of results
-        printTableResults(models, table, tex);
+        printTableResults(models, table, tex, index);
         // Compute the Friedman test
         std::map<std::string, std::map<std::string, float>> ranksModels;
         if (friedman) {

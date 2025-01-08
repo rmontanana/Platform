@@ -16,7 +16,8 @@ void manageArguments(argparse::ArgumentParser& program)
     program.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
     program.add_argument("--friedman").help("Friedman test").default_value(false).implicit_value(true);
     program.add_argument("--excel").help("Output to excel").default_value(false).implicit_value(true);
-    program.add_argument("--tex").help("Output result table to TeX file").default_value(false).implicit_value(true);
+    program.add_argument("--tex").help("Output results to TeX & Markdown files").default_value(false).implicit_value(true);
+    program.add_argument("--index").help("In tex output show the index of the dataset instead of the name to save space").default_value(false).implicit_value(true);
     program.add_argument("--level").help("significance level").default_value(0.05).scan<'g', double>().action([](const std::string& value) {
         try {
             auto k = std::stod(value);
@@ -38,7 +39,7 @@ int main(int argc, char** argv)
     argparse::ArgumentParser program("b_best", { platform_project_version.begin(), platform_project_version.end() });
     manageArguments(program);
     std::string model, dataset, score;
-    bool build, report, friedman, excel, tex;
+    bool build, report, friedman, excel, tex, index;
     double level;
     try {
         program.parse_args(argc, argv);
@@ -48,6 +49,7 @@ int main(int argc, char** argv)
         friedman = program.get<bool>("friedman");
         excel = program.get<bool>("excel");
         tex = program.get<bool>("tex");
+        index = program.get<bool>("index");
         level = program.get<double>("level");
         if (model == "" || score == "") {
             throw std::runtime_error("Model and score name must be supplied");
@@ -67,7 +69,7 @@ int main(int argc, char** argv)
     auto results = platform::BestResults(platform::Paths::results(), score, model, dataset, friedman, level);
     if (model == "any") {
         results.buildAll();
-        results.reportAll(excel, tex);
+        results.reportAll(excel, tex, index);
     } else {
         std::string fileName = results.build();
         std::cout << Colors::GREEN() << fileName << " created!" << Colors::RESET() << std::endl;

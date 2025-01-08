@@ -13,7 +13,7 @@ namespace platform {
         }
         std::string build();
         void reportSingle(bool excel);
-        void reportAll(bool excel, bool tex);
+        void reportAll(bool excel, bool tex, bool index);
         void buildAll();
     private:
         std::vector<std::string> getModels();
@@ -21,7 +21,7 @@ namespace platform {
         std::vector<std::string> loadResultFiles();
         void messageOutputFile(const std::string& title, const std::string& fileName);
         json buildTableResults(std::vector<std::string> models);
-        void printTableResults(std::vector<std::string> models, json table, bool tex);
+        void printTableResults(std::vector<std::string> models, json table, bool tex, bool index);
         json loadFile(const std::string& fileName);
         void listFile();
         std::string path;

@@ -12,7 +12,7 @@ namespace platform {
             exit(1);
         }
     }
-    void BestResultsTex::results_header(const std::vector<std::string>& models, const std::string& date)
+    void BestResultsTex::results_header(const std::vector<std::string>& models, const std::string& date, bool index)
     {
         this->models = models;
         auto file_name = Paths::tex() + Paths::tex_output();
@@ -29,7 +29,8 @@ namespace platform {
         handler << "\\renewcommand{\\tabcolsep }{0.07cm} " << std::endl;
         handler << "\\caption{Accuracy results(mean $\\pm$ std) for all the algorithms and datasets} " << std::endl;
         handler << "\\label{tab:results_accuracy}" << std::endl;
-        handler << "\\begin{tabular} {{r" << std::string(models.size(), 'c').c_str() << "}}" << std::endl;
+        std::string header_dataset_name = index ? "r" : "l";
+        handler << "\\begin{tabular} {{" << header_dataset_name << std::string(models.size(), 'c').c_str() << "}}" << std::endl;
         handler << "\\hline " << std::endl;
         handler << "" << std::endl;
         for (const auto& model : models) {
@@ -38,13 +39,12 @@ namespace platform {
         handler << "\\\\" << std::endl;
         handler << "\\hline" << std::endl;
     }
-    void BestResultsTex::results_body(const std::vector<std::string>& datasets, json& table)
+    void BestResultsTex::results_body(const std::vector<std::string>& datasets, json& table, bool index)
     {
         int i = 0;
         for (auto const& dataset : datasets) {
             // Find out max value for this dataset
             double max_value = 0;
-            // Find out the max value for this dataset
             for (const auto& model : models) {
                 double value;
                 try {
@@ -57,7 +57,10 @@ namespace platform {
                     max_value = value;
                 }
             }
-            handler << ++i << " ";
+            if (index)
+                handler << ++i << " ";
+            else
+                handler << dataset << " ";
             for (const auto& model : models) {
                 double value = table[model].at(dataset).at(0).get<double>();
                 double std_value = table[model].at(dataset).at(3).get<double>();

@@ -277,7 +277,7 @@ namespace platform {
             }
             if (!quiet) {
                 seed_timer.stop();
-                std::cout << "end. [" << seed_timer.getDurationString() << "]" << std::endl;
+                std::cout << "end. [" << seed_timer.getDurationString() << "]";
             }
             delete fold;
         }

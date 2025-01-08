@@ -1,4 +1,5 @@
 #include <fstream>
+#include<algorithm>
 #include "Datasets.h"
 #include <nlohmann/json.hpp>
 
@@ -24,10 +25,15 @@ namespace platform {
             throw std::invalid_argument("Unable to open catalog file. [" + path + "all.txt" + "]");
         }
         std::string line;
+        std::vector<std::string> sorted_lines;
         while (getline(catalog, line)) {
             if (line.empty() || line[0] == '#') {
                 continue;
             }
+            sorted_lines.push_back(line);
+        }
+        std::stable_sort(sorted_lines.begin(), sorted_lines.end());
+        for (const auto& line : sorted_lines) {
             std::vector<std::string> tokens = split(line, ';');
             std::string name = tokens[0];
             std::string className;

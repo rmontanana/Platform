@@ -132,6 +132,7 @@ namespace platform {
         for (const auto& dataset_ : table.items()) {
             datasets.push_back(dataset_.key());
         }
+        std::stable_sort(datasets.begin(), datasets.end());
         maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
         maxDatasetName = std::max(7, maxDatasetName);
         return datasets;

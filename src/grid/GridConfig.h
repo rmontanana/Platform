@@ -38,8 +38,13 @@ namespace platform {
         uint idx_dataset;
         uint idx_combination;
         int n_fold;
-        double score;
-        double time;
+        double score; // Experiment: Score test, no score train in this case
+        double time; // Experiment: Time train+test, no time train and/or time test in this case
+        double nodes; // Experiment specific
+        double leaves; // Experiment specific
+        double depth; // Experiment specific
+        int process;
+        int task;
     } Task_Result;
     const int TAG_QUERY = 1;
     const int TAG_RESULT = 2;

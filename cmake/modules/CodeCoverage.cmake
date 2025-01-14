@@ -137,7 +137,7 @@
 
 include(CMakeParseArguments)
 
-option(CODE_COVERAGE_VERBOSE "Verbose information" FALSE)
+option(CODE_COVERAGE_VERBOSE "Verbose information" TRUE)
 
 # Check prereqs
 find_program( GCOV_PATH gcov )
@@ -160,7 +160,11 @@ foreach(LANG ${LANGUAGES})
     endif()
   elseif(NOT "${CMAKE_${LANG}_COMPILER_ID}" MATCHES "GNU"
          AND NOT "${CMAKE_${LANG}_COMPILER_ID}" MATCHES "(LLVM)?[Ff]lang")
-    message(FATAL_ERROR "Compiler is not GNU or Flang! Aborting...")
+         if ("${LANG}" MATCHES "CUDA")
+             message(STATUS "Ignoring CUDA")
+        else()
+            message(FATAL_ERROR "Compiler is not GNU or Flang! Aborting...")
+        endif()
   endif()
 endforeach()
 

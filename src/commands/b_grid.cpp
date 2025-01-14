@@ -318,7 +318,7 @@ void experiment(argparse::ArgumentParser& program)
     auto env = platform::DotEnv();
     config.platform = env.get("platform");
     platform::Paths::createPath(platform::Paths::grid());
-    // auto grid_experiment = platform::GridExperiment(config);
+    auto grid_experiment = platform::GridExperiment(config);
     platform::Timer timer;
     timer.start();
     struct platform::ConfigMPI mpi_config;
@@ -329,7 +329,7 @@ void experiment(argparse::ArgumentParser& program)
     if (mpi_config.n_procs < 2) {
         throw std::runtime_error("Cannot use --compute with less than 2 mpi processes, try mpirun -np 2 ...");
     }
-    // grid_experiment.go(mpi_config);
+    grid_experiment.go(mpi_config);
     if (mpi_config.rank == mpi_config.manager) {
         // auto results = grid_experiment.loadResults();
         // list_results(results, config.model);

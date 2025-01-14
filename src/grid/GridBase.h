@@ -19,23 +19,23 @@ namespace platform {
     public:
         explicit GridBase(struct ConfigGrid& config);
         ~GridBase() = default;
+        void go(struct ConfigMPI& config_mpi);
     protected:
-        virtual json build_tasks() = 0;
         virtual void save(json& results) = 0;
+        virtual std::vector<std::string> filterDatasets(Datasets& datasets) const = 0;
+        virtual json initializeResults() = 0;
+        virtual json producer(std::vector<std::string>& names, json& tasks, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result) = 0;
+        virtual void consumer(Datasets& datasets, json& tasks, struct ConfigGrid& config, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result) = 0;
+        virtual void select_best_results_folds(json& results, json& all_results, std::string& model) = 0;
+        virtual json store_result(std::vector<std::string>& names, Task_Result& result, json& results) = 0;
+        virtual void consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result) = 0;
+        std::string get_color_rank(int rank);
+        json build_tasks();
+        void summary(json& all_results, json& tasks, struct ConfigMPI& config_mpi);
         struct ConfigGrid config;
         Timer timer; // used to measure the time of the whole process
         const std::string separator = "|";
         bayesnet::Smoothing_t smooth_type{ bayesnet::Smoothing_t::NONE };
-    };
-    class MPI_Base {
-    public:
-        static std::string get_color_rank(int rank)
-        {
-            auto colors = { Colors::WHITE(), Colors::RED(), Colors::GREEN(),  Colors::BLUE(), Colors::MAGENTA(), Colors::CYAN(), Colors::YELLOW(), Colors::BLACK() };
-            std::string id = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-            auto idx = rank % id.size();
-            return *(colors.begin() + rank % colors.size()) + id[idx];
-        }
     };
 } /* namespace platform */
 #endif

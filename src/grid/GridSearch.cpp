@@ -19,6 +19,41 @@ namespace platform {
         }
         return json();
     }
+    json GridSearch::build_tasks(Datasets& datasets)
+    {
+        /*
+        * Each task is a json object with the following structure:
+        * {
+        *   "dataset": "dataset_name",
+        *   "idx_dataset": idx_dataset, // used to identify the dataset in the results
+        *    // this index is relative to the list of used datasets in the actual run not to the whole datasets list
+        *   "seed": # of seed to use,
+        *   "fold": # of fold to process
+        * }
+        * This way a task consists in process all combinations of hyperparameters for a dataset, seed and fold
+        */
+        auto tasks = json::array();
+        auto grid = GridData(Paths::grid_input(config.model));
+        auto all_datasets = datasets.getNames();
+        auto datasets_names = filterDatasets(datasets);
+        for (int idx_dataset = 0; idx_dataset < datasets_names.size(); ++idx_dataset) {
+            auto dataset = datasets_names[idx_dataset];
+            for (const auto& seed : config.seeds) {
+                auto combinations = grid.getGrid(dataset);
+                for (int n_fold = 0; n_fold < config.n_folds; n_fold++) {
+                    json task = {
+                        { "dataset", dataset },
+                        { "idx_dataset", idx_dataset},
+                        { "seed", seed },
+                        { "fold", n_fold},
+                    };
+                    tasks.push_back(task);
+                }
+            }
+        }
+        shuffle_and_progress_bar(tasks);
+        return tasks;
+    }
     std::vector<std::string> GridSearch::filterDatasets(Datasets& datasets) const
     {
         // Load datasets
@@ -93,66 +128,7 @@ namespace platform {
         };
         file << output.dump(4);
     }
-    //
-    //
-    //
-    json GridSearch::producer(std::vector<std::string>& names, json& tasks, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result)
-    {
-        Task_Result result;
-        json results;
-        int num_tasks = tasks.size();
-        //
-        // 2a.1 Producer will loop to send all the tasks to the consumers and receive the results
-        //
-        for (int i = 0; i < num_tasks; ++i) {
-            MPI_Status status;
-            MPI_Recv(&result, 1, MPI_Result, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-            if (status.MPI_TAG == TAG_RESULT) {
-                //Store result
-                store_result(names, result, results);
-
-            }
-            MPI_Send(&i, 1, MPI_INT, status.MPI_SOURCE, TAG_TASK, MPI_COMM_WORLD);
-        }
-        //
-        // 2a.2 Producer will send the end message to all the consumers
-        //
-        for (int i = 0; i < config_mpi.n_procs - 1; ++i) {
-            MPI_Status status;
-            MPI_Recv(&result, 1, MPI_Result, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-            if (status.MPI_TAG == TAG_RESULT) {
-                //Store result
-                store_result(names, result, results);
-            }
-            MPI_Send(&i, 1, MPI_INT, status.MPI_SOURCE, TAG_END, MPI_COMM_WORLD);
-        }
-        return results;
-    }
-    void GridSearch::consumer(Datasets& datasets, json& tasks, struct ConfigGrid& config, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result)
-    {
-        Task_Result result;
-        //
-        // 2b.1 Consumers announce to the producer that they are ready to receive a task
-        //
-        MPI_Send(&result, 1, MPI_Result, config_mpi.manager, TAG_QUERY, MPI_COMM_WORLD);
-        int task;
-        while (true) {
-            MPI_Status status;
-            //
-            // 2b.2 Consumers receive the task from the producer and process it
-            //
-            MPI_Recv(&task, 1, MPI_INT, config_mpi.manager, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-            if (status.MPI_TAG == TAG_END) {
-                break;
-            }
-            consumer_go(config, config_mpi, tasks, task, datasets, &result);
-            //
-            // 2b.3 Consumers send the result to the producer
-            //
-            MPI_Send(&result, 1, MPI_Result, config_mpi.manager, TAG_RESULT, MPI_COMM_WORLD);
-        }
-    }
-    void GridSearch::select_best_results_folds(json& results, json& all_results, std::string& model)
+    void GridSearch::compile_results(json& results, json& all_results, std::string& model)
     {
         Timer timer;
         auto grid = GridData(Paths::grid_input(model));

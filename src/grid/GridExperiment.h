@@ -17,15 +17,14 @@ namespace platform {
     public:
         explicit GridExperiment(struct ConfigGrid& config);
         ~GridExperiment() = default;
-        json loadResults();
-        static inline std::string NO_CONTINUE() { return "NO_CONTINUE"; }
+        json getResults();
     private:
+        json computed_results;
         void save(json& results);
         json initializeResults();
+        json build_tasks(Datasets& datasets);
         std::vector<std::string> filterDatasets(Datasets& datasets) const;
-        json producer(std::vector<std::string>& names, json& tasks, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result);
-        void consumer(Datasets& datasets, json& tasks, struct ConfigGrid& config, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result);
-        void select_best_results_folds(json& results, json& all_results, std::string& model);
+        void compile_results(json& results, json& all_results, std::string& model);
         json store_result(std::vector<std::string>& names, Task_Result& result, json& results);
         void consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result);
     };

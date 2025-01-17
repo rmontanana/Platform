@@ -24,7 +24,6 @@ namespace platform {
     private:
         void save(json& results);
         json initializeResults();
-        json build_tasks(Datasets& datasets);
         std::vector<std::string> filterDatasets(Datasets& datasets) const;
         void compile_results(json& results, json& all_results, std::string& model);
         json store_result(std::vector<std::string>& names, Task_Result& result, json& results);

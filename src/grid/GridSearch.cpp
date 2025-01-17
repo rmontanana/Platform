@@ -19,41 +19,6 @@ namespace platform {
         }
         return json();
     }
-    json GridSearch::build_tasks(Datasets& datasets)
-    {
-        /*
-        * Each task is a json object with the following structure:
-        * {
-        *   "dataset": "dataset_name",
-        *   "idx_dataset": idx_dataset, // used to identify the dataset in the results
-        *    // this index is relative to the list of used datasets in the actual run not to the whole datasets list
-        *   "seed": # of seed to use,
-        *   "fold": # of fold to process
-        * }
-        * This way a task consists in process all combinations of hyperparameters for a dataset, seed and fold
-        */
-        auto tasks = json::array();
-        auto grid = GridData(Paths::grid_input(config.model));
-        auto all_datasets = datasets.getNames();
-        auto datasets_names = filterDatasets(datasets);
-        for (int idx_dataset = 0; idx_dataset < datasets_names.size(); ++idx_dataset) {
-            auto dataset = datasets_names[idx_dataset];
-            for (const auto& seed : config.seeds) {
-                auto combinations = grid.getGrid(dataset);
-                for (int n_fold = 0; n_fold < config.n_folds; n_fold++) {
-                    json task = {
-                        { "dataset", dataset },
-                        { "idx_dataset", idx_dataset},
-                        { "seed", seed },
-                        { "fold", n_fold},
-                    };
-                    tasks.push_back(task);
-                }
-            }
-        }
-        shuffle_and_progress_bar(tasks);
-        return tasks;
-    }
     std::vector<std::string> GridSearch::filterDatasets(Datasets& datasets) const
     {
         // Load datasets

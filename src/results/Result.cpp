@@ -64,18 +64,10 @@ namespace platform {
     {
         return data;
     }
-    void Result::check()
+    std::vector<std::string> Result::check()
     {
         platform::JsonValidator validator(platform::SchemaV1_0::schema);
-        data["schema_version"] = "1.0";
-        std::vector<std::string> errors = validator.validate(data);
-        if (!errors.empty()) {
-            std::string message;
-            for (const auto& error : errors) {
-                message += " - " + error + "\n";
-            }
-            throw std::runtime_error("* Result file has validation errors:\n" + message);
-        }
+        return validator.validate(data);
     }
     void Result::save()
     {

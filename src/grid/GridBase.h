@@ -22,7 +22,7 @@ namespace platform {
         void go(struct ConfigMPI& config_mpi);
         void validate_config();
     protected:
-        virtual json build_tasks(Datasets& datasets) = 0;
+        json build_tasks(Datasets& datasets);
         virtual void save(json& results) = 0;
         virtual std::vector<std::string> filterDatasets(Datasets& datasets) const = 0;
         virtual json initializeResults() = 0;

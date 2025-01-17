@@ -9,6 +9,7 @@ namespace platform {
 
     void Experiment::saveResult()
     {
+        result.setSchemaVersion("1.0");
         result.check();
         result.save();
         std::cout << "Result saved in " << Paths::results() << result.getFilename() << std::endl;

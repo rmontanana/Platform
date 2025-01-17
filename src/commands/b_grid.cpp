@@ -318,12 +318,13 @@ void experiment(argparse::ArgumentParser& program)
     }
     grid_experiment.go(mpi_config);
     if (mpi_config.rank == mpi_config.manager) {
-        auto results = grid_experiment.getResults();
-        //build_experiment_result(results);
-        std::cout << "****** RESULTS ********" << std::endl;
-        std::cout << results.dump(4) << std::endl;
-        // list_results(results, config.model);
-        std::cout << "Process took " << timer.getDurationString() << std::endl;
+        auto experiment = grid_experiment.getExperiment();
+        std::cout << "* Report of the computed hyperparameters" << std::endl;
+        auto duration = timer.getDuration();
+        experiment.setDuration(duration);
+        // experiment.report(grid_experiment.numFiles() == 1);
+        experiment.saveResult();
+        std::cout << "Process took " << duration << std::endl;
     }
     MPI_Finalize();
 }

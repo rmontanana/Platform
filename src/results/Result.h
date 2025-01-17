@@ -16,7 +16,7 @@ namespace platform {
         Result();
         Result& load(const std::string& path, const std::string& filename);
         void save();
-        void check();
+        std::vector<std::string> check();
         // Getters
         json getJson();
         std::string to_string(int maxModel, int maxTitle) const;
@@ -29,7 +29,7 @@ namespace platform {
         std::string getModel() const { return data["model"].get<std::string>(); };
         std::string getPlatform() const { return data["platform"].get<std::string>(); };
         std::string getScoreName() const { return data["score_name"].get<std::string>(); };
-
+        void setSchemaVersion(const std::string& version) { data["schema_version"] = version; };
         bool isComplete() const { return complete; };
         json getData() const { return data; }
         // Setters

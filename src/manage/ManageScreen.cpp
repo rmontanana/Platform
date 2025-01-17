@@ -257,8 +257,9 @@ namespace platform {
         auto [index_from, index_to] = paginator[static_cast<int>(output_type)].getOffset();
         for (int i = index_from; i <= index_to; i++) {
             auto color = (i % 2) ? Colors::BLUE() : Colors::CYAN();
-            std::cout << color << std::setw(3) << std::fixed << std::right << i << " ";
-            std::cout << results.at(i).to_string(maxModel, maxTitle) << std::endl;
+            auto color_status = results.at(i).check().size() == 0 ? color : Colors::RED();
+            std::cout << color_status << std::setw(3) << std::fixed << std::right << i << " ";
+            std::cout << color << results.at(i).to_string(maxModel, maxTitle) << std::endl;
         }
         //
         // Status Area

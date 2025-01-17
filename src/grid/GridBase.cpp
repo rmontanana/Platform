@@ -46,6 +46,41 @@ namespace platform {
         }
         std::cout << separator << std::endl << separator << std::flush;
     }
+    json GridBase::build_tasks(Datasets& datasets)
+    {
+        /*
+        * Each task is a json object with the following structure:
+        * {
+        *   "dataset": "dataset_name",
+        *   "idx_dataset": idx_dataset, // used to identify the dataset in the results
+        *    // this index is relative to the list of used datasets in the actual run not to the whole datasets list
+        *   "seed": # of seed to use,
+        *   "fold": # of fold to process
+        * }
+        * This way a task consists in process all combinations of hyperparameters for a dataset, seed and fold
+        */
+        auto tasks = json::array();
+        auto grid = GridData(Paths::grid_input(config.model));
+        auto all_datasets = datasets.getNames();
+        auto datasets_names = filterDatasets(datasets);
+        for (int idx_dataset = 0; idx_dataset < datasets_names.size(); ++idx_dataset) {
+            auto dataset = datasets_names[idx_dataset];
+            for (const auto& seed : config.seeds) {
+                auto combinations = grid.getGrid(dataset);
+                for (int n_fold = 0; n_fold < config.n_folds; n_fold++) {
+                    json task = {
+                        { "dataset", dataset },
+                        { "idx_dataset", idx_dataset},
+                        { "seed", seed },
+                        { "fold", n_fold},
+                    };
+                    tasks.push_back(task);
+                }
+            }
+        }
+        shuffle_and_progress_bar(tasks);
+        return tasks;
+    }
     void GridBase::summary(json& all_results, json& tasks, struct ConfigMPI& config_mpi)
     {
         // Report the tasks done by each worker, showing dataset number, seed, fold and time spent
@@ -146,20 +181,21 @@ namespace platform {
         Task_Result result;
         int tasks_size;
         MPI_Datatype MPI_Result;
-        MPI_Datatype type[10] = { MPI_UNSIGNED, MPI_UNSIGNED, MPI_INT, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_INT, MPI_INT };
-        int blocklen[10] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-        MPI_Aint disp[10];
+        MPI_Datatype type[11] = { MPI_UNSIGNED, MPI_UNSIGNED, MPI_INT, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_INT, MPI_INT };
+        int blocklen[11] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+        MPI_Aint disp[11];
         disp[0] = offsetof(Task_Result, idx_dataset);
         disp[1] = offsetof(Task_Result, idx_combination);
         disp[2] = offsetof(Task_Result, n_fold);
         disp[3] = offsetof(Task_Result, score);
         disp[4] = offsetof(Task_Result, time);
-        disp[5] = offsetof(Task_Result, nodes);
-        disp[6] = offsetof(Task_Result, leaves);
-        disp[7] = offsetof(Task_Result, depth);
-        disp[8] = offsetof(Task_Result, process);
-        disp[9] = offsetof(Task_Result, task);
-        MPI_Type_create_struct(10, blocklen, disp, type, &MPI_Result);
+        disp[5] = offsetof(Task_Result, time_train);
+        disp[6] = offsetof(Task_Result, nodes);
+        disp[7] = offsetof(Task_Result, leaves);
+        disp[8] = offsetof(Task_Result, depth);
+        disp[9] = offsetof(Task_Result, process);
+        disp[10] = offsetof(Task_Result, task);
+        MPI_Type_create_struct(11, blocklen, disp, type, &MPI_Result);
         MPI_Type_commit(&MPI_Result);
         //
         // 0.2 Manager creates the tasks

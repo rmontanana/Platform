@@ -21,6 +21,8 @@ namespace platform {
         explicit GridExperiment(argparse::ArgumentParser& program, struct ConfigGrid& config);
         ~GridExperiment() = default;
         json getResults();
+        Experiment& getExperiment() { return experiment; }
+        size_t numFiles() const { return filesToTest.size(); }
     private:
         argparse::ArgumentParser& arguments;
         Experiment experiment;
@@ -28,7 +30,6 @@ namespace platform {
         std::vector<std::string> filesToTest;
         void save(json& results);
         json initializeResults();
-        json build_tasks(Datasets& datasets);
         std::vector<std::string> filterDatasets(Datasets& datasets) const;
         void compile_results(json& results, json& all_results, std::string& model);
         json store_result(std::vector<std::string>& names, Task_Result& result, json& results);

@@ -49,7 +49,8 @@ namespace platform {
         oss << "Execution took  " << timer.translate2String(data["duration"].get<float>())
             << " on " << data["platform"].get<std::string>() << " Language: " << data["language"].get<std::string>();
         sheader << headerLine(oss.str());
-        sheader << headerLine("Score is " + data["score_name"].get<std::string>());
+        std::string schema_version = data.find("schema_version") != data.end() ? data["schema_version"].get<std::string>() : "-";
+        sheader << headerLine("Score is " + data["score_name"].get<std::string>() + " Schema version: " + schema_version);
         sheader << std::string(MAXL, '*') << std::endl;
         sheader << std::endl;
     }
@@ -250,7 +251,7 @@ namespace platform {
             if (train_data) {
                 oss << color_line << std::left << std::setw(maxLine) << output_train[i]
                     << suffix << Colors::BLUE() << " | " << color_line << std::left << std::setw(maxLine)
-                    << output_test[i] << std::endl;
+                        << output_test[i] << std::endl;
             } else {
                 oss << color_line << output_test[i] << std::endl;
             }

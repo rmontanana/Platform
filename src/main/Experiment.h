@@ -20,6 +20,7 @@ namespace platform {
         Experiment& setTitle(const std::string& title) { this->result.setTitle(title); return *this; }
         Experiment& setModelVersion(const std::string& model_version) { this->result.setModelVersion(model_version); return *this; }
         Experiment& setModel(const std::string& model) { this->result.setModel(model); return *this; }
+        std::string getModel() const { return result.getModel(); }
         Experiment& setLanguage(const std::string& language) { this->result.setLanguage(language); return *this; }
         Experiment& setDiscretizationAlgorithm(const std::string& discretization_algo)
         {

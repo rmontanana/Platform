@@ -123,46 +123,8 @@ namespace platform {
     {
         return computed_results;
     }
-    json GridExperiment::build_tasks(Datasets& datasets)
-    {
-        /*
-        * Each task is a json object with the following structure:
-        * {
-        *   "dataset": "dataset_name",
-        *   "idx_dataset": idx_dataset, // used to identify the dataset in the results
-        *    // this index is relative to the list of used datasets in the actual run not to the whole datasets list
-        *   "seed": # of seed to use,
-        *   "fold": # of fold to process
-        * }
-        */
-        auto tasks = json::array();
-        auto all_datasets = datasets.getNames();
-        auto datasets_names = filterDatasets(datasets);
-        for (int idx_dataset = 0; idx_dataset < datasets_names.size(); ++idx_dataset) {
-            auto dataset = datasets_names[idx_dataset];
-            for (const auto& seed : config.seeds) {
-                for (int n_fold = 0; n_fold < config.n_folds; n_fold++) {
-                    json task = {
-                        { "dataset", dataset },
-                        { "idx_dataset", idx_dataset},
-                        { "seed", seed },
-                        { "fold", n_fold},
-                    };
-                    tasks.push_back(task);
-                }
-            }
-        }
-        shuffle_and_progress_bar(tasks);
-        return tasks;
-    }
     std::vector<std::string> GridExperiment::filterDatasets(Datasets& datasets) const
     {
-        // Load datasets
-        // auto datasets_names = datasets.getNames();
-        // datasets_names.clear();
-        // datasets_names.push_back("iris");
-        // datasets_names.push_back("wine");
-        // datasets_names.push_back("balance-scale");
         return filesToTest;
     }
     json GridExperiment::initializeResults()
@@ -172,25 +134,9 @@ namespace platform {
     }
     void GridExperiment::save(json& results)
     {
-        // std::ofstream file(Paths::grid_output(config.model));
-        // json output = {
-        //     { "model", config.model },
-        //     { "score", config.score },
-        //     { "discretize", config.discretize },
-        //     { "stratified", config.stratified },
-        //     { "n_folds", config.n_folds },
-        //     { "seeds", config.seeds },
-        //     { "date", get_date() + " " + get_time()},
-        //     { "nested", config.nested},
-        //     { "platform", config.platform },
-        //     { "duration", timer.getDurationString(true)},
-        //     { "results", results }
-        // };
-        // file << output.dump(4);
     }
     void GridExperiment::compile_results(json& results, json& all_results, std::string& model)
     {
-        results = json::array();
         auto datasets = Datasets(false, Paths::datasets());
         for (const auto& result_item : all_results.items()) {
             // each result has the results of all the outer folds as each one were a different task
@@ -199,52 +145,44 @@ namespace platform {
             auto result = json::object();
             int data_size = data.size();
             auto score = torch::zeros({ data_size }, torch::kFloat64);
-            auto time_t = torch::zeros({ data_size }, torch::kFloat64);
+            auto score_train = torch::zeros({ data_size }, torch::kFloat64);
+            auto time_test = torch::zeros({ data_size }, torch::kFloat64);
+            auto time_train = torch::zeros({ data_size }, torch::kFloat64);
             auto nodes = torch::zeros({ data_size }, torch::kFloat64);
             auto leaves = torch::zeros({ data_size }, torch::kFloat64);
             auto depth = torch::zeros({ data_size }, torch::kFloat64);
+            auto& dataset = datasets.getDataset(dataset_name);
+            dataset.load();
+            //
+            // Prepare Result
+            //
+            auto partial_result = PartialResult();
+            partial_result.setSamples(dataset.getNSamples()).setFeatures(dataset.getNFeatures()).setClasses(dataset.getNClasses());
+            partial_result.setHyperparameters(experiment.getHyperParameters().get(dataset_name));
             for (int fold = 0; fold < data_size; ++fold) {
-                result["scores_test"].push_back(data[fold]["score"]);
+                partial_result.addScoreTest(data[fold]["score"]);
+                partial_result.addScoreTrain(0.0);
+                partial_result.addTimeTest(data[fold]["time"]);
+                partial_result.addTimeTrain(data[fold]["time_train"]);
                 score[fold] = data[fold]["score"].get<double>();
-                time_t[fold] = data[fold]["time"].get<double>();
+                time_test[fold] = data[fold]["time"].get<double>();
+                time_train[fold] = data[fold]["time_train"].get<double>();
                 nodes[fold] = data[fold]["nodes"].get<double>();
                 leaves[fold] = data[fold]["leaves"].get<double>();
                 depth[fold] = data[fold]["depth"].get<double>();
             }
-            double score_mean = torch::mean(score).item<double>();
-            double score_std = torch::std(score).item<double>();
-            double time_mean = torch::mean(time_t).item<double>();
-            double time_std = torch::std(time_t).item<double>();
-            double nodes_mean = torch::mean(nodes).item<double>();
-            double leaves_mean = torch::mean(leaves).item<double>();
-            double depth_mean = torch::mean(depth).item<double>();
-            auto& dataset = datasets.getDataset(dataset_name);
-            dataset.load();
-            result["samples"] = dataset.getNSamples();
-            result["features"] = dataset.getNFeatures();
-            result["classes"] = dataset.getNClasses();
-            result["hyperparameters"] = experiment.getHyperParameters().get(dataset_name);
-            result["score"] = score_mean;
-            result["score_std"] = score_std;
-            result["time"] = time_mean;
-            result["time_std"] = time_std;
-            result["nodes"] = nodes_mean;
-            result["leaves"] = leaves_mean;
-            result["depth"] = depth_mean;
-            result["dataset"] = dataset_name;
-            // Fixed data
-            result["scores_train"] = json::array();
-            result["times_train"] = json::array();
-            result["times_test"] = json::array();
-            result["train_time"] = 0.0;
-            result["train_time_std"] = 0.0;
-            result["test_time"] = 0.0;
-            result["test_time_std"] = 0.0;
-            result["score_train"] = 0.0;
-            result["score_train_std"] = 0.0;
-            result["confusion_matrices"] = json::array();
-            results.push_back(result);
+            partial_result.setGraph(std::vector<std::string>());
+            partial_result.setScoreTest(torch::mean(score).item<double>()).setScoreTrain(0.0);
+            partial_result.setScoreTestStd(torch::std(score).item<double>()).setScoreTrainStd(0.0);
+            partial_result.setTrainTime(torch::mean(time_train).item<double>()).setTestTime(torch::mean(time_test).item<double>());
+            partial_result.setTrainTimeStd(torch::std(time_train).item<double>()).setTestTimeStd(torch::std(time_test).item<double>());
+            partial_result.setNodes(torch::mean(nodes).item<double>()).setLeaves(torch::mean(leaves).item<double>()).setDepth(torch::mean(depth).item<double>());
+            partial_result.setDataset(dataset_name).setNotes(std::vector<std::string>());
+            partial_result.setConfusionMatrices(json::array());
+            experiment.addResult(partial_result);
         }
+        auto clf = Models::instance()->create(experiment.getModel());
+        experiment.setModelVersion(clf->getVersion());
         computed_results = results;
     }
     json GridExperiment::store_result(std::vector<std::string>& names, Task_Result& result, json& results)
@@ -254,6 +192,7 @@ namespace platform {
             { "combination", result.idx_combination },
             { "fold", result.n_fold },
             { "time", result.time },
+            { "time_train", result.time_train },
             { "dataset", result.idx_dataset },
             { "nodes", result.nodes },
             { "leaves", result.leaves },
@@ -273,8 +212,7 @@ namespace platform {
         //
         // initialize
         //
-        Timer timer;
-        timer.start();
+        Timer train_timer, test_timer;
         json task = tasks[n_task];
         auto model = config.model;
         auto dataset_name = task["dataset"].get<std::string>();
@@ -305,6 +243,7 @@ namespace platform {
             fold = new folding::StratifiedKFold(config.n_folds, y, seed);
         else
             fold = new folding::KFold(config.n_folds, y.size(0), seed);
+        train_timer.start();
         auto [train, test] = fold->getFold(n_fold);
         auto [X_train, X_test, y_train, y_test] = dataset.getTrainTestTensors(train, test);
         auto states = dataset.getStates(); // Get the states of the features Once they are discretized
@@ -321,11 +260,14 @@ namespace platform {
         // Train model
         //
         clf->fit(X_train, y_train, features, className, states, smooth);
+        auto train_time = train_timer.getDuration();
         //
         // Test model
         //
+        test_timer.start();
         double score = clf->score(X_test, y_test);
         delete fold;
+        auto test_time = test_timer.getDuration();
         //
         // Return the result
         //
@@ -333,7 +275,8 @@ namespace platform {
         result->idx_combination = 0;
         result->score = score;
         result->n_fold = n_fold;
-        result->time = timer.getDuration();
+        result->time = test_time;
+        result->time_train = train_time;
         result->nodes = clf->getNumberOfNodes();
         result->leaves = clf->getNumberOfEdges();
         result->depth = clf->getNumberOfStates();

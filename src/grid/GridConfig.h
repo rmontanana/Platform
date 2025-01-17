@@ -39,7 +39,8 @@ namespace platform {
         uint idx_combination;
         int n_fold;
         double score; // Experiment: Score test, no score train in this case
-        double time; // Experiment: Time train+test, no time train and/or time test in this case
+        double time; // Experiment: Time test
+        double time_train;
         double nodes; // Experiment specific
         double leaves; // Experiment specific
         double depth; // Experiment specific

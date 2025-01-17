@@ -29,11 +29,13 @@ add_executable(
 target_link_libraries(b_best Boost::boost "${PyClassifiers}" "${BayesNet}" fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
 # b_grid
-set(grid_sources GridSearch.cpp GridData.cpp GridExperiment.cpp GridBase.cpp)
+set(grid_sources GridSearch.cpp GridData.cpp GridExperiment.cpp GridBase.cpp )
 list(TRANSFORM grid_sources PREPEND grid/)
 add_executable(b_grid commands/b_grid.cpp ${grid_sources} 
     common/Datasets.cpp common/Dataset.cpp common/Discretization.cpp
-    main/HyperParameters.cpp main/Models.cpp 
+    main/HyperParameters.cpp main/Models.cpp main/Experiment.cpp main/Scores.cpp
+    reports/ReportConsole.cpp reports/ReportBase.cpp 
+    results/Result.cpp
 )
 target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} "${PyClassifiers}" "${BayesNet}" fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 

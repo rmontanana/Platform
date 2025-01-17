@@ -11,47 +11,33 @@ namespace platform {
     public:
         JsonValidator(const json& schema) : schema(schema) {}
 
-        std::vector<std::string> validate(const std::string& fileName)
+        std::vector<std::string> validate_file(const std::string& fileName)
         {
-            std::ifstream file(fileName);
-            if (!file.is_open()) {
-                return { "Error: Unable to open file." };
-            }
-
-            json data;
-            try {
-                file >> data;
-            }
-            catch (const json::parse_error& e) {
-                return { "Error: JSON parsing failed: " + std::string(e.what()) };
-            }
-
+            auto data = load_json_file(fileName);
+            return validate(data);
+        }
+        std::vector<std::string> validate(const json& data)
+        {
             std::vector<std::string> errors;
-
             // Validate the top-level object
             validateObject("", schema, data, errors);
-
             return errors;
         }
-
-        void fix_it(const std::string& fileName)
+        json load_json_file(const std::string& fileName)
         {
             std::ifstream file(fileName);
             if (!file.is_open()) {
-                std::cerr << "Error: Unable to open file for fixing." << std::endl;
-                return;
+                throw std::runtime_error("Error: Unable to open file " + fileName);
             }
-
             json data;
-            try {
-                file >> data;
-            }
-            catch (const json::parse_error& e) {
-                std::cerr << "Error: JSON parsing failed: " << e.what() << std::endl;
-                return;
-            }
+            file >> data;
             file.close();
-
+            return data;
+        }
+        void fix_it(const std::string& fileName)
+        {
+            // Load JSON file
+            auto data = load_json_file(fileName);
             // Fix fields
             for (const auto& [key, value] : schema["properties"].items()) {
                 if (!data.contains(key)) {
@@ -77,7 +63,6 @@ namespace platform {
                 std::cerr << "Error: Unable to open file for writing." << std::endl;
                 return;
             }
-
             outFile << data.dump(4);
             outFile.close();
         }

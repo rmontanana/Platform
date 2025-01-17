@@ -20,6 +20,7 @@ namespace platform {
         explicit GridBase(struct ConfigGrid& config);
         ~GridBase() = default;
         void go(struct ConfigMPI& config_mpi);
+        void validate_config();
     protected:
         virtual json build_tasks(Datasets& datasets) = 0;
         virtual void save(json& results) = 0;

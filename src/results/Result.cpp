@@ -8,6 +8,8 @@
 #include "common/Paths.h"
 #include "common/Symbols.h"
 #include "Result.h"
+#include "JsonValidator.h"
+#include "SchemaV1_0.h"
 
 namespace platform {
     std::string get_actual_date()
@@ -62,7 +64,19 @@ namespace platform {
     {
         return data;
     }
-
+    void Result::check()
+    {
+        platform::JsonValidator validator(platform::SchemaV1_0::schema);
+        data["schema_version"] = "1.0";
+        std::vector<std::string> errors = validator.validate(data);
+        if (!errors.empty()) {
+            std::string message;
+            for (const auto& error : errors) {
+                message += " - " + error + "\n";
+            }
+            throw std::runtime_error("* Result file has validation errors:\n" + message);
+        }
+    }
     void Result::save()
     {
         std::ofstream file(Paths::results() + getFilename());

@@ -3,8 +3,11 @@
 #include <string>
 #include <map>
 #include <mpi.h>
+#include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>
 #include "common/Datasets.h"
+#include "common/DotEnv.h"
+#include "main/Experiment.h"
 #include "main/HyperParameters.h"
 #include "GridData.h"
 #include "GridBase.h"
@@ -15,11 +18,14 @@ namespace platform {
     using json = nlohmann::ordered_json;
     class GridExperiment : public GridBase {
     public:
-        explicit GridExperiment(struct ConfigGrid& config);
+        explicit GridExperiment(argparse::ArgumentParser& program, struct ConfigGrid& config);
         ~GridExperiment() = default;
         json getResults();
     private:
+        argparse::ArgumentParser& arguments;
+        Experiment experiment;
         json computed_results;
+        std::vector<std::string> filesToTest;
         void save(json& results);
         json initializeResults();
         json build_tasks(Datasets& datasets);

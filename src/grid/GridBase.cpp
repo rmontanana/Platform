@@ -9,6 +9,10 @@ namespace platform {
     GridBase::GridBase(struct ConfigGrid& config)
     {
         this->config = config;
+
+    }
+    void GridBase::validate_config()
+    {
         if (config.smooth_strategy == "ORIGINAL")
             smooth_type = bayesnet::Smoothing_t::ORIGINAL;
         else if (config.smooth_strategy == "LAPLACE")
@@ -116,7 +120,7 @@ namespace platform {
         * Each task is a json object with the data needed by the process
         *
         * The overall process consists in these steps:
-           * 0. Create the MPI result type & tasks
+           * 0. Validate config, create the MPI result type & tasks
            * 0.1 Create the MPI result type
            * 0.2 Manager creates the tasks
            * 1. Manager will broadcast the tasks to all the processes
@@ -138,6 +142,7 @@ namespace platform {
         //
         // 0.1 Create the MPI result type
         //
+        validate_config();
         Task_Result result;
         int tasks_size;
         MPI_Datatype MPI_Result;

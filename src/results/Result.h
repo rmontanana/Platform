@@ -16,6 +16,7 @@ namespace platform {
         Result();
         Result& load(const std::string& path, const std::string& filename);
         void save();
+        void check();
         // Getters
         json getJson();
         std::string to_string(int maxModel, int maxTitle) const;

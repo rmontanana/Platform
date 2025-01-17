@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     int n_errors = 0;
     std::vector<std::string> files_with_errors;
     for (const auto& file_name : result_files) {
-        std::vector<std::string> errors = validator.validate(file_name);
+        std::vector<std::string> errors = validator.validate_file(file_name);
         if (!errors.empty()) {
             n_errors++;
             std::cout << std::setw(max_length) << std::left << file_name << ": " << errors.size() << " Errors:" << std::endl;

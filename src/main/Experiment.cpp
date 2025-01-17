@@ -9,6 +9,7 @@ namespace platform {
 
     void Experiment::saveResult()
     {
+        result.check();
         result.save();
         std::cout << "Result saved in " << Paths::results() << result.getFilename() << std::endl;
     }

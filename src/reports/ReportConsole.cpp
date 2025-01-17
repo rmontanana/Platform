@@ -224,7 +224,7 @@ namespace platform {
     std::string ReportConsole::buildClassificationReport(json& result, std::string color)
     {
         std::stringstream oss;
-        if (result.find("confusion_matrices") == result.end())
+        if (result.find("confusion_matrices") == result.end() || result["confusion_matrices"].size() == 0)
             return "";
         bool second_header = false;
         int lines_header = 0;

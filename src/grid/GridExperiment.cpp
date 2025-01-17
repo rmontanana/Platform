@@ -95,7 +95,6 @@ namespace platform {
                 }
             }
         }
-
         platform::HyperParameters test_hyperparams;
         if (hyperparameters_file != "") {
             test_hyperparams = platform::HyperParameters(datasets.getNames(), hyperparameters_file, hyper_best);
@@ -109,6 +108,7 @@ namespace platform {
         this->config.smooth_strategy = smooth_strat;
         this->config.n_folds = n_folds;
         this->config.seeds = seeds;
+        this->config.quiet = false;
         auto env = platform::DotEnv();
         experiment.setTitle(title).setLanguage("c++").setLanguageVersion("gcc 14.1.1");
         experiment.setDiscretizationAlgorithm(discretize_algo).setSmoothSrategy(smooth_strat);
@@ -138,6 +138,8 @@ namespace platform {
     void GridExperiment::compile_results(json& results, json& all_results, std::string& model)
     {
         auto datasets = Datasets(false, Paths::datasets());
+        nlohmann::json temp = all_results; // To restore the order of the data by dataset name
+        all_results = temp;
         for (const auto& result_item : all_results.items()) {
             // each result has the results of all the outer folds as each one were a different task
             auto dataset_name = result_item.key();

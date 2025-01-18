@@ -2,6 +2,7 @@
 #include <cstddef>
 #include "common/DotEnv.h"
 #include "common/Paths.h"
+#include "common/DotEnv.h"
 #include "GridBase.h"
 
 namespace platform {
@@ -9,6 +10,8 @@ namespace platform {
     GridBase::GridBase(struct ConfigGrid& config)
     {
         this->config = config;
+        auto env = platform::DotEnv();
+        this->config.platform = env.get("platform");
 
     }
     void GridBase::validate_config()

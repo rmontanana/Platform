@@ -9,6 +9,7 @@
 #include "common/DotEnv.h"
 #include "main/Experiment.h"
 #include "main/HyperParameters.h"
+#include "main/ArgumentsExperiment.h"
 #include "GridData.h"
 #include "GridBase.h"
 #include "bayesnet/network/Network.h"
@@ -18,14 +19,14 @@ namespace platform {
     using json = nlohmann::ordered_json;
     class GridExperiment : public GridBase {
     public:
-        explicit GridExperiment(argparse::ArgumentParser& program, struct ConfigGrid& config);
+        explicit GridExperiment(ArgumentsExperiment& program, struct ConfigGrid& config);
         ~GridExperiment() = default;
         json getResults();
         Experiment& getExperiment() { return experiment; }
         size_t numFiles() const { return filesToTest.size(); }
         bool haveToSaveResults() const { return saveResults; }
     private:
-        argparse::ArgumentParser& arguments;
+        ArgumentsExperiment& arguments;
         Experiment experiment;
         json computed_results;
         bool saveResults;

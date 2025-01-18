@@ -20,7 +20,6 @@ namespace platform {
         Experiment& setTitle(const std::string& title) { this->result.setTitle(title); return *this; }
         Experiment& setModelVersion(const std::string& model_version) { this->result.setModelVersion(model_version); return *this; }
         Experiment& setModel(const std::string& model) { this->result.setModel(model); return *this; }
-        std::string getModel() const { return result.getModel(); }
         Experiment& setLanguage(const std::string& language) { this->result.setLanguage(language); return *this; }
         Experiment& setDiscretizationAlgorithm(const std::string& discretization_algo)
         {
@@ -28,7 +27,8 @@ namespace platform {
         }
         Experiment& setSmoothSrategy(const std::string& smooth_strategy)
         {
-            this->smooth_strategy = smooth_strategy; this->result.setSmoothStrategy(smooth_strategy);
+            this->smooth_strategy = smooth_strategy;
+            this->result.setSmoothStrategy(smooth_strategy);
             if (smooth_strategy == "ORIGINAL")
                 smooth_type = bayesnet::Smoothing_t::ORIGINAL;
             else if (smooth_strategy == "LAPLACE")
@@ -50,18 +50,32 @@ namespace platform {
         Experiment& setDuration(float duration) { this->result.setDuration(duration); return *this; }
         Experiment& setHyperparameters(const HyperParameters& hyperparameters_) { this->hyperparameters = hyperparameters_; return *this; }
         HyperParameters& getHyperParameters() { return hyperparameters; }
-        void cross_validation(const std::string& fileName, bool quiet, bool no_train_score, bool generate_fold_files, bool graph);
-        void go(std::vector<std::string> filesToProcess, bool quiet, bool no_train_score, bool generate_fold_files, bool graph);
+        std::string getModel() const { return result.getModel(); }
+        std::string getScore() const { return result.getScoreName(); }
+        bool isDiscretized() const { return discretized; }
+        bool isStratified() const { return stratified; }
+        bool isQuiet() const { return quiet; }
+        std::string getSmoothStrategy() const { return smooth_strategy; }
+        int getNFolds() const { return nfolds; }
+        std::vector<int> getRandomSeeds() const { return randomSeeds; }
+        void cross_validation(const std::string& fileName);
+        void go();
         void saveResult();
         void show();
         void saveGraph();
-        void report(bool classification_report = false);
+        void report();
+        void setFilesToTest(const std::vector<std::string>& filesToTest) { this->filesToTest = filesToTest; }
+        void setQuiet(bool quiet) { this->quiet = quiet; }
+        void setNoTrainScore(bool no_train_score) { this->no_train_score = no_train_score; }
+        void setGenerateFoldFiles(bool generate_fold_files) { this->generate_fold_files = generate_fold_files; }
+        void setGraph(bool graph) { this->graph = graph; }
     private:
         score_t parse_score() const;
         Result result;
-        bool discretized{ false }, stratified{ false };
+        bool discretized{ false }, stratified{ false }, generate_fold_files{ false }, graph{ false }, quiet{ false }, no_train_score{ false };
         std::vector<PartialResult> results;
         std::vector<int> randomSeeds;
+        std::vector<std::string> filesToTest;
         std::string discretization_algo;
         std::string smooth_strategy;
         bayesnet::Smoothing_t smooth_type{ bayesnet::Smoothing_t::NONE };

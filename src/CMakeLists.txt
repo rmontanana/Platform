@@ -33,7 +33,7 @@ set(grid_sources GridSearch.cpp GridData.cpp GridExperiment.cpp GridBase.cpp )
 list(TRANSFORM grid_sources PREPEND grid/)
 add_executable(b_grid commands/b_grid.cpp ${grid_sources} 
     common/Datasets.cpp common/Dataset.cpp common/Discretization.cpp
-    main/HyperParameters.cpp main/Models.cpp main/Experiment.cpp main/Scores.cpp
+    main/HyperParameters.cpp main/Models.cpp main/Experiment.cpp main/Scores.cpp main/ArgumentsExperiment.cpp
     reports/ReportConsole.cpp reports/ReportBase.cpp 
     results/Result.cpp
 )
@@ -49,7 +49,7 @@ add_executable(b_list commands/b_list.cpp
 target_link_libraries(b_list "${PyClassifiers}" "${BayesNet}" fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
 # b_main
-set(main_sources Experiment.cpp Models.cpp HyperParameters.cpp Scores.cpp)
+set(main_sources Experiment.cpp Models.cpp HyperParameters.cpp Scores.cpp ArgumentsExperiment.cpp)
 list(TRANSFORM main_sources PREPEND main/)
 add_executable(b_main commands/b_main.cpp ${main_sources} 
     common/Datasets.cpp common/Dataset.cpp common/Discretization.cpp

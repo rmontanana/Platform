@@ -33,7 +33,6 @@ void assignModel(argparse::ArgumentParser& parser)
             }
         );
 }
-
 void add_search_args(argparse::ArgumentParser& program)
 {
     auto env = platform::DotEnv();

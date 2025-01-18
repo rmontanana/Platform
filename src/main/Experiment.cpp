@@ -43,6 +43,22 @@ namespace platform {
             }
         }
     }
+    Experiment& Experiment::setSmoothSrategy(const std::string& smooth_strategy)
+    {
+        this->smooth_strategy = smooth_strategy;
+        this->result.setSmoothStrategy(smooth_strategy);
+        if (smooth_strategy == "ORIGINAL")
+            smooth_type = bayesnet::Smoothing_t::ORIGINAL;
+        else if (smooth_strategy == "LAPLACE")
+            smooth_type = bayesnet::Smoothing_t::LAPLACE;
+        else if (smooth_strategy == "CESTNIK")
+            smooth_type = bayesnet::Smoothing_t::CESTNIK;
+        else {
+            std::cerr << "Experiment: Unknown smoothing strategy: " << smooth_strategy << std::endl;
+            exit(1);
+        }
+        return *this;
+    }
     void Experiment::go()
     {
         for (auto fileName : filesToTest) {
@@ -64,6 +80,8 @@ namespace platform {
             std::cout << " --- " << string(max_name, '-') << " ----- ----- ---- " << string(4 + 3 * nfolds, '-') << " ----------" << Colors::RESET() << std::endl;
         }
         int num = 0;
+        // Sort files to test to have a consistent order even if --datasets is used
+        std::stable_sort(filesToTest.begin(), filesToTest.end());
         for (auto fileName : filesToTest) {
             if (!quiet)
                 std::cout << " " << setw(3) << right << num++ << " " << setw(max_name) << left << fileName << right << flush;

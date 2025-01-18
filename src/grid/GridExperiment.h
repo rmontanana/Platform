@@ -23,10 +23,12 @@ namespace platform {
         json getResults();
         Experiment& getExperiment() { return experiment; }
         size_t numFiles() const { return filesToTest.size(); }
+        bool haveToSaveResults() const { return saveResults; }
     private:
         argparse::ArgumentParser& arguments;
         Experiment experiment;
         json computed_results;
+        bool saveResults;
         std::vector<std::string> filesToTest;
         void save(json& results);
         json initializeResults();

@@ -21,6 +21,7 @@ namespace platform {
         datasets_file = program.get<std::string>("datasets-file");
         model_name = program.get<std::string>("model");
         discretize_dataset = program.get<bool>("discretize");
+        saveResults = program.get<bool>("save");
         discretize_algo = program.get<std::string>("discretize-algo");
         smooth_strat = program.get<std::string>("smooth-strat");
         stratified = program.get<bool>("stratified");
@@ -61,6 +62,7 @@ namespace platform {
                     filesToTest.push_back(line);
                 }
                 catalog.close();
+                saveResults = true;
                 if (title == "") {
                     title = "Test " + to_string(filesToTest.size()) + " datasets (" + datasets_file + ") "\
                         + model_name + " " + to_string(n_folds) + " folds";
@@ -77,6 +79,7 @@ namespace platform {
                     }
                 }
                 filesToTest = file_names;
+                saveResults = true;
                 if (title == "") {
                     title = "Test " + to_string(file_names.size()) + " datasets " + model_name + " " + to_string(n_folds) + " folds";
                 }
@@ -92,6 +95,7 @@ namespace platform {
                     filesToTest.push_back(file_name);
                 } else {
                     filesToTest = datasets.getNames();
+                    saveResults = true;
                 }
             }
         }

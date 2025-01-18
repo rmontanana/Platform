@@ -68,7 +68,7 @@ void manageArguments(argparse::ArgumentParser& program)
     program.add_argument("--graph").help("generate graphviz dot files with the model").default_value(false).implicit_value(true);
     program.add_argument("--no-train-score").help("Don't compute train score").default_value(false).implicit_value(true);
     program.add_argument("--quiet").help("Don't display detailed progress").default_value(false).implicit_value(true);
-    program.add_argument("--save").help("Save result (always save if no dataset is supplied)").default_value(false).implicit_value(true);
+    program.add_argument("--save").help("Save result (always save even if a dataset is supplied)").default_value(false).implicit_value(true);
     program.add_argument("--stratified").help("If Stratified KFold is to be done").default_value((bool)stoi(env.get("stratified"))).implicit_value(true);
     program.add_argument("-f", "--folds").help("Number of folds").default_value(stoi(env.get("n_folds"))).scan<'i', int>().action([](const std::string& value) {
         try {

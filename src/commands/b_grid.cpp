@@ -53,6 +53,7 @@ void add_experiment_args(argparse::ArgumentParser& program)
     group.add_argument("--datasets").nargs(1, 50).help("Datasets file names 1..50 separated by spaces").default_value(std::vector<std::string>());
     group.add_argument("--datasets-file").default_value("").help("Datasets file name. Mutually exclusive with dataset. This file should contain a list of datasets to test.");
     program.add_argument("--hyperparameters").default_value("{}").help("Hyperparameters passed to the model in Experiment");
+    program.add_argument("--save").help("Save result (always save even if a dataset is supplied)").default_value(false).implicit_value(true);
     program.add_argument("--hyper-file").default_value("").help("Hyperparameters file name." \
         "Mutually exclusive with hyperparameters. This file should contain hyperparameters for each dataset in json format.");
     program.add_argument("--hyper-best").default_value(false).help("Use best results of the model as source of hyperparameters").implicit_value(true);
@@ -322,7 +323,9 @@ void experiment(argparse::ArgumentParser& program)
         std::cout << "* Report of the computed hyperparameters" << std::endl;
         auto duration = timer.getDuration();
         experiment.setDuration(duration);
-        experiment.saveResult();
+        if (grid_experiment.haveToSaveResults()) {
+            experiment.saveResult();
+        }
         experiment.report(grid_experiment.numFiles() == 1);
         std::cout << "Process took " << duration << std::endl;
     }

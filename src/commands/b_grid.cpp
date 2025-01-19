@@ -284,6 +284,7 @@ int main(int argc, char** argv)
     argparse::ArgumentParser experiment_command("experiment");
     experiment_command.add_description("Experiment like b_main using mpi.");
     auto arguments = platform::ArgumentsExperiment(experiment_command, platform::experiment_t::GRID);
+    arguments.add_arguments();
     program.add_subparser(dump_command);
     program.add_subparser(report_command);
     program.add_subparser(search_command);

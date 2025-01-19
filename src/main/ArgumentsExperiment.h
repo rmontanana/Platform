@@ -15,6 +15,7 @@ namespace platform {
         ArgumentsExperiment(argparse::ArgumentParser& program, experiment_t type);
         ~ArgumentsExperiment() = default;
         std::vector<std::string> getFilesToTest() const { return filesToTest; }
+        void add_arguments();
         void parse_args(int argc, char** argv);
         void parse();
         Experiment& initializedExperiment();

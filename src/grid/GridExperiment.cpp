@@ -12,6 +12,8 @@ namespace platform {
     GridExperiment::GridExperiment(ArgumentsExperiment& program, struct ConfigGrid& config) : arguments(program), GridBase(config)
     {
         experiment = arguments.initializedExperiment();
+        filesToTest = arguments.getFilesToTest();
+        saveResults = arguments.haveToSaveResults();
         this->config.model = experiment.getModel();
         this->config.score = experiment.getScore();
         this->config.discretize = experiment.isDiscretized();

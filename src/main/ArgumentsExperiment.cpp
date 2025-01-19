@@ -7,6 +7,9 @@
 namespace platform {
     ArgumentsExperiment::ArgumentsExperiment(argparse::ArgumentParser& program, experiment_t type) : arguments{ program }, type{ type }
     {
+    }
+    void ArgumentsExperiment::add_arguments()
+    {
         auto env = platform::DotEnv();
         auto datasets = platform::Datasets(false, platform::Paths::datasets());
         auto& group = arguments.add_mutually_exclusive_group(true);
@@ -106,7 +109,6 @@ namespace platform {
             smooth_strat = arguments.get<std::string>("smooth-strat");
             stratified = arguments.get<bool>("stratified");
             quiet = arguments.get<bool>("quiet");
-
             n_folds = arguments.get<int>("folds");
             score = arguments.get<std::string>("score");
             seeds = arguments.get<std::vector<int>>("seeds");
@@ -196,7 +198,6 @@ namespace platform {
                 }
             }
         }
-
         if (hyperparameters_file != "") {
             test_hyperparams = platform::HyperParameters(datasets.getNames(), hyperparameters_file, hyper_best);
         } else {

@@ -11,6 +11,7 @@ int main(int argc, char** argv)
 {
     argparse::ArgumentParser program("b_main", { platform_project_version.begin(), platform_project_version.end() });
     auto arguments = platform::ArgumentsExperiment(program, platform::experiment_t::NORMAL);
+    arguments.add_arguments();
     arguments.parse_args(argc, argv);
     /*
      * Begin Processing

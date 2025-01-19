@@ -29,7 +29,7 @@ namespace platform {
         ArgumentsExperiment& arguments;
         Experiment experiment;
         json computed_results;
-        bool saveResults;
+        bool saveResults = false;
         std::vector<std::string> filesToTest;
         void save(json& results);
         json initializeResults();

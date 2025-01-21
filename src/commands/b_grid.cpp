@@ -140,7 +140,8 @@ void list_results(json& results, std::string& model)
     std::cout << std::string(MAXL, '*') << std::endl;
     int spaces = 7;
     int hyperparameters_spaces = 15;
-    for (const auto& item : results["results"].items()) {
+    nlohmann::json temp = results["results"]; // To show in alphabetical order of the dataset
+    for (const auto& item : temp.items()) {
         auto key = item.key();
         auto value = item.value();
         if (key.size() > spaces) {
@@ -155,7 +156,7 @@ void list_results(json& results, std::string& model)
     std::cout << "=== " << string(spaces, '=') << " " << string(19, '=') << " " << string(8, '=') << " "
         << string(8, '=') << " " << string(hyperparameters_spaces, '=') << std::endl;
     int index = 0;
-    for (const auto& item : results["results"].items()) {
+    for (const auto& item : temp.items()) {
         auto color = (index % 2) ? Colors::CYAN() : Colors::BLUE();
         auto value = item.value();
         std::cout << color;

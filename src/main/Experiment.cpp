@@ -76,8 +76,9 @@ namespace platform {
             std::cout << " ( " << Colors::GREEN() << "b" << Colors::RESET() << " )  Scoring train dataset" << std::endl;
             std::cout << " ( " << Colors::GREEN() << "c" << Colors::RESET() << " )  Scoring test dataset" << std::endl << std::endl;
             std::cout << Colors::YELLOW() << "Note: fold number in this color means fitting had issues such as not using all features in BoostAODE classifier" << std::endl << std::endl;
-            std::cout << Colors::GREEN() << left << "  #  " << setw(max_name) << "Dataset" << " #Samp #Feat Seed Status" << string(3 * nfolds - 2, ' ') << " Time" << std::endl;
-            std::cout << " --- " << string(max_name, '-') << " ----- ----- ---- " << string(4 + 3 * nfolds, '-') << " ----------" << Colors::RESET() << std::endl;
+            std::cout << Colors::GREEN() << left << "  #  " << setw(max_name) << "Dataset" << " #Samp #Feat Seed Status" << string(3 * nfolds - 2, ' ') << setw(11) << " Time" << " Score" << std::endl;
+            std::cout << " --- " << string(max_name, '-') << " ----- ----- ---- " << string(4 + 3 * nfolds, '-') << " ----------" << " ---------";
+            std::cout << Colors::RESET() << std::endl;
         }
         int num = 0;
         // Sort files to test to have a consistent order even if --datasets is used
@@ -297,10 +298,13 @@ namespace platform {
             }
             if (!quiet) {
                 seed_timer.stop();
-                std::cout << "end. [" << seed_timer.getDurationString() << "]";
+                std::cout << "end. " << std::setw(10) << std::right << seed_timer.getDurationString();
             }
             delete fold;
         }
+        // Show Results
+        if (!quiet)
+            std::cout << " " << setw(9) << right << std::fixed << std::setprecision(7) << torch::mean(score_test).item<double>();
         //
         // Store result totals in Result
         //

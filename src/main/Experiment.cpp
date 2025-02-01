@@ -76,8 +76,9 @@ namespace platform {
             std::cout << " ( " << Colors::GREEN() << "b" << Colors::RESET() << " )  Scoring train dataset" << std::endl;
             std::cout << " ( " << Colors::GREEN() << "c" << Colors::RESET() << " )  Scoring test dataset" << std::endl << std::endl;
             std::cout << Colors::YELLOW() << "Note: fold number in this color means fitting had issues such as not using all features in BoostAODE classifier" << std::endl << std::endl;
-            std::cout << Colors::GREEN() << left << "  #  " << setw(max_name) << "Dataset" << " #Samp #Feat Seed Status" << string(3 * nfolds - 2, ' ') << setw(11) << " Time" << " Score" << std::endl;
-            std::cout << " --- " << string(max_name, '-') << " ----- ----- ---- " << string(4 + 3 * nfolds, '-') << " ----------" << " ---------";
+            int nc = 4 + 3 * nfolds + (nfolds >= 10 ? nfolds - 10 + 1 : 0);
+            std::cout << Colors::GREEN() << left << "  #  " << setw(max_name) << "Dataset" << " #Samp #Feat Seed Status" << string(nc - 6, ' ') << setw(11) << " Time" << " Score" << std::endl;
+            std::cout << " --- " << string(max_name, '-') << " ----- ----- ---- " << string(nc, '-') << " ----------" << " ---------";
             std::cout << Colors::RESET() << std::endl;
         }
         int num = 0;
@@ -116,7 +117,8 @@ namespace platform {
     }
     void showProgress(int fold, const std::string& color, const std::string& phase)
     {
-        std::string prefix = phase == "-" ? "" : "\b\b\b\b";
+        int nc = fold >= 10 ? 5 : 4;
+        std::string prefix = phase == "-" ? "" : std::string(nc, '\b');
         std::cout << prefix << color << fold << Colors::RESET() << "(" << color << phase << Colors::RESET() << ")" << flush;
 
     }

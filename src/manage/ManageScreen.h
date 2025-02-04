@@ -27,6 +27,7 @@ namespace platform {
         void list_datasets(const std::string& status, const std::string& color);
         bool confirmAction(const std::string& intent, const std::string& fileName) const;
         std::string report(const int index, const bool excelReport);
+        void changeModel(const int index);
         std::string report_compared();
         std::pair<std::string, std::string> sortList();
         std::string getVersions();

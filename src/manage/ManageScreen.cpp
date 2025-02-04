@@ -312,6 +312,34 @@ namespace platform {
             return "Reporting " + results.at(index).getFilename();
         }
     }
+    void ManageScreen::changeModel(const int index)
+    {
+        std::cout << "Old model: " << results.at(index).getModel() << std::endl;
+        std::cout << "New model: ";
+        std::string newModel;
+        getline(std::cin, newModel);
+        if (newModel.empty()) {
+            list("Model not changed", Colors::YELLOW());
+            return;
+        }
+        if (newModel == results.at(index).getModel()) {
+            list("Model already set to " + newModel, Colors::RED());
+            return;
+        }
+        // Remove the old result file
+        std::string oldFile = Paths::results() + results.at(index).getFilename();
+        std::filesystem::remove(oldFile);
+        // Actually change the model
+        results.at(index).setModel(newModel);
+        results.at(index).save();
+        int newModelSize = static_cast<int>(newModel.size());
+        if (newModelSize > maxModel) {
+            maxModel = newModelSize;
+            header_lengths[2] = maxModel;
+            updateSize(rows, cols);
+        }
+        list("Model changed to " + newModel, Colors::GREEN());
+    }
     std::pair<std::string, std::string> ManageScreen::sortList()
     {
         std::vector<std::tuple<std::string, char, bool>>  sortOptions = {
@@ -372,6 +400,7 @@ namespace platform {
             {"list", 'l', false},
             {"Delete", 'D', true},
             {"datasets", 'd', false},
+            {"change model", 'm', true},
             {"hide", 'h', true},
             {"sort", 's', false},
             {"report", 'r', true},
@@ -498,6 +527,9 @@ namespace platform {
                     paginator[static_cast<int>(OutputType::EXPERIMENTS)].setTotal(results.size());
                     list(filename + " deleted!", Colors::RED());
                     break;
+                case 'm':
+                    changeModel(index);
+                    break;
                 case 'h':
                     {
                         std::string status_message;
@@ -544,7 +576,6 @@ namespace platform {
                     break;
                 case 't':
                     {
-                        std::string status_message;
                         std::cout << "Title: " << results.at(index).getTitle() << std::endl;
                         std::cout << "New title: ";
                         std::string newTitle;
@@ -552,8 +583,7 @@ namespace platform {
                         if (!newTitle.empty()) {
                             results.at(index).setTitle(newTitle);
                             results.at(index).save();
-                            status_message = "Title changed to " + newTitle;
-                            list(status_message, Colors::GREEN());
+                            list("Title changed to " + newTitle, Colors::GREEN());
                             break;
                         }
                         list("No title change!", Colors::YELLOW());

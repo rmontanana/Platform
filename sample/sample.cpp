@@ -219,7 +219,7 @@ int main(int argc, char** argv)
                 auto [Xtrain, ytrain] = extract_indices(train, Xd, y);
                 auto [Xtest, ytest] = extract_indices(test, Xd, y);
                 clf->fit(Xtrain, ytrain, features, className, states, smoothing);
-                std::cout << "Nodes: " << clf->geb_managetNumberOfNodes() << std::endl;
+                std::cout << "Nodes: " << clf->getNumberOfNodes() << std::endl;
                 nodes += clf->getNumberOfNodes();
                 score_train = clf->score(Xtrain, ytrain);
                 score_test = clf->score(Xtest, ytest);

@@ -32,7 +32,12 @@ namespace platform {
             }
             sorted_lines.push_back(line);
         }
-        std::stable_sort(sorted_lines.begin(), sorted_lines.end());
+        sort(sorted_lines.begin(), sorted_lines.end(), [](const auto& lhs, const auto& rhs) {
+            const auto result = mismatch(lhs.cbegin(), lhs.cend(), rhs.cbegin(), rhs.cend(), [](const auto& lhs, const auto& rhs) {return tolower(lhs) == tolower(rhs);});
+
+            return result.second != rhs.cend() && (result.first == lhs.cend() || tolower(*result.first) < tolower(*result.second));
+            });
+
         for (const auto& line : sorted_lines) {
             std::vector<std::string> tokens = split(line, ';');
             std::string name = tokens[0];
@@ -76,6 +81,11 @@ namespace platform {
     {
         std::vector<std::string> result;
         transform(datasets.begin(), datasets.end(), back_inserter(result), [](const auto& d) { return d.first; });
+        sort(result.begin(), result.end(), [](const auto& lhs, const auto& rhs) {
+            const auto result = mismatch(lhs.cbegin(), lhs.cend(), rhs.cbegin(), rhs.cend(), [](const auto& lhs, const auto& rhs) {return tolower(lhs) == tolower(rhs);});
+
+            return result.second != rhs.cend() && (result.first == lhs.cend() || tolower(*result.first) < tolower(*result.second));
+            });
         return result;
     }
     bool Datasets::isDataset(const std::string& name) const

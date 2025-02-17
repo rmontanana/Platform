@@ -28,7 +28,7 @@ namespace platform {
         auto datasets_names = datasets.getNames();
         int maxName = std::max(size_t(7), (*max_element(datasets_names.begin(), datasets_names.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size());
         std::vector<std::string> header_labels = { " #", "Dataset", "Sampl.", "Feat.", "#Num.", "Cls", "Balance" };
-        std::vector<int> header_lengths = { 3, maxName, 6, 5, 5, 3, DatasetsConsole::BALANCE_LENGTH };
+        std::vector<int> header_lengths = { 3, maxName, 6, 6, 6, 3, DatasetsConsole::BALANCE_LENGTH };
         sheader << Colors::GREEN();
         for (int i = 0; i < header_labels.size(); i++) {
             sheader << setw(header_lengths[i]) << left << header_labels[i] << " ";
@@ -51,14 +51,14 @@ namespace platform {
             auto& dataset = datasets.getDataset(dataset_name);
             dataset.load();
             auto nSamples = dataset.getNSamples();
-            line << setw(6) << right << nSamples << " ";
+            line << setw(header_lengths[2]) << right << nSamples << " ";
             auto nFeatures = dataset.getFeatures().size();
-            line << setw(5) << right << nFeatures << " ";
+            line << setw(header_lengths[3]) << right << nFeatures << " ";
             auto numericFeatures = dataset.getNumericFeatures();
             auto num = std::count(numericFeatures.begin(), numericFeatures.end(), true);
-            line << setw(5) << right << num << " ";
+            line << setw(header_lengths[4]) << right << num << " ";
             auto nClasses = dataset.getNClasses();
-            line << setw(3) << right << nClasses << " ";
+            line << setw(header_lengths[5]) << right << nClasses << " ";
             std::string sep = "";
             oss.str("");
             for (auto number : dataset.getClassesCounts()) {

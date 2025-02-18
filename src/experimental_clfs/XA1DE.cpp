@@ -22,22 +22,21 @@ namespace platform {
             throw std::invalid_argument("Invalid hyperparameters" + hyperparameters.dump());
         }
     }
-    void XA1DE::fit(std::vector<std::vector<int>> X, std::vector<int> y, std::vector<double> weights)
+    XA1DE& XA1DE::fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
     {
         Timer timer, timert;
         timer.start();
         timert.start();
-        weights_ = weights;
         std::vector<std::vector<int>> instances = X;
         instances.push_back(y);
         int num_instances = instances[0].size();
         int num_attributes = instances.size();
         normalize_weights(num_instances);
-        std::vector<int> states;
+        std::vector<int> statesv;
         for (int i = 0; i < num_attributes; i++) {
-            states.push_back(*max_element(instances[i].begin(), instances[i].end()) + 1);
+            statesv.push_back(*max_element(instances[i].begin(), instances[i].end()) + 1);
         }
-        aode_.init(states);
+        aode_.init(statesv);
         aode_.duration_first += timer.getDuration(); timer.start();
         std::vector<int> instance;
         for (int n_instance = 0; n_instance < num_instances; n_instance++) {
@@ -62,6 +61,7 @@ namespace platform {
             std::cout << "* Time to build the model: " << timert.getDuration() << " seconds" << std::endl;
             // exit(1);
         }
+        return *this;
     }
     std::vector<std::vector<double>> XA1DE::predict_proba(std::vector<std::vector<int>>& test_data)
     {

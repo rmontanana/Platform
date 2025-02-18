@@ -21,16 +21,18 @@ namespace platform {
     public:
         XA1DE();
         virtual ~XA1DE() = default;
+        const std::string CLASSIFIER_NOT_FITTED = "Classifier has not been fitted";
 
         std::vector<std::vector<double>> predict_proba_threads(const std::vector<std::vector<int>>& test_data);
         std::vector<std::vector<double>> predict_proba(std::vector<std::vector<int>>& X) override;
         float score(std::vector<std::vector<int>>& X, std::vector<int>& y) override;
+        std::vector<int> predict(std::vector<std::vector<int>>& X) override;
         XA1DE& fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing) override;
+
         XA1DE& fit(torch::Tensor& X, torch::Tensor& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing) override { return *this; };
         XA1DE& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing) override { return *this; };
         XA1DE& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing) override { return *this; };
         torch::Tensor predict(torch::Tensor& X) override { return torch::zeros(0); };
-        std::vector<int> predict(std::vector<std::vector<int>>& X) override;
         torch::Tensor predict_proba(torch::Tensor& X) override { return torch::zeros(0); };
 
         int getNumberOfNodes() const override { return 0; };
@@ -61,6 +63,8 @@ namespace platform {
                 w = w * num_instances / sum;
             }
         }
+        std::vector<int> to_vector(const torch::Tensor& y);
+        std::vector<std::vector<int>> to_matrix(const torch::Tensor& X);
         Xaode aode_;
         std::vector<double> weights_;
         CountingSemaphore& semaphore_;
@@ -69,6 +73,7 @@ namespace platform {
         std::vector<std::string> notes;
         bool use_threads = false;
         std::string version = "0.9.7";
+        bool fitted = false;
     };
 }
 #endif // XA1DE_H

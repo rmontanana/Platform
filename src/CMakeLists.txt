@@ -55,6 +55,7 @@ add_executable(b_main commands/b_main.cpp ${main_sources}
     common/Datasets.cpp common/Dataset.cpp common/Discretization.cpp
     reports/ReportConsole.cpp reports/ReportBase.cpp 
     results/Result.cpp
+    experimental_clfs/XA1DE.cpp
 )
 target_link_libraries(b_main "${PyClassifiers}" "${BayesNet}" fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 

@@ -8,7 +8,7 @@
 #include "main/modelRegister.h"
 #include "main/ArgumentsExperiment.h"
 #include "common/Paths.h"
-#include "common/Timer.h"
+#include "common/Timer.hpp"
 #include "common/Colors.h"
 #include "common/DotEnv.h"
 #include "grid/GridSearch.h"

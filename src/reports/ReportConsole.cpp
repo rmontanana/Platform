@@ -2,7 +2,7 @@
 #include <locale>
 #include "best/BestScore.h"
 #include "common/CLocale.h"
-#include "common/Timer.h"
+#include "common/Timer.hpp"
 #include "ReportConsole.h"
 #include "main/Scores.h"
 
@@ -251,7 +251,7 @@ namespace platform {
             if (train_data) {
                 oss << color_line << std::left << std::setw(maxLine) << output_train[i]
                     << suffix << Colors::BLUE() << " | " << color_line << std::left << std::setw(maxLine)
-                        << output_test[i] << std::endl;
+                    << output_test[i] << std::endl;
             } else {
                 oss << color_line << output_test[i] << std::endl;
             }

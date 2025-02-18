@@ -5,7 +5,7 @@
 #include <mpi.h>
 #include <nlohmann/json.hpp>
 #include "common/Datasets.h"
-#include "common/Timer.h"
+#include "common/Timer.hpp"
 #include "common/Colors.h"
 #include "main/HyperParameters.h"
 #include "GridData.h"

@@ -9,6 +9,7 @@
 #include <fimdlp/CPPFImdlp.h>
 #include <folding.hpp>
 #include <bayesnet/utils/BayesMetrics.h>
+#include <bayesnet/classifiers/SPODE.h>
 #include "Models.h"
 #include "modelRegister.h"
 #include "config_platform.h"
@@ -160,82 +161,119 @@ int main(int argc, char** argv)
             states[feature] = std::vector<int>(maxes[feature]);
         }
         states[className] = std::vector<int>(maxes[className]);
-        auto clf = platform::Models::instance()->create(model_name);
+        // Output the states
+        std::cout << std::string(80, '-') << std::endl;
+        std::cout << "States" << std::endl;
+        for (auto feature : features) {
+            std::cout << feature << ": " << states[feature].size() << std::endl;
+        }
+        std::cout << std::string(80, '-') << std::endl;
+        //auto clf = platform::Models::instance()->create("SPODE");
+        auto clf = bayesnet::SPODE(2);
+
         bayesnet::Smoothing_t smoothing = bayesnet::Smoothing_t::ORIGINAL;
-        clf->fit(Xd, y, features, className, states, smoothing);
+        clf.fit(Xd, y, features, className, states, smoothing);
         if (dump_cpt) {
             std::cout << "--- CPT Tables ---" << std::endl;
-            clf->dump_cpt();
+            std::cout << clf.dump_cpt();
         }
-        auto lines = clf->show();
+        std::cout << "--- Datos predicción ---" << std::endl;
+        std::cout << "Orden de variables: " << std::endl;
+        for (auto feature : features) {
+            std::cout << feature << ", ";
+        }
+        std::cout << std::endl;
+        std::cout << "X[0]: ";
+        for (int i = 0; i < Xd.size(); ++i) {
+            std::cout << Xd[i][0] << ", ";
+        }
+        std::cout << std::endl;
+        std::cout << std::string(80, '-') << std::endl;
+
+        auto lines = clf.show();
         for (auto line : lines) {
             std::cout << line << std::endl;
         }
         std::cout << "--- Topological Order ---" << std::endl;
-        auto order = clf->topological_order();
+        auto order = clf.topological_order();
         for (auto name : order) {
             std::cout << name << ", ";
         }
-        std::cout << "end." << std::endl;
-        auto score = clf->score(Xd, y);
-        std::cout << "Score: " << score << std::endl;
-        auto graph = clf->graph();
-        auto dot_file = model_name + "_" + file_name;
-        ofstream file(dot_file + ".dot");
-        file << graph;
-        file.close();
-        std::cout << "Graph saved in " << model_name << "_" << file_name << ".dot" << std::endl;
-        std::cout << "dot -Tpng -o " + dot_file + ".png " + dot_file + ".dot " << std::endl;
-        std::string stratified_string = stratified ? " Stratified" : "";
-        std::cout << nFolds << " Folds" << stratified_string << " Cross validation" << std::endl;
-        std::cout << "==========================================" << std::endl;
-        torch::Tensor Xt = torch::zeros({ static_cast<int>(Xd.size()), static_cast<int>(Xd[0].size()) }, torch::kInt32);
-        torch::Tensor yt = torch::tensor(y, torch::kInt32);
-        for (int i = 0; i < features.size(); ++i) {
-            Xt.index_put_({ i, "..." }, torch::tensor(Xd[i], torch::kInt32));
-        }
-        float total_score = 0, total_score_train = 0, score_train, score_test;
-        folding::Fold* fold;
-        double nodes = 0.0;
-        if (stratified)
-            fold = new folding::StratifiedKFold(nFolds, y, seed);
-        else
-            fold = new folding::KFold(nFolds, y.size(), seed);
-        for (auto i = 0; i < nFolds; ++i) {
-            auto [train, test] = fold->getFold(i);
-            std::cout << "Fold: " << i + 1 << std::endl;
-            if (tensors) {
-                auto ttrain = torch::tensor(train, torch::kInt64);
-                auto ttest = torch::tensor(test, torch::kInt64);
-                torch::Tensor Xtraint = torch::index_select(Xt, 1, ttrain);
-                torch::Tensor ytraint = yt.index({ ttrain });
-                torch::Tensor Xtestt = torch::index_select(Xt, 1, ttest);
-                torch::Tensor ytestt = yt.index({ ttest });
-                clf->fit(Xtraint, ytraint, features, className, states, smoothing);
-                auto temp = clf->predict(Xtraint);
-                score_train = clf->score(Xtraint, ytraint);
-                score_test = clf->score(Xtestt, ytestt);
-            } else {
-                auto [Xtrain, ytrain] = extract_indices(train, Xd, y);
-                auto [Xtest, ytest] = extract_indices(test, Xd, y);
-                clf->fit(Xtrain, ytrain, features, className, states, smoothing);
-                std::cout << "Nodes: " << clf->getNumberOfNodes() << std::endl;
-                nodes += clf->getNumberOfNodes();
-                score_train = clf->score(Xtrain, ytrain);
-                score_test = clf->score(Xtest, ytest);
+        auto predict_proba = clf.predict_proba(Xd);
+        std::cout << "Instances predict_proba: ";
+        for (int i = 0; i < predict_proba.size(); i++) {
+            std::cout << "Instance " << i << ": ";
+            for (int j = 0; j < 4; ++j) {
+                std::cout << Xd[j][i] << ", ";
             }
-            if (dump_cpt) {
-                std::cout << "--- CPT Tables ---" << std::endl;
-                std::cout << clf->dump_cpt();
+            std::cout << ": ";
+            for (auto score : predict_proba[i]) {
+                std::cout << score << ", ";
             }
-            total_score_train += score_train;
-            total_score += score_test;
-            std::cout << "Score Train: " << score_train << std::endl;
-            std::cout << "Score Test : " << score_test << std::endl;
-            std::cout << "-------------------------------------------------------------------------------" << std::endl;
+            std::cout << std::endl;
         }
-        std::cout << "Nodes: " << nodes / nFolds << std::endl;
-        std::cout << "**********************************************************************************" << std::endl;
-        std::cout << "Average Score Train: " << total_score_train / nFolds << std::endl;
-        std::cout << "Average Score Test : " << total_score / nFolds << std::endl;return 0;
+        // std::cout << std::endl;
+        // std::cout << "end." << std::endl;
+        // auto score = clf->score(Xd, y);
+        // std::cout << "Score: " << score << std::endl;
+        // auto graph = clf->graph();
+        // auto dot_file = model_name + "_" + file_name;
+        // ofstream file(dot_file + ".dot");
+        // file << graph;
+        // file.close();
+        // std::cout << "Graph saved in " << model_name << "_" << file_name << ".dot" << std::endl;
+        // std::cout << "dot -Tpng -o " + dot_file + ".png " + dot_file + ".dot " << std::endl;
+        // std::string stratified_string = stratified ? " Stratified" : "";
+        // std::cout << nFolds << " Folds" << stratified_string << " Cross validation" << std::endl;
+        // std::cout << "==========================================" << std::endl;
+        // torch::Tensor Xt = torch::zeros({ static_cast<int>(Xd.size()), static_cast<int>(Xd[0].size()) }, torch::kInt32);
+        // torch::Tensor yt = torch::tensor(y, torch::kInt32);
+        // for (int i = 0; i < features.size(); ++i) {
+        //     Xt.index_put_({ i, "..." }, torch::tensor(Xd[i], torch::kInt32));
+        // }
+        // float total_score = 0, total_score_train = 0, score_train, score_test;
+        // folding::Fold* fold;
+        // double nodes = 0.0;
+        // if (stratified)
+        //     fold = new folding::StratifiedKFold(nFolds, y, seed);
+        // else
+        //     fold = new folding::KFold(nFolds, y.size(), seed);
+        // for (auto i = 0; i < nFolds; ++i) {
+        //     auto [train, test] = fold->getFold(i);
+        //     std::cout << "Fold: " << i + 1 << std::endl;
+        //     if (tensors) {
+        //         auto ttrain = torch::tensor(train, torch::kInt64);
+        //         auto ttest = torch::tensor(test, torch::kInt64);
+        //         torch::Tensor Xtraint = torch::index_select(Xt, 1, ttrain);
+        //         torch::Tensor ytraint = yt.index({ ttrain });
+        //         torch::Tensor Xtestt = torch::index_select(Xt, 1, ttest);
+        //         torch::Tensor ytestt = yt.index({ ttest });
+        //         clf->fit(Xtraint, ytraint, features, className, states, smoothing);
+        //         auto temp = clf->predict(Xtraint);
+        //         score_train = clf->score(Xtraint, ytraint);
+        //         score_test = clf->score(Xtestt, ytestt);
+        //     } else {
+        //         auto [Xtrain, ytrain] = extract_indices(train, Xd, y);
+        //         auto [Xtest, ytest] = extract_indices(test, Xd, y);
+        //         clf->fit(Xtrain, ytrain, features, className, states, smoothing);
+        //         std::cout << "Nodes: " << clf->getNumberOfNodes() << std::endl;
+        //         nodes += clf->getNumberOfNodes();
+        //         score_train = clf->score(Xtrain, ytrain);
+        //         score_test = clf->score(Xtest, ytest);
+        //     }
+        //     // if (dump_cpt) {
+        //     //     std::cout << "--- CPT Tables ---" << std::endl;
+        //     //     std::cout << clf->dump_cpt();
+        //     // }
+        //     total_score_train += score_train;
+        //     total_score += score_test;
+        //     std::cout << "Score Train: " << score_train << std::endl;
+        //     std::cout << "Score Test : " << score_test << std::endl;
+        //     std::cout << "-------------------------------------------------------------------------------" << std::endl;
+        // }
+
+        // std::cout << "Nodes: " << nodes / nFolds << std::endl;
+        // std::cout << "**********************************************************************************" << std::endl;
+        // std::cout << "Average Score Train: " << total_score_train / nFolds << std::endl;
+        // std::cout << "Average Score Test : " << total_score / nFolds << std::endl;return 0;
 }

@@ -20,6 +20,7 @@
 #include <pyclassifiers/SVC.h>
 #include <pyclassifiers/XGBoost.h>
 #include <pyclassifiers/RandomForest.h>
+#include "../experimental_clfs/XA1DE.h"
 namespace platform {
     class Models {
     public:

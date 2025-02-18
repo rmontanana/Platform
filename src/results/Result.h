@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
-#include "common/Timer.h"
+#include "common/Timer.hpp"
 #include "main/HyperParameters.h"
 #include "main/PartialResult.h"
 

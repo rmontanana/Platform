@@ -35,5 +35,7 @@ static platform::Registrar registrarRaF("RandomForest",
     [](void) -> bayesnet::BaseClassifier* { return new pywrap::RandomForest();});
 static platform::Registrar registrarXGB("XGBoost",
     [](void) -> bayesnet::BaseClassifier* { return new pywrap::XGBoost();});
+static platform::Registrar registrarXA1DE("XA1DE",
+    [](void) -> bayesnet::BaseClassifier* { return new platform::XA1DE();});
 
 #endif

@@ -66,6 +66,9 @@ namespace platform {
     }
     std::vector<std::vector<double>> XA1DE::predict_proba(std::vector<std::vector<int>>& test_data)
     {
+        if (use_threads) {
+            return predict_proba_threads(test_data);
+        }
         int test_size = test_data[0].size();
         std::vector<std::vector<double>> probabilities;
 
@@ -151,7 +154,8 @@ namespace platform {
         }
         return static_cast<float>(correct) / predictions.size();
     }
-    std::vector<std::vector<int>> to_matrix(const torch::Tensor& X)
+
+    std::vector<std::vector<int>> XA1DE::to_matrix(const torch::Tensor& X)
     {
         // Ensure tensor is contiguous in memory
         auto X_contig = X.contiguous();
@@ -174,24 +178,45 @@ namespace platform {
         }
         return data;
     }
-    std::vector<int> to_vector(const torch::Tensor& y)
+    template <typename T>
+    std::vector<T> XA1DE::to_vector(const torch::Tensor& y)
     {
         // Ensure the tensor is contiguous in memory
         auto y_contig = y.contiguous();
 
         // Access data pointer
-        auto data_ptr = y_contig.data_ptr<int>();
+        auto data_ptr = y_contig.data_ptr<T>();
 
         // Prepare output container
-        std::vector<int> data(y.size(0));
+        std::vector<T> data(y.size(0));
 
         // Copy data efficiently
         std::copy(data_ptr, data_ptr + y.size(0), data.begin());
 
         return data;
     }
+
+    //
+    // Fit
+    //
+    // fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
     XA1DE& XA1DE::fit(torch::Tensor& X, torch::Tensor& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
     {
-        return fit(to_matrix(X), to_vector(y), features, className, states, smoothing);
+        auto X_ = to_matrix(X);
+        int a = 1;
+        std::vector<int> y_ = to_vector<int>(y);
+        return fit(X_, y_, features, className, states, smoothing);
+    }
+    XA1DE& XA1DE::fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
+    {
+        torch::Tensor y = dataset[dataset.size(0) - 1];
+        torch::Tensor X = dataset.slice(0, 0, dataset.size(0) - 1);
+        return fit(X, y, features, className, states, smoothing);
+    }
+    XA1DE& XA1DE::fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing)
+    {
+        double b = 1;
+        weights_ = to_vector<double>(weights);
+        return fit(dataset, features, className, states, smoothing);
     }
 }

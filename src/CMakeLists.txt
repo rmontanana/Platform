@@ -25,6 +25,7 @@ add_executable(
     main/Models.cpp main/Scores.cpp
     reports/ReportExcel.cpp reports/ReportBase.cpp reports/ExcelFile.cpp
     results/Result.cpp
+    experimental_clfs/XA1DE.cpp
 )
 target_link_libraries(b_best Boost::boost "${PyClassifiers}" "${BayesNet}" fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
@@ -36,6 +37,7 @@ add_executable(b_grid commands/b_grid.cpp ${grid_sources}
     main/HyperParameters.cpp main/Models.cpp main/Experiment.cpp main/Scores.cpp main/ArgumentsExperiment.cpp
     reports/ReportConsole.cpp reports/ReportBase.cpp 
     results/Result.cpp
+    experimental_clfs/XA1DE.cpp
 )
 target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} "${PyClassifiers}" "${BayesNet}" fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 
@@ -45,6 +47,7 @@ add_executable(b_list commands/b_list.cpp
     main/Models.cpp main/Scores.cpp
     reports/ReportExcel.cpp reports/ExcelFile.cpp reports/ReportBase.cpp reports/DatasetsExcel.cpp reports/DatasetsConsole.cpp reports/ReportsPaged.cpp
     results/Result.cpp results/ResultsDatasetExcel.cpp results/ResultsDataset.cpp results/ResultsDatasetConsole.cpp
+    experimental_clfs/XA1DE.cpp
 )
 target_link_libraries(b_list "${PyClassifiers}" "${BayesNet}" fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 

@@ -487,20 +487,19 @@ namespace platform {
                     index_A = index;
                     list("A set to " + std::to_string(index), Colors::GREEN());
                     break;
-                case 'B': // set_b or back to list
-                    if (output_type == OutputType::EXPERIMENTS) {
-                        if (index == index_A) {
-                            list("A and B cannot be the same!", Colors::RED());
-                            break;
-                        }
-                        index_B = index;
-                        list("B set to " + std::to_string(index), Colors::GREEN());
-                    } else {
-                        // back to show the report
-                        output_type = OutputType::RESULT;
-                        paginator[static_cast<int>(OutputType::DETAIL)].setPage(1);
-                        list(STATUS_OK, STATUS_COLOR);
+                case 'B': // set_b
+                    if (index == index_A) {
+                        list("A and B cannot be the same!", Colors::RED());
+                        break;
                     }
+                    index_B = index;
+                    list("B set to " + std::to_string(index), Colors::GREEN());
+                    break;
+                case 'b': // back to list
+                    // back to show the report
+                    output_type = OutputType::RESULT;
+                    paginator[static_cast<int>(OutputType::DETAIL)].setPage(1);
+                    list(STATUS_OK, STATUS_COLOR);
                     break;
                 case 'c':
                     if (index_A == -1 || index_B == -1) {

@@ -27,6 +27,7 @@ namespace platform {
         Timer timer, timert;
         timer.start();
         timert.start();
+        // debug = true;
         std::vector<std::vector<int>> instances = X;
         instances.push_back(y);
         int num_instances = instances[0].size();
@@ -36,6 +37,16 @@ namespace platform {
         for (int i = 0; i < num_attributes; i++) {
             statesv.push_back(*max_element(instances[i].begin(), instances[i].end()) + 1);
         }
+        // std::cout << "* States: " << statesv << std::endl;
+        // std::cout << "* Weights: " << weights_ << std::endl;
+        // std::cout << "* Instances: " << num_instances << std::endl;
+        // std::cout << "* Attributes: " << num_attributes << std::endl;
+        // std::cout << "* y: " << y << std::endl;
+        // std::cout << "* x shape: " << X.size() << "x" << X[0].size() << std::endl;
+        // for (int i = 0; i < num_attributes - 1; i++) {
+        //     std::cout << "* " << features[i] << ": " << instances[i] << std::endl;
+        // }
+        // std::cout << "Starting to build the model" << std::endl;
         aode_.init(statesv);
         aode_.duration_first += timer.getDuration(); timer.start();
         std::vector<int> instance;
@@ -54,7 +65,7 @@ namespace platform {
             // std::cout << "* Checking coherence... ";
             // aode_.checkCoherenceApprox(1e-6);
             // std::cout << "Ok!" << std::endl;
-            // aode_.show();
+            aode_.show();
             // std::cout << "* Accumulated first time: " << aode_.duration_first << std::endl;
             // std::cout << "* Accumulated second time: " << aode_.duration_second << std::endl;
             // std::cout << "* Accumulated third time: " << aode_.duration_third << std::endl;
@@ -197,14 +208,33 @@ namespace platform {
     }
 
     //
+    // statistics
+    //
+    int XA1DE::getNumberOfNodes() const
+    {
+        return aode_.getNumberOfNodes();
+    }
+    int XA1DE::getNumberOfEdges() const
+    {
+        return aode_.getNumberOfEdges();
+    }
+    int XA1DE::getNumberOfStates() const
+    {
+        return aode_.getNumberOfStates();
+    }
+    int XA1DE::getClassNumStates() const
+    {
+        return aode_.statesClass();
+    }
+
+    //
     // Fit
     //
     // fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
     XA1DE& XA1DE::fit(torch::Tensor& X, torch::Tensor& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
     {
         auto X_ = to_matrix(X);
-        int a = 1;
-        std::vector<int> y_ = to_vector<int>(y);
+        auto y_ = to_vector<int>(y);
         return fit(X_, y_, features, className, states, smoothing);
     }
     XA1DE& XA1DE::fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
@@ -215,8 +245,37 @@ namespace platform {
     }
     XA1DE& XA1DE::fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing)
     {
-        double b = 1;
         weights_ = to_vector<double>(weights);
         return fit(dataset, features, className, states, smoothing);
     }
+    //
+    // Predict
+    //
+    torch::Tensor XA1DE::predict(torch::Tensor& X)
+    {
+        auto X_ = to_matrix(X);
+        torch::Tensor y = torch::tensor(predict(X_));
+        return y;
+    }
+    torch::Tensor XA1DE::predict_proba(torch::Tensor& X)
+    {
+        auto X_ = to_matrix(X);
+        auto probabilities = predict_proba(X_);
+        auto n_samples = X.size(1);
+        int n_classes = probabilities[0].size();
+        auto y = torch::zeros({ n_samples, n_classes });
+        for (int i = 0; i < n_samples; i++) {
+            for (int j = 0; j < n_classes; j++) {
+                y[i][j] = probabilities[i][j];
+            }
+        }
+        return y;
+    }
+    float XA1DE::score(torch::Tensor& X, torch::Tensor& y)
+    {
+        auto X_ = to_matrix(X);
+        auto y_ = to_vector<int>(y);
+        return score(X_, y_);
+    }
+
 }

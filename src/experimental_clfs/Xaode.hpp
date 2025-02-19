@@ -31,7 +31,7 @@ namespace platform {
         double duration_first = 0.0;
         double duration_second = 0.0;
         double duration_third = 0.0;
-        Xaode() : nFeatures_{ 0 }, statesClass_{ 0 }, totalSize_{ 0 }, matrixState_{ MatrixState::EMPTY } {}
+        Xaode() : nFeatures_{ 0 }, statesClass_{ 0 }, matrixState_{ MatrixState::EMPTY } {}
         // -------------------------------------------------------
         // init
         // -------------------------------------------------------
@@ -84,9 +84,9 @@ namespace platform {
                 }
                 runningOffset += states_[i];
             }
-            totalSize_ = index * statesClass_;
-            data_.resize(totalSize_);
-            dataOpp_.resize(totalSize_);
+            int totalSize = index * statesClass_;
+            data_.resize(totalSize);
+            dataOpp_.resize(totalSize);
 
             classFeatureCounts_.resize(feature_offset * statesClass_);
             classFeatureProbs_.resize(feature_offset * statesClass_);
@@ -96,12 +96,6 @@ namespace platform {
             classPriors_.resize(statesClass_, 0.0);
 
             matrixState_ = MatrixState::COUNTS;
-        }
-
-        // Returns the dimension of data_ (just for info).
-        int size() const
-        {
-            return totalSize_;
         }
 
         // Returns current mode: INIT, COUNTS or PROBS
@@ -116,7 +110,6 @@ namespace platform {
             std::cout << "-------- Xaode.show() --------" << std::endl
                 << "- nFeatures = " << nFeatures_ << std::endl
                 << "- statesClass = " << statesClass_ << std::endl
-                << "- totalSize_ = " << totalSize_ << std::endl
                 << "- matrixState = " << (matrixState_ == MatrixState::COUNTS ? "COUNTS" : "PROBS") << std::endl;
             std::cout << "- states: size: " << states_.size() << std::endl;
             for (int s : states_) std::cout << s << " "; std::cout << std::endl;
@@ -543,6 +536,23 @@ namespace platform {
         {
             return statesClass_;
         }
+        int nFeatures() const
+        {
+            return nFeatures_;
+        }
+        int getNumberOfStates() const
+        {
+            return std::accumulate(states_.begin(), states_.end(), 0) * nFeatures_;
+        }
+        int getNumberOfEdges() const
+        {
+            return nFeatures_ * (2 * nFeatures_ - 1);
+        }
+        int getNumberOfNodes() const
+        {
+            return (nFeatures_ + 1) * nFeatures_;
+        }
+
 
     private:
         // -----------
@@ -555,7 +565,6 @@ namespace platform {
         // data_ means p(child=sj | c, superparent= si) after normalization.
         // But in COUNTS mode, it accumulates raw counts.
         std::vector<int> pairOffset_;
-        int totalSize_;
         // data_ stores p(child=sj | c, superparent=si) for each pair (i<j).
         std::vector<double> data_;
         // dataOpp_ stores p(superparent=si | c, child=sj) for each pair (i<j).

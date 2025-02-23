@@ -73,7 +73,7 @@ namespace platform {
         bool debug = false;
         bayesnet::status_t status = bayesnet::NORMAL;
         std::vector<std::string> notes;
-        bool use_threads = false;
+        bool use_threads = true;
         std::string version = "0.9.7";
         bool fitted = false;
     };

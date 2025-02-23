@@ -552,6 +552,10 @@ namespace platform {
         {
             return (nFeatures_ + 1) * nFeatures_;
         }
+        void set_active_parents(std::vector<int> active_parents)
+        {
+            this->active_parents = active_parents;
+        }
 
 
     private:
@@ -583,6 +587,7 @@ namespace platform {
         MatrixState matrixState_;
 
         double SMOOTHING = 1.0;
+        std::vector<int> active_parents;
     };
 }
 #endif // XAODE_H

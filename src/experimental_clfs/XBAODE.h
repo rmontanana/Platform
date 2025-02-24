@@ -53,7 +53,9 @@ namespace platform {
         void trainModel(const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing) override {};
 
     private:
+        std::vector<int> initializeModels(const bayesnet::Smoothing_t smoothing);
         XA1DE aode_;
+        int n_models;
         std::vector<double> weights_;
         CountingSemaphore& semaphore_;
         bool debug = false;

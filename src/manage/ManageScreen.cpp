@@ -82,10 +82,12 @@ namespace platform {
             workbook_close(workbook);
         }
         if (didExcel) {
-            std::cout << Colors::MAGENTA() << "Excel file created: " << Paths::excel() + Paths::excelResults() << std::endl;
+            excelFileName = Paths::excel() + Paths::excelResults();
+            std::cout << Colors::MAGENTA() << "Excel file created: " << excelFileName << std::endl;
         }
         std::cout << Colors::RESET() << "Done!" << std::endl;
     }
+
     std::string ManageScreen::getVersions()
     {
         std::string kfold_version = folding::KFold(5, 100).version();

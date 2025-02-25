@@ -19,6 +19,7 @@ namespace platform {
         ~ManageScreen() = default;
         void doMenu();
         void updateSize(int rows, int cols);
+        std::string getExcelFileName() const { return excelFileName; }
     private:
         void list(const std::string& status, const std::string& color);
         void list_experiments(const std::string& status, const std::string& color);
@@ -58,6 +59,7 @@ namespace platform {
         std::vector<Paginator> paginator;
         ResultsManager results;
         lxw_workbook* workbook;
+        std::string excelFileName;
     };
 }
 #endif

@@ -51,6 +51,66 @@ void handleResize(int sig)
     manager->updateSize(rows, cols);
 }
 
+void openFile(const std::string& fileName)
+{
+    // #ifdef __APPLE__
+    //     // macOS uses the "open" command
+    //     std::string command = "open";
+    // #elif defined(__linux__)
+    //     // Linux typically uses "xdg-open"
+    //     std::string command = "xdg-open";
+    // #else
+    //     // For other OSes, do nothing or handle differently
+    //     std::cerr << "Unsupported platform." << std::endl;
+    //     return;
+    // #endif
+    //     execlp(command.c_str(), command.c_str(), fileName.c_str(), NULL);
+#ifdef __APPLE__
+    const char* tool = "/usr/bin/open";
+#elif defined(__linux__)
+    const char* tool = "/usr/bin/xdg-open";
+#else
+    std::cerr << "Unsupported platform." << std::endl;
+    return;
+#endif
+
+    // We'll build an argv array for execve:
+    std::vector<char*> argv;
+    argv.push_back(const_cast<char*>(tool));               // argv[0]
+    argv.push_back(const_cast<char*>(fileName.c_str()));   // argv[1]
+    argv.push_back(nullptr);
+
+    // Make a new environment array, skipping BASH_FUNC_ variables
+    std::vector<std::string> filteredEnv;
+    for (char** env = environ; *env != nullptr; ++env) {
+        // *env is a string like "NAME=VALUE"
+        // We want to skip those starting with "BASH_FUNC_"
+        if (strncmp(*env, "BASH_FUNC_", 10) == 0) {
+            // skip it
+            continue;
+        }
+        filteredEnv.push_back(*env);
+    }
+
+    // Convert filteredEnv into a char* array
+    std::vector<char*> envp;
+    for (auto& var : filteredEnv) {
+        envp.push_back(const_cast<char*>(var.c_str()));
+    }
+    envp.push_back(nullptr);
+
+    // Now call execve with the cleaned environment
+    // NOTE: You may need a full path to the tool if it's not in PATH, or use which() logic
+    // For now, let's assume "open" or "xdg-open" is found in the default PATH:
+    execve(tool, argv.data(), envp.data());
+
+    // If we reach here, execve failed
+    perror("execve failed");
+    // This would terminate your current process if it's not in a child
+    // Usually you'd do something like:
+    _exit(EXIT_FAILURE);
+}
+
 int main(int argc, char** argv)
 {
     auto program = argparse::ArgumentParser("b_manage", { platform_project_version.begin(), platform_project_version.end() });
@@ -67,6 +127,11 @@ int main(int argc, char** argv)
     auto [rows, cols] = numRowsCols();
     manager = new platform::ManageScreen(rows, cols, model, score, platform, complete, partial, compare);
     manager->doMenu();
+    auto fileName = manager->getExcelFileName();
     delete manager;
+    if (!fileName.empty()) {
+        std::cout << "Opening " << fileName << std::endl;
+        openFile(fileName);
+    }
     return 0;
 }

@@ -40,9 +40,8 @@ namespace platform {
         //   where states.back() = number of class states.
         //
         // We'll store:
-        //  1) p(c) in classPriors_
-        //  2) p(x_i=si | c) in classFeatureProbs_
-        //  3) p(x_j=sj | c, x_i=si) in data_, with i<j => i is "superparent," j is "child."
+        //  1) p(x_i=si | c) in classFeatureProbs_
+        //  2) p(x_j=sj | c, x_i=si) in data_, with i<j => i is "superparent," j is "child."
         //
         // Internally, in COUNTS mode, data_ accumulates raw counts, then
         // computeProbabilities(...) normalizes them into conditionals.
@@ -98,9 +97,8 @@ namespace platform {
             classFeatureCounts_.resize(feature_offset * statesClass_);
             classFeatureProbs_.resize(feature_offset * statesClass_);
 
-            // classCounts_[c] & p(c) in classPriors_
+            // classCounts_[c]
             classCounts_.resize(statesClass_, 0.0);
-            classPriors_.resize(statesClass_, 0.0);
 
             matrixState_ = MatrixState::COUNTS;
         }
@@ -122,8 +120,6 @@ namespace platform {
             for (int s : states_) std::cout << s << " "; std::cout << std::endl;
             std::cout << "- classCounts: size: " << classCounts_.size() << std::endl;
             for (double cc : classCounts_) std::cout << cc << " "; std::cout << std::endl;
-            std::cout << "- classPriors: size: " << classPriors_.size() << std::endl;
-            for (double cp : classPriors_) std::cout << cp << " ";  std::cout << std::endl;
             std::cout << "- classFeatureCounts: size: " << classFeatureCounts_.size() << std::endl;
             for (double cfc : classFeatureCounts_) std::cout << cfc << " "; std::cout << std::endl;
             std::cout << "- classFeatureProbs: size: " << classFeatureProbs_.size() << std::endl;
@@ -191,29 +187,16 @@ namespace platform {
         // -------------------------------------------------------
         //
         // Once all samples are added in COUNTS mode, call this to:
-        //  1) compute class priors p(c)
-        //  2) compute p(x_i=si | c) => classFeatureProbs_
-        //  3) compute p(x_j=sj | c, x_i=si) => data_ (for i<j) dataOpp_ (for i>j)
+        //  1) compute p(x_i=si | c) => classFeatureProbs_
+        //  2) compute p(x_j=sj | c, x_i=si) => data_ (for i<j) dataOpp_ (for i>j)
         //
         void computeProbabilities()
         {
             if (matrixState_ != MatrixState::COUNTS) {
                 throw std::logic_error("computeProbabilities: must be in COUNTS mode.");
             }
-            // (1) p(c)
             double totalCount = std::accumulate(classCounts_.begin(), classCounts_.end(), 0.0);
-            if (totalCount <= 0.0) {
-                // fallback => uniform
-                double unif = 1.0 / statesClass_;
-                for (int c = 0; c < statesClass_; ++c) {
-                    classPriors_[c] = unif;
-                }
-            } else {
-                for (int c = 0; c < statesClass_; ++c) {
-                    classPriors_[c] = classCounts_[c] / totalCount;
-                }
-            }
-            // (2) p(x_i=si | c) => classFeatureProbs_
+            // (1) p(x_i=si | c) => classFeatureProbs_
             int idx, sf;
             double denom, countVal, p;
             for (int feature = 0; feature < nFeatures_; ++feature) {
@@ -237,8 +220,8 @@ namespace platform {
                 }
             }
             // getCountFromTable(int classVal, int pIndex, int childIndex)
-            // (3) p(x_j=sj | c, x_i=si) => data_(i,si,j,sj,c)
-            // (3) p(x_i=si | c, x_j=sj) => dataOpp_(j,sj,i,si,c)
+            // (2) p(x_j=sj | c, x_i=si) => data_(i,si,j,sj,c)
+            // (2) p(x_i=si | c, x_j=sj) => dataOpp_(j,sj,i,si,c)
             double pccCount, pcCount, ccCount;
             double conditionalProb, oppositeCondProb;
             int part1, part2, p1, part2_class, p1_class;
@@ -286,76 +269,66 @@ namespace platform {
         // We multiply p(c) * p(x_sp| c) * p(x_i| c, x_sp).
         // Then normalize the distribution.
         //
-        std::vector<double> predict_proba_spode(const std::vector<int>& instance, int parent) const
+        std::vector<double> predict_proba_spode(const std::vector<int>& instance, int parent)
         {
-            if (matrixState_ != MatrixState::PROBS) {
-                throw std::logic_error("predict_proba_spode: Xaode not in PROBS state.");
-            }
-            if ((int)instance.size() != nFeatures_) {
-                throw std::invalid_argument("predict_proba_spode: instance.size() != nFeatures_.");
-            }
-            if (parent < 0 || parent >= nFeatures_) {
-                throw std::out_of_range("predict_proba_spode: invalid superparent index.");
-            }
-
-            std::vector<double> scores(statesClass_, 0.0);
+            // accumulates posterior probabilities for each class
+            auto probs = std::vector<double>(statesClass_);
+            auto spodeProbs = std::vector<double>(statesClass_);
+            // Initialize the probabilities with the feature|class probabilities
+            int localOffset;
             int sp = instance[parent];
-            int idx;
-            double pSpGivenC, pChildGivenSp, product;
-            double base;
-            double offset = (featureClassOffset_[parent] + sp) * statesClass_;
-            double parent_offset = pairOffset_[featureClassOffset_[parent] + sp];
-            // For each class c
+            localOffset = (featureClassOffset_[parent] + sp) * statesClass_;
             for (int c = 0; c < statesClass_; ++c) {
-                // Start with p(c) * p(x_sp=spState| c)
-                pSpGivenC = classFeatureProbs_[offset + c];
-                product = pSpGivenC;
-                bool zeroProb = false;
-                for (int feature = 0; feature < nFeatures_; ++feature) {
-                    if (feature == parent) continue;
-                    int sf = instance[feature];
-                    // Retrieve p(x_i= state_i | c, x_sp= spState)
-                    base = (parent_offset + featureClassOffset_[feature] + sf) * statesClass_;
-                    idx = base + c;
-                    pChildGivenSp = data_[idx] * dataOpp_[idx];
-                    if (pChildGivenSp <= 0.0) {
-                        zeroProb = true;
-                        break;
-                    }
-                    product *= pChildGivenSp;
-                }
-                scores[c] = zeroProb ? 0.0 : product;
+                spodeProbs[c] = classFeatureProbs_[localOffset + c];
             }
-            normalize(scores);
-            return scores;
+            int idx, base, sc, parent_offset;
+            sp = instance[parent];
+            parent_offset = pairOffset_[featureClassOffset_[parent] + sp];
+            for (int child = 0; child < parent; ++child) {
+                sc = instance[child];
+                base = (parent_offset + featureClassOffset_[child] + sc) * statesClass_;
+                for (int c = 0; c < statesClass_; ++c) {
+                    /*
+                     * The probability P(xc|xp,c) is stored in dataOpp_, and
+                     * the probability P(xp|xc,c) is stored in data_
+                     */
+                     /*
+                        int base = pairOffset_[i * nFeatures_ + j];
+                        int blockSize = states_[i] * states_[j];
+                        return base + c * blockSize + (si * states_[j] + sj);
+                     */
+                     // index = compute_index(parent, instance[parent], child, instance[child], classVal);
+                    idx = base + c;
+                    spodeProbs[c] *= data_[idx];
+                    spodeProbs[c] *= dataOpp_[idx];
+                }
+            }
+            // Normalize the probabilities
+            normalize(probs);
+            return probs;
         }
-        int predict_spode(const std::vector<int>& instance, int parent) const
+        int predict_spode(const std::vector<int>& instance, int parent)
         {
             auto probs = predict_proba_spode(instance, parent);
             return (int)std::distance(probs.begin(), std::max_element(probs.begin(), probs.end()));
         }
-        std::vector<double> predict_proba(std::vector<int>& instance)
+        std::vector<double> predict_proba(const std::vector<int>& instance)
         {
-            Timer timer;
-            timer.start();
-            if (matrixState_ != MatrixState::PROBS) {
-                throw std::logic_error("predict_proba: Xaode not in PROBS state.");
-            }
-            if ((int)instance.size() != nFeatures_) {
-                throw std::invalid_argument("predict_proba: instance.size() != nFeatures_.");
-            }
             // accumulates posterior probabilities for each class
             auto probs = std::vector<double>(statesClass_);
             auto spodeProbs = std::vector<std::vector<double>>(nFeatures_, std::vector<double>(statesClass_));
             // Initialize the probabilities with the feature|class probabilities
             int localOffset;
             for (int feature = 0; feature < nFeatures_; ++feature) {
+                // if feature is not in the active_parents, skip it
+                if (std::find(active_parents.begin(), active_parents.end(), feature) == active_parents.end()) {
+                    continue;
+                }
                 localOffset = (featureClassOffset_[feature] + instance[feature]) * statesClass_;
                 for (int c = 0; c < statesClass_; ++c) {
                     spodeProbs[feature][c] = classFeatureProbs_[localOffset + c];
                 }
             }
-            duration_first += timer.getDuration(); timer.start();
             int idx, base, sp, sc, parent_offset;
             for (int parent = 1; parent < nFeatures_; ++parent) {
                 // if parent is not in the active_parents, skip it
@@ -386,7 +359,6 @@ namespace platform {
                     }
                 }
             }
-            duration_second += timer.getDuration(); timer.start();
             /* add all the probabilities for each class */
             for (int c = 0; c < statesClass_; ++c) {
                 for (int i = 0; i < nFeatures_; ++i) {
@@ -414,140 +386,6 @@ namespace platform {
             }
         }
 
-        // -------------------------------------------------------
-        // checkCoherence
-        // -------------------------------------------------------
-        //
-        // Check that the class priors, feature–class distributions and pairwise conditionals
-        // are coherent. They have to sum to 1.0 within a threshold.
-        //
-        void checkCoherenceApprox(double threshold) const
-        {
-            if (matrixState_ != MatrixState::PROBS) {
-                throw std::logic_error("checkCoherenceApprox: must be in PROBS state.");
-            }
-
-            // ------------------------------------------------------------------
-            // 1) Check that sum of class priors ~ 1
-            // ------------------------------------------------------------------
-            double sumPriors = 0.0;
-            for (double pc : classPriors_) {
-                sumPriors += pc;
-            }
-            if (std::fabs(sumPriors - 1.0) > threshold) {
-                std::ostringstream oss;
-                oss << "Xaode::checkCoherenceApprox - sum of classPriors = " << sumPriors
-                    << ", differs from 1.0 by more than " << threshold;
-                throw std::runtime_error(oss.str());
-            }
-
-            // ------------------------------------------------------------------
-            // 2) For each feature i and class c, the sum over all states si of
-            //    classFeatureProbs_ should match the prior p(c) ~ classPriors_[c].
-            //
-            //    (Because if you're storing p(x_i=si, c)/total or a scaled version,
-            //    summing over si is effectively p(c).)
-            // ------------------------------------------------------------------
-            for (int c = 0; c < statesClass_; ++c) {
-                for (int i = 0; i < nFeatures_; ++i) {
-                    double sumFeature = 0.0;
-                    for (int si = 0; si < states_[i]; ++si) {
-                        int idx = (featureClassOffset_[i] + si) * statesClass_ + c;
-                        sumFeature += classFeatureProbs_[idx];
-                    }
-                    double expected = classPriors_[c];
-                    if (std::fabs(sumFeature - expected) > threshold) {
-                        std::ostringstream oss;
-                        oss << "Xaode::checkCoherenceApprox - sum_{si} classFeatureProbs_ "
-                            << "for (feature=" << i << ", class=" << c << ") = " << sumFeature
-                            << ", expected ~ " << expected
-                            << ", difference is " << std::fabs(sumFeature - expected)
-                            << " > threshold=" << threshold;
-                        throw std::runtime_error(oss.str());
-                    }
-                }
-            }
-
-            // ------------------------------------------------------------------
-            // 3) For data_: sum_{child states} data_ should match the "parent" row
-            //    in classFeatureProbs_, i.e. p(x_i=si, c).
-            //
-            //    Because if data_[... i, si, j, sj, c] holds something like
-            //      p(x_i=si, x_j=sj, c) (or a scaled fraction),
-            //    then sum_{ sj } data_ = p(x_i=si, c).
-            // ------------------------------------------------------------------
-            for (int parent = 1; parent < nFeatures_; ++parent) {
-                for (int child = 0; child < parent; ++child) {
-                    for (int c = 0; c < statesClass_; ++c) {
-                        for (int spVal = 0; spVal < states_[parent]; ++spVal) {
-                            double sumChildProb = 0.0;
-                            // pairOffset_ gives the offset for (parent featureVal),
-                            // then we add the child's offset and multiply by statesClass_.
-                            int part1 = pairOffset_[featureClassOffset_[parent] + spVal];
-                            for (int scVal = 0; scVal < states_[child]; ++scVal) {
-                                int part2 = featureClassOffset_[child] + scVal;
-                                int idx = (part1 + part2) * statesClass_ + c;
-                                sumChildProb += data_[idx];
-                            }
-                            // Compare with classFeatureProbs_[parent, spVal, c]
-                            double expected = classFeatureProbs_[
-                                (featureClassOffset_[parent] + spVal) * statesClass_ + c
-                            ];
-                            if (std::fabs(sumChildProb - expected) > threshold) {
-                                std::ostringstream oss;
-                                oss << "Xaode::checkCoherenceApprox - sum_{sj} data_ "
-                                    << "for (parentFeature=" << parent
-                                    << ", parentVal=" << spVal
-                                    << ", childFeature=" << child
-                                    << ", class=" << c << ") = " << sumChildProb
-                                    << ", expected ~ " << expected
-                                    << ", diff " << std::fabs(sumChildProb - expected)
-                                    << " > threshold=" << threshold;
-                                throw std::runtime_error(oss.str());
-                            }
-                        }
-                    }
-                }
-            }
-
-            // ------------------------------------------------------------------
-            // 4) For dataOpp_: sum_{parent states} dataOpp_ should match the "child"
-            //    row in classFeatureProbs_, i.e. p(x_j=sj, c).
-            // ------------------------------------------------------------------
-            for (int parent = 1; parent < nFeatures_; ++parent) {
-                for (int child = 0; child < parent; ++child) {
-                    for (int c = 0; c < statesClass_; ++c) {
-                        for (int scVal = 0; scVal < states_[child]; ++scVal) {
-                            double sumParentProb = 0.0;
-                            int part2 = featureClassOffset_[child] + scVal;
-                            for (int spVal = 0; spVal < states_[parent]; ++spVal) {
-                                int part1 = pairOffset_[featureClassOffset_[parent] + spVal];
-                                int idx = (part1 + part2) * statesClass_ + c;
-                                sumParentProb += dataOpp_[idx];
-                            }
-                            // Compare with classFeatureProbs_[child, scVal, c]
-                            double expected = classFeatureProbs_[
-                                (featureClassOffset_[child] + scVal) * statesClass_ + c
-                            ];
-                            if (std::fabs(sumParentProb - expected) > threshold) {
-                                std::ostringstream oss;
-                                oss << "Xaode::checkCoherenceApprox - sum_{spVal} dataOpp_ "
-                                    << "for (childFeature=" << child
-                                    << ", childVal=" << scVal
-                                    << ", parentFeature=" << parent
-                                    << ", class=" << c << ") = " << sumParentProb
-                                    << ", expected ~ " << expected
-                                    << ", diff " << std::fabs(sumParentProb - expected)
-                                    << " > threshold=" << threshold;
-                                throw std::runtime_error(oss.str());
-                            }
-                        }
-                    }
-                }
-            }
-
-            // If we get here, all sums are coherent under this "joint distribution" interpretation
-        }
         int statesClass() const
         {
             return statesClass_;
@@ -601,8 +439,6 @@ namespace platform {
         std::vector<int> featureClassOffset_;
         std::vector<double> classFeatureCounts_;
         std::vector<double> classFeatureProbs_;  // => p(x_i=si | c) after normalization
-
-        std::vector<double> classPriors_;        // => p(c)
 
         MatrixState matrixState_;
 

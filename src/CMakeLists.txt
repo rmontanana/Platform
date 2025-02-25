@@ -1,5 +1,6 @@
 include_directories(
     ## Libs
+    ${Platform_SOURCE_DIR}/lib/log
     ${Platform_SOURCE_DIR}/lib/Files
     ${Platform_SOURCE_DIR}/lib/folding
     ${Platform_SOURCE_DIR}/lib/mdlp/src

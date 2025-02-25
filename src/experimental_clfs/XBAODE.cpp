@@ -10,10 +10,14 @@
 #include <tuple>
 #include "XBAODE.h"
 #include "TensorUtils.hpp"
+#include <loguru.hpp>
+#include <loguru.cpp>
 
 namespace platform {
     XBAODE::XBAODE() : semaphore_{ CountingSemaphore::getInstance() }, Boost(false)
     {
+        validHyperparameters = { "alpha_block", "order", "convergence", "convergence_best", "bisection", "threshold", "maxTolerance",
+            "predict_voting", "select_features" };
     }
     void XBAODE::trainModel(const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing)
     {
@@ -22,23 +26,23 @@ namespace platform {
         y_train_ = TensorUtils::to_vector<int>(y_train);
         X_test_ = TensorUtils::to_matrix(X_test);
         y_test_ = TensorUtils::to_vector<int>(y_test);
+        maxTolerance = 5;
         //
         // Logging setup
         //
-        // loguru::set_thread_name("XBAODE");
-        // loguru::g_stderr_verbosity = loguru::Verbosity_OFF;
-        // loguru::add_file("boostAODE.log", loguru::Truncate, loguru::Verbosity_MAX);
+        loguru::set_thread_name("XBAODE");
+        loguru::g_stderr_verbosity = loguru::Verbosity_OFF;
+        loguru::add_file("XBAODE.log", loguru::Truncate, loguru::Verbosity_MAX);
 
         // Algorithm based on the adaboost algorithm for classification
         // as explained in Ensemble methods (Zhi-Hua Zhou, 2012)
         double alpha_t = 0;
-        torch::Tensor weights_ = torch::full({ m }, 1.0, torch::kFloat64);
+        torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         bool finished = false;
         std::vector<int> featuresUsed;
-        int num_instances = m;
-        int num_attributes = n;
-        significanceModels.resize(num_attributes, 0.0);
+        significanceModels.resize(n, 0.0); // n possible spodes
         aode_.fit(X_train_, y_train_, features, className, states, smoothing);
+        n_models = 0;
         if (selectFeatures) {
             featuresUsed = featureSelection(weights_);
             aode_.set_active_parents(featuresUsed);
@@ -49,6 +53,8 @@ namespace platform {
             for (const auto& parent : featuresUsed) {
                 significanceModels[parent] = alpha_t;
             }
+            n_models = featuresUsed.size();
+            VLOG_SCOPE_F(1, "SelectFeatures. alpha_t: %f n_models: %d", alpha_t, n_models);
             if (finished) {
                 return;
             }
@@ -78,46 +84,41 @@ namespace platform {
             );
             int k = bisection ? pow(2, tolerance) : 1;
             int counter = 0; // The model counter of the current pack
-            // VLOG_SCOPE_F(1, "counter=%d k=%d featureSelection.size: %zu", counter, k, featureSelection.size());
+            VLOG_SCOPE_F(1, "counter=%d k=%d featureSelection.size: %zu", counter, k, featureSelection.size());
             while (counter++ < k && featureSelection.size() > 0) {
                 auto feature = featureSelection[0];
                 featureSelection.erase(featureSelection.begin());
                 aode_.add_active_parent(feature);
                 alpha_t = 0.0;
-                if (!block_update) {
-                    std::vector<int> ypred;
-                    if (alpha_block) {
-                        //
-                        // Compute the prediction with the current ensemble + model
-                        //
-                        // Add the model to the ensemble
-                        n_models++;
-                        significanceModels[feature] = 1.0;
-                        aode_.add_active_parent(feature);
-                        // Compute the prediction
-                        ypred = aode_.predict(X_train_);
-                        // Remove the model from the ensemble
-                        significanceModels[feature] = 0.0;
-                        aode_.remove_last_parent();
-                        n_models--;
-                    } else {
-                        ypred = aode_.predict_spode(X_train_, feature);
-                    }
-                    // Step 3.1: Compute the classifier amout of say
-                    auto ypred_t = torch::tensor(ypred);
-                    std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred_t, weights_);
+                std::vector<int> ypred;
+                if (alpha_block) {
+                    //
+                    // Compute the prediction with the current ensemble + model
+                    //
+                    // Add the model to the ensemble
+                    n_models++;
+                    significanceModels[feature] = 1.0;
+                    aode_.add_active_parent(feature);
+                    // Compute the prediction
+                    ypred = aode_.predict(X_train_);
+                    // Remove the model from the ensemble
+                    significanceModels[feature] = 0.0;
+                    aode_.remove_last_parent();
+                    n_models--;
+                } else {
+                    ypred = aode_.predict_spode(X_train_, feature);
                 }
+                // Step 3.1: Compute the classifier amout of say
+                auto ypred_t = torch::tensor(ypred);
+                std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred_t, weights_);
                 // Step 3.4: Store classifier and its accuracy to weigh its future vote
                 numItemsPack++;
                 featuresUsed.push_back(feature);
                 aode_.add_active_parent(feature);
                 significanceModels.push_back(alpha_t);
                 n_models++;
-                // VLOG_SCOPE_F(2, "numItemsPack: %d n_models: %d featuresUsed: %zu", numItemsPack, n_models, featuresUsed.size());
-            }
-            if (block_update) {
-                std::tie(weights_, alpha_t, finished) = update_weights_block(k, y_train, weights_);
-            }
+                VLOG_SCOPE_F(2, "finished: %d numItemsPack: %d n_models: %d featuresUsed: %zu", finished, numItemsPack, n_models, featuresUsed.size());
+            } // End of the pack
             if (convergence && !finished) {
                 auto y_val_predict = predict(X_test);
                 double accuracy = (y_val_predict == y_test).sum().item<double>() / (double)y_test.size(0);
@@ -127,10 +128,10 @@ namespace platform {
                     improvement = accuracy - priorAccuracy;
                 }
                 if (improvement < convergence_threshold) {
-                    // VLOG_SCOPE_F(3, "  (improvement<threshold) tolerance: %d numItemsPack: %d improvement: %f prior: %f current: %f", tolerance, numItemsPack, improvement, priorAccuracy, accuracy);
+                    VLOG_SCOPE_F(3, "  (improvement<threshold) tolerance: %d numItemsPack: %d improvement: %f prior: %f current: %f", tolerance, numItemsPack, improvement, priorAccuracy, accuracy);
                     tolerance++;
                 } else {
-                    // VLOG_SCOPE_F(3, "* (improvement>=threshold) Reset. tolerance: %d numItemsPack: %d improvement: %f prior: %f current: %f", tolerance, numItemsPack, improvement, priorAccuracy, accuracy);
+                    VLOG_SCOPE_F(3, "* (improvement>=threshold) Reset. tolerance: %d numItemsPack: %d improvement: %f prior: %f current: %f", tolerance, numItemsPack, improvement, priorAccuracy, accuracy);
                     tolerance = 0; // Reset the counter if the model performs better
                     numItemsPack = 0;
                 }
@@ -142,13 +143,13 @@ namespace platform {
                     priorAccuracy = accuracy;
                 }
             }
-            // VLOG_SCOPE_F(1, "tolerance: %d featuresUsed.size: %zu features.size: %zu", tolerance, featuresUsed.size(), features.size());
+            VLOG_SCOPE_F(1, "tolerance: %d featuresUsed.size: %zu features.size: %zu", tolerance, featuresUsed.size(), features.size());
             finished = finished || tolerance > maxTolerance || featuresUsed.size() == features.size();
         }
         if (tolerance > maxTolerance) {
             if (numItemsPack < n_models) {
                 notes.push_back("Convergence threshold reached & " + std::to_string(numItemsPack) + " models eliminated");
-                // VLOG_SCOPE_F(4, "Convergence threshold reached & %d models eliminated of %d", numItemsPack, n_models);
+                VLOG_SCOPE_F(4, "Convergence threshold reached & %d models eliminated of %d", numItemsPack, n_models);
                 for (int i = 0; i < numItemsPack; ++i) {
                     significanceModels.pop_back();
                     models.pop_back();
@@ -156,7 +157,7 @@ namespace platform {
                 }
             } else {
                 notes.push_back("Convergence threshold reached & 0 models eliminated");
-                // VLOG_SCOPE_F(4, "Convergence threshold reached & 0 models eliminated n_models=%d numItemsPack=%d", n_models, numItemsPack);
+                VLOG_SCOPE_F(4, "Convergence threshold reached & 0 models eliminated n_models=%d numItemsPack=%d", n_models, numItemsPack);
             }
         }
         if (featuresUsed.size() != features.size()) {

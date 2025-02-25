@@ -98,8 +98,8 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 fname = iris
 example: ## Build sample
 	@echo ">>> Building Sample...";
-	@cmake --build build_debug -t sample
-	build_debug/sample/PlatformSample --model BoostAODE --dataset $(fname) --discretize --stratified
+	@cmake --build $(f_release) -t sample
+	$(f_release)/sample/PlatformSample --model BoostAODE --dataset $(fname) --discretize --stratified
 	@echo ">>> Done";
 
 

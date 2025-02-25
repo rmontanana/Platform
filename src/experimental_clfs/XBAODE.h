@@ -17,21 +17,14 @@
 #include "XA1DE.h"
 
 namespace platform {
-
     class XBAODE : public bayesnet::Boost {
     public:
         XBAODE();
         virtual ~XBAODE() = default;
         const std::string CLASSIFIER_NOT_FITTED = "Classifier has not been fitted";
-
-        XBAODE& fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing) override;
-        XBAODE& fit(torch::Tensor& X, torch::Tensor& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing) override;
-        XBAODE& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing) override;
-        XBAODE& fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing) override;
         std::vector<int> predict(std::vector<std::vector<int>>& X) override;
         torch::Tensor predict(torch::Tensor& X) override;
         torch::Tensor predict_proba(torch::Tensor& X) override;
-        std::vector<std::vector<double>> predict_proba_threads(const std::vector<std::vector<int>>& test_data);
         std::vector<std::vector<double>> predict_proba(std::vector<std::vector<int>>& X) override;
         float score(std::vector<std::vector<int>>& X, std::vector<int>& y) override;
         float score(torch::Tensor& X, torch::Tensor& y) override;
@@ -50,10 +43,11 @@ namespace platform {
         std::vector<std::string> graph(const std::string& title = "") const override { return {}; }
         void set_active_parents(std::vector<int> active_parents) { aode_.set_active_parents(active_parents); }
     protected:
-        void trainModel(const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing) override {};
-
+        void trainModel(const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing) override;
     private:
-        std::vector<int> initializeModels(const bayesnet::Smoothing_t smoothing);
+        std::vector<std::vector<int>> X_train_, X_test_;
+        std::vector<int> y_train_, y_test_;
+        torch::Tensor dataset;
         XA1DE aode_;
         int n_models;
         std::vector<double> weights_;

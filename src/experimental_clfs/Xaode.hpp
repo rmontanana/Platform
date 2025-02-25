@@ -49,6 +49,9 @@ namespace platform {
         //
         void init(const std::vector<int>& states)
         {
+            //
+            // Check Valid input data
+            //
             if (matrixState_ != MatrixState::EMPTY) {
                 throw std::logic_error("Xaode: already initialized.");
             }
@@ -61,6 +64,10 @@ namespace platform {
             if (statesClass_ <= 0) {
                 throw std::invalid_argument("Xaode: class states must be > 0.");
             }
+            //
+            // Initialize data structures
+            //
+            active_parents.resize(nFeatures_);
             int totalStates = std::accumulate(states.begin(), states.end(), 0) - statesClass_;
 
             // For p(x_i=si | c), we store them in a 1D array classFeatureProbs_ after we compute.
@@ -322,6 +329,11 @@ namespace platform {
             normalize(scores);
             return scores;
         }
+        int predict_spode(const std::vector<int>& instance, int parent) const
+        {
+            auto probs = predict_proba_spode(instance, parent);
+            return (int)std::distance(probs.begin(), std::max_element(probs.begin(), probs.end()));
+        }
         std::vector<double> predict_proba(std::vector<int>& instance)
         {
             Timer timer;
@@ -346,6 +358,10 @@ namespace platform {
             duration_first += timer.getDuration(); timer.start();
             int idx, base, sp, sc, parent_offset;
             for (int parent = 1; parent < nFeatures_; ++parent) {
+                // if parent is not in the active_parents, skip it
+                if (std::find(active_parents.begin(), active_parents.end(), parent) == active_parents.end()) {
+                    continue;
+                }
                 sp = instance[parent];
                 parent_offset = pairOffset_[featureClassOffset_[parent] + sp];
                 for (int child = 0; child < parent; ++child) {
@@ -552,9 +568,13 @@ namespace platform {
         {
             return (nFeatures_ + 1) * nFeatures_;
         }
-        void set_active_parents(std::vector<int> active_parents)
+        void set_active_parent(int active_parent)
         {
-            this->active_parents = active_parents;
+            active_parents.push_back(active_parent);
+        }
+        void remove_last_parent()
+        {
+            active_parents.pop_back();
         }
 
 

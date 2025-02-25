@@ -9,34 +9,23 @@
 #include <limits.h>
 #include <tuple>
 #include "XBAODE.h"
+#include "TensorUtils.hpp"
 
 namespace platform {
     XBAODE::XBAODE() : semaphore_{ CountingSemaphore::getInstance() }, Boost(false)
     {
     }
-    std::vector<int> XBAODE::initializeModels(const bayesnet::Smoothing_t smoothing)
+    void XBAODE::trainModel(const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing)
     {
-        torch::Tensor weights_ = torch::full({ m }, 1.0, torch::kFloat64);
-        std::vector<int> featuresSelected = featureSelection(weights_);
-        for (const int& feature : featuresSelected) {
-            // std::unique_ptr<Classifier> model = std::make_unique<SPODE>(feature);
-            // model->fit(dataset, features, className, states, weights_, smoothing);
-            // models.push_back(std::move(model));
-            significanceModels.push_back(1.0); // They will be updated later in trainModel
-            n_models++;
-        }
-        notes.push_back("Used features in initialization: " + std::to_string(featuresSelected.size()) + " of " + std::to_string(features.size()) + " with " + select_features_algorithm);
-        return featuresSelected;
-    }
-
-    XBAODE& XBAODE::fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
-    {
-        // aode_.fit(X, y, features, className, states, smoothing);
         fitted = true;
+        X_train_ = TensorUtils::to_matrix(X_train);
+        y_train_ = TensorUtils::to_vector<int>(y_train);
+        X_test_ = TensorUtils::to_matrix(X_test);
+        y_test_ = TensorUtils::to_vector<int>(y_test);
         //
         // Logging setup
         //
-        // loguru::set_thread_name("BoostAODE");
+        // loguru::set_thread_name("XBAODE");
         // loguru::g_stderr_verbosity = loguru::Verbosity_OFF;
         // loguru::add_file("boostAODE.log", loguru::Truncate, loguru::Verbosity_MAX);
 
@@ -46,16 +35,22 @@ namespace platform {
         torch::Tensor weights_ = torch::full({ m }, 1.0, torch::kFloat64);
         bool finished = false;
         std::vector<int> featuresUsed;
+        int num_instances = m;
+        int num_attributes = n;
+        significanceModels.resize(num_attributes, 0.0);
+        aode_.fit(X_train_, y_train_, features, className, states, smoothing);
         if (selectFeatures) {
-            featuresUsed = initializeModels(smoothing);
-            auto ypred = predict(X_train);
+            featuresUsed = featureSelection(weights_);
+            aode_.set_active_parents(featuresUsed);
+            notes.push_back("Used features in initialization: " + std::to_string(featuresUsed.size()) + " of " + std::to_string(features.size()) + " with " + select_features_algorithm);
+            auto ypred = aode_.predict(X_train);
             std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
             // Update significance of the models
-            for (int i = 0; i < n_models; ++i) {
-                significanceModels[i] = alpha_t;
+            for (const auto& parent : featuresUsed) {
+                significanceModels[parent] = alpha_t;
             }
             if (finished) {
-                return *this;
+                return;
             }
         }
         int numItemsPack = 0; // The counter of the models inserted in the current pack
@@ -87,37 +82,35 @@ namespace platform {
             while (counter++ < k && featureSelection.size() > 0) {
                 auto feature = featureSelection[0];
                 featureSelection.erase(featureSelection.begin());
-                std::unique_ptr<Classifier> model;
-                //model = std::make_unique<SPODE>(feature);
-                //model->fit(dataset, features, className, states, weights_, smoothing);
+                aode_.add_active_parent(feature);
                 alpha_t = 0.0;
                 if (!block_update) {
-                    torch::Tensor ypred;
+                    std::vector<int> ypred;
                     if (alpha_block) {
                         //
                         // Compute the prediction with the current ensemble + model
                         //
                         // Add the model to the ensemble
                         n_models++;
-                        //models.push_back(std::move(model));
-                        significanceModels.push_back(1);
+                        significanceModels[feature] = 1.0;
+                        aode_.add_active_parent(feature);
                         // Compute the prediction
-                        ypred = predict(X_train);
+                        ypred = aode_.predict(X_train_);
                         // Remove the model from the ensemble
-                        //model = std::move(models.back());
-                        models.pop_back();
-                        significanceModels.pop_back();
+                        significanceModels[feature] = 0.0;
+                        aode_.remove_last_parent();
                         n_models--;
                     } else {
-                        ypred = model->predict(X_train);
+                        ypred = aode_.predict_spode(X_train_, feature);
                     }
                     // Step 3.1: Compute the classifier amout of say
-                    std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
+                    auto ypred_t = torch::tensor(ypred);
+                    std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred_t, weights_);
                 }
                 // Step 3.4: Store classifier and its accuracy to weigh its future vote
                 numItemsPack++;
                 featuresUsed.push_back(feature);
-                //models.push_back(std::move(model));
+                aode_.add_active_parent(feature);
                 significanceModels.push_back(alpha_t);
                 n_models++;
                 // VLOG_SCOPE_F(2, "numItemsPack: %d n_models: %d featuresUsed: %zu", numItemsPack, n_models, featuresUsed.size());
@@ -171,7 +164,7 @@ namespace platform {
             status = bayesnet::WARNING;
         }
         notes.push_back("Number of models: " + std::to_string(n_models));
-        return *this;
+        return;
     }
 
     //
@@ -213,25 +206,6 @@ namespace platform {
         return aode_.getClassNumStates();
     }
 
-    //
-    // Fit
-    //
-    // fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
-    XBAODE& XBAODE::fit(torch::Tensor& X, torch::Tensor& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
-    {
-        aode_.fit(X, y, features, className, states, smoothing);
-        return *this;
-    }
-    XBAODE& XBAODE::fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
-    {
-        aode_.fit(dataset, features, className, states, smoothing);
-        return *this;
-    }
-    XBAODE& XBAODE::fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing)
-    {
-        aode_.fit(dataset, features, className, states, weights, smoothing);
-        return *this;
-    }
     //
     // Predict
     //

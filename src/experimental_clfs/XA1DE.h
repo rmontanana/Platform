@@ -29,6 +29,7 @@ namespace platform {
         std::vector<int> predict(std::vector<std::vector<int>>& X) override;
         torch::Tensor predict(torch::Tensor& X) override;
         torch::Tensor predict_proba(torch::Tensor& X) override;
+        std::vector<int> predict_spode(std::vector<std::vector<int>>& test_data, int parent);
         std::vector<std::vector<double>> predict_proba_threads(const std::vector<std::vector<int>>& test_data);
         std::vector<std::vector<double>> predict_proba(std::vector<std::vector<int>>& X) override;
         float score(std::vector<std::vector<int>>& X, std::vector<int>& y) override;
@@ -47,7 +48,9 @@ namespace platform {
         std::vector<std::string>& getValidHyperparameters() { return validHyperparameters; }
         void setDebug(bool debug) { this->debug = debug; }
         std::vector<std::string> graph(const std::string& title = "") const override { return {}; }
-        void set_active_parents(std::vector<int> active_parents) { aode_.set_active_parents(active_parents); }
+        void set_active_parents(std::vector<int> active_parents) { for (const auto& parent : active_parents) aode_.set_active_parent(parent); }
+        void add_active_parent(int parent) { aode_.set_active_parent(parent); }
+        void remove_last_parent() { aode_.remove_last_parent(); }
     protected:
         void trainModel(const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing) override {};
 
@@ -64,9 +67,6 @@ namespace platform {
                 }
             }
         }
-        template <typename T>
-        std::vector<T> to_vector(const torch::Tensor& y);
-        std::vector<std::vector<int>> to_matrix(const torch::Tensor& X);
         Xaode aode_;
         std::vector<double> weights_;
         CountingSemaphore& semaphore_;

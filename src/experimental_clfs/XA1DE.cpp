@@ -5,6 +5,7 @@
 // ***************************************************************
 
 #include "XA1DE.h"
+#include "TensorUtils.hpp"
 
 namespace platform {
     XA1DE::XA1DE() : semaphore_{ CountingSemaphore::getInstance() }
@@ -32,6 +33,7 @@ namespace platform {
         instances.push_back(y);
         int num_instances = instances[0].size();
         int num_attributes = instances.size();
+
         normalize_weights(num_instances);
         std::vector<int> statesv;
         for (int i = 0; i < num_attributes; i++) {
@@ -166,47 +168,6 @@ namespace platform {
         return static_cast<float>(correct) / predictions.size();
     }
 
-    std::vector<std::vector<int>> XA1DE::to_matrix(const torch::Tensor& X)
-    {
-        // Ensure tensor is contiguous in memory
-        auto X_contig = X.contiguous();
-
-        // Access tensor data pointer directly
-        auto data_ptr = X_contig.data_ptr<int>();
-
-        // IF you are using int64_t as the data type, use the following line
-        //auto data_ptr = X_contig.data_ptr<int64_t>();
-        //std::vector<std::vector<int64_t>> data(X.size(0), std::vector<int64_t>(X.size(1)));
-
-        // Prepare output container
-        std::vector<std::vector<int>> data(X.size(0), std::vector<int>(X.size(1)));
-
-        // Fill the 2D vector in a single loop using pointer arithmetic
-        int rows = X.size(0);
-        int cols = X.size(1);
-        for (int i = 0; i < rows; ++i) {
-            std::copy(data_ptr + i * cols, data_ptr + (i + 1) * cols, data[i].begin());
-        }
-        return data;
-    }
-    template <typename T>
-    std::vector<T> XA1DE::to_vector(const torch::Tensor& y)
-    {
-        // Ensure the tensor is contiguous in memory
-        auto y_contig = y.contiguous();
-
-        // Access data pointer
-        auto data_ptr = y_contig.data_ptr<T>();
-
-        // Prepare output container
-        std::vector<T> data(y.size(0));
-
-        // Copy data efficiently
-        std::copy(data_ptr, data_ptr + y.size(0), data.begin());
-
-        return data;
-    }
-
     //
     // statistics
     //
@@ -233,8 +194,8 @@ namespace platform {
     // fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
     XA1DE& XA1DE::fit(torch::Tensor& X, torch::Tensor& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
     {
-        auto X_ = to_matrix(X);
-        auto y_ = to_vector<int>(y);
+        auto X_ = TensorUtils::to_matrix(X);
+        auto y_ = TensorUtils::to_vector<int>(y);
         return fit(X_, y_, features, className, states, smoothing);
     }
     XA1DE& XA1DE::fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const bayesnet::Smoothing_t smoothing)
@@ -245,21 +206,55 @@ namespace platform {
     }
     XA1DE& XA1DE::fit(torch::Tensor& dataset, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing)
     {
-        weights_ = to_vector<double>(weights);
+        weights_ = TensorUtils::to_vector<double>(weights);
         return fit(dataset, features, className, states, smoothing);
     }
     //
     // Predict
     //
+    std::vector<int> XA1DE::predict_spode(std::vector<std::vector<int>>& test_data, int parent)
+    {
+        int test_size = test_data[0].size();
+        int sample_size = test_data.size();
+        auto predictions = std::vector<int>(test_size);
+
+        int chunk_size = std::min(150, int(test_size / semaphore_.getMaxCount()) + 1);
+        std::vector<std::thread> threads;
+        auto worker = [&](const std::vector<std::vector<int>>& samples, int begin, int chunk, int sample_size, std::vector<int>& predictions) {
+            std::string threadName = "(V)PWorker-" + std::to_string(begin) + "-" + std::to_string(chunk);
+#if defined(__linux__)
+            pthread_setname_np(pthread_self(), threadName.c_str());
+#else
+            pthread_setname_np(threadName.c_str());
+#endif
+            std::vector<int> instance(sample_size);
+            for (int sample = begin; sample < begin + chunk; ++sample) {
+                for (int feature = 0; feature < sample_size; ++feature) {
+                    instance[feature] = samples[feature][sample];
+                }
+                predictions[sample] = aode_.predict_spode(instance, parent);
+            }
+            semaphore_.release();
+            };
+        for (int begin = 0; begin < test_size; begin += chunk_size) {
+            int chunk = std::min(chunk_size, test_size - begin);
+            semaphore_.acquire();
+            threads.emplace_back(worker, test_data, begin, chunk, sample_size, std::ref(predictions));
+        }
+        for (auto& thread : threads) {
+            thread.join();
+        }
+        return predictions;
+    }
     torch::Tensor XA1DE::predict(torch::Tensor& X)
     {
-        auto X_ = to_matrix(X);
+        auto X_ = TensorUtils::to_matrix(X);
         torch::Tensor y = torch::tensor(predict(X_));
         return y;
     }
     torch::Tensor XA1DE::predict_proba(torch::Tensor& X)
     {
-        auto X_ = to_matrix(X);
+        auto X_ = TensorUtils::to_matrix(X);
         auto probabilities = predict_proba(X_);
         auto n_samples = X.size(1);
         int n_classes = probabilities[0].size();
@@ -273,8 +268,8 @@ namespace platform {
     }
     float XA1DE::score(torch::Tensor& X, torch::Tensor& y)
     {
-        auto X_ = to_matrix(X);
-        auto y_ = to_vector<int>(y);
+        auto X_ = TensorUtils::to_matrix(X);
+        auto y_ = TensorUtils::to_vector<int>(y);
         return score(X_, y_);
     }
 

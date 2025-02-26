@@ -16,6 +16,7 @@
 #include <string>
 #include <cmath>
 #include <limits>
+#include <torch/torch.h>
 
 namespace platform {
     class Xaode {
@@ -28,10 +29,48 @@ namespace platform {
             COUNTS,
             PROBS
         };
-        double duration_first = 0.0;
-        double duration_second = 0.0;
-        double duration_third = 0.0;
+        std::vector<double> significance_models;
         Xaode() : nFeatures_{ 0 }, statesClass_{ 0 }, matrixState_{ MatrixState::EMPTY } {}
+        // -------------------------------------------------------
+        // fit
+        // -------------------------------------------------------
+        //
+        // Classifiers interface
+        // all parameter decide if the model is initialized with all the parents active or none of them
+        //
+        void fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const bool all_parents)
+        {
+            int num_instances = X[0].size();
+            int n_features_ = X.size();
+
+            significance_models.resize(n_features_, (all_parents ? 1.0 : 0.0));
+            std::vector<int> statesv;
+            for (int i = 0; i < n_features_; i++) {
+                if (all_parents) active_parents.push_back(i);
+                statesv.push_back(*max_element(X[i].begin(), X[i].end()) + 1);
+            }
+            statesv.push_back(*max_element(y.begin(), y.end()) + 1);
+            // std::cout << "* States: " << statesv << std::endl;
+            // std::cout << "* Weights: " << weights_ << std::endl;
+            // std::cout << "* Instances: " << num_instances << std::endl;
+            // std::cout << "* Attributes: " << n_features_ +1 << std::endl;
+            // std::cout << "* y: " << y << std::endl;
+            // std::cout << "* x shape: " << X.size() << "x" << X[0].size() << std::endl;
+            // for (int i = 0; i < n_features_; i++) {
+            //     std::cout << "* " << features[i] << ": " << instances[i] << std::endl;
+            // }
+            // std::cout << "Starting to build the model" << std::endl;
+            init(statesv);
+            std::vector<int> instance(n_features_ + 1);
+            for (int n_instance = 0; n_instance < num_instances; n_instance++) {
+                for (int feature = 0; feature < n_features_; feature++) {
+                    instance[feature] = X[feature][n_instance];
+                }
+                instance[n_features_] = y[n_instance];
+                addSample(instance, weights[n_instance].item<double>());
+            }
+            computeProbabilities();
+        }
         // -------------------------------------------------------
         // init
         // -------------------------------------------------------
@@ -406,7 +445,7 @@ namespace platform {
         {
             return (nFeatures_ + 1) * nFeatures_;
         }
-        void set_active_parent(int active_parent)
+        void add_active_parent(int active_parent)
         {
             active_parents.push_back(active_parent);
         }

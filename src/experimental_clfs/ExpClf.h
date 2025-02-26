@@ -12,14 +12,14 @@
 #include <cmath>
 #include <algorithm>
 #include <limits>
-#include "bayesnet/BaseClassifier.h"
+#include "bayesnet/ensembles/Boost.h"
 #include "common/Timer.hpp"
 #include "CountingSemaphore.hpp"
 #include "Xaode.hpp"
 
 namespace platform {
 
-    class ExpClf : public bayesnet::BaseClassifier {
+    class ExpClf : public bayesnet::Boost {
     public:
         ExpClf();
         virtual ~ExpClf() = default;

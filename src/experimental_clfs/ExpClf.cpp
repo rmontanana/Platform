@@ -8,7 +8,7 @@
 #include "TensorUtils.hpp"
 
 namespace platform {
-    ExpClf::ExpClf() : semaphore_{ CountingSemaphore::getInstance() }
+    ExpClf::ExpClf() : semaphore_{ CountingSemaphore::getInstance() }, Boost(false)
     {
     }
     void ExpClf::setHyperparameters(const nlohmann::json& hyperparameters)

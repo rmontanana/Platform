@@ -12,11 +12,10 @@
 #include <algorithm>
 #include <limits>
 #include "common/Timer.hpp"
-#include "bayesnet/ensembles/Boost.h"
 #include "ExpClf.h"
 
 namespace platform {
-    class XBAODE : public bayesnet::Boost, public ExpClf {
+    class XBAODE : public ExpClf {
     public:
         XBAODE();
         virtual ~XBAODE() = default;

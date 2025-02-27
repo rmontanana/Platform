@@ -29,7 +29,7 @@ namespace platform {
             COUNTS,
             PROBS
         };
-        std::vector<double> significance_models;
+        std::vector<double> significance_models_;
         Xaode() : nFeatures_{ 0 }, statesClass_{ 0 }, matrixState_{ MatrixState::EMPTY } {}
         // -------------------------------------------------------
         // fit
@@ -43,7 +43,7 @@ namespace platform {
             int num_instances = X[0].size();
             int n_features_ = X.size();
 
-            significance_models.resize(n_features_, (all_parents ? 1.0 : 0.0));
+            significance_models_.resize(n_features_, (all_parents ? 1.0 : 0.0));
             std::vector<int> statesv;
             for (int i = 0; i < n_features_; i++) {
                 if (all_parents) active_parents.push_back(i);

@@ -43,13 +43,13 @@ namespace platform {
         n_models = 0;
         if (selectFeatures) {
             featuresUsed = featureSelection(weights_);
-            set_active_parents(featuresUsed);
+            add_active_parents(featuresUsed);
             notes.push_back("Used features in initialization: " + std::to_string(featuresUsed.size()) + " of " + std::to_string(features.size()) + " with " + select_features_algorithm);
             auto ypred = ExpClf::predict(X_train);
             std::tie(weights_, alpha_t, finished) = update_weights(y_train, ypred, weights_);
             // Update significance of the models
             for (const auto& parent : featuresUsed) {
-                aode_.significance_models[parent] = alpha_t;
+                aode_.significance_models_[parent] = alpha_t;
             }
             n_models = featuresUsed.size();
             VLOG_SCOPE_F(1, "SelectFeatures. alpha_t: %f n_models: %d", alpha_t, n_models);
@@ -95,12 +95,12 @@ namespace platform {
                     //
                     // Add the model to the ensemble
                     n_models++;
-                    aode_.significance_models[feature] = 1.0;
+                    aode_.significance_models_[feature] = 1.0;
                     aode_.add_active_parent(feature);
                     // Compute the prediction
                     ypred = ExpClf::predict(X_train_);
                     // Remove the model from the ensemble
-                    aode_.significance_models[feature] = 0.0;
+                    aode_.significance_models_[feature] = 0.0;
                     aode_.remove_last_parent();
                     n_models--;
                 } else {
@@ -113,7 +113,7 @@ namespace platform {
                 numItemsPack++;
                 featuresUsed.push_back(feature);
                 aode_.add_active_parent(feature);
-                aode_.significance_models[feature] = alpha_t;
+                aode_.significance_models_[feature] = alpha_t;
                 n_models++;
                 VLOG_SCOPE_F(2, "finished: %d numItemsPack: %d n_models: %d featuresUsed: %zu", finished, numItemsPack, n_models, featuresUsed.size());
             } // End of the pack
@@ -150,7 +150,7 @@ namespace platform {
                 VLOG_SCOPE_F(4, "Convergence threshold reached & %d models eliminated of %d", numItemsPack, n_models);
                 for (int i = featuresUsed.size() - 1; i >= featuresUsed.size() - numItemsPack; --i) {
                     aode_.remove_last_parent();
-                    aode_.significance_models[featuresUsed[i]] = 0.0;
+                    aode_.significance_models_[featuresUsed[i]] = 0.0;
                     n_models--;
                 }
                 VLOG_SCOPE_F(4, "*Convergence threshold %d models left & %d features used.", n_models, featuresUsed.size());

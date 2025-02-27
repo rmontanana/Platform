@@ -13,6 +13,22 @@ namespace platform {
         validHyperparameters = {};
     }
     //
+    // Parents
+    //
+    void ExpClf::add_active_parents(const std::vector<int>& active_parents)
+    {
+        for (const auto& parent : active_parents)
+            aode_.add_active_parent(parent);
+    }
+    void ExpClf::add_active_parent(int parent)
+    {
+        aode_.add_active_parent(parent);
+    }
+    void ExpClf::remove_last_parent()
+    {
+        aode_.remove_last_parent();
+    }
+    //
     // Predict
     //
     std::vector<int> ExpClf::predict_spode(std::vector<std::vector<int>>& test_data, int parent)

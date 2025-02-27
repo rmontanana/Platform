@@ -39,9 +39,9 @@ namespace platform {
         bayesnet::status_t getStatus() const override { return status; }
         std::vector<std::string> getNotes() const override { return notes; }
         std::vector<std::string> graph(const std::string& title = "") const override { return {}; }
-        void set_active_parents(const std::vector<int>& active_parents) { for (const auto& parent : active_parents) aode_.add_active_parent(parent); }
-        void add_active_parent(int parent) { aode_.add_active_parent(parent); }
-        void remove_last_parent() { aode_.remove_last_parent(); }
+        void add_active_parents(const std::vector<int>& active_parents);
+        void add_active_parent(int parent);
+        void remove_last_parent();
     protected:
         bool debug = false;
         Xaode aode_;

@@ -18,7 +18,7 @@ namespace platform {
     class XBAODE : public ExpClf {
     public:
         XBAODE();
-        virtual ~XBAODE() = default;
+        virtual ~XBAODE() override = default;
         std::string getVersion() override { return version; };
     protected:
         void trainModel(const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing) override;

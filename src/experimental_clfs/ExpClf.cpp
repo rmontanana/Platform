@@ -10,12 +10,7 @@
 namespace platform {
     ExpClf::ExpClf() : semaphore_{ CountingSemaphore::getInstance() }, Boost(false)
     {
-    }
-    void ExpClf::setHyperparameters(const nlohmann::json& hyperparameters)
-    {
-        if (!hyperparameters.empty()) {
-            throw std::invalid_argument("Invalid hyperparameters" + hyperparameters.dump());
-        }
+        validHyperparameters = {};
     }
     //
     // Predict

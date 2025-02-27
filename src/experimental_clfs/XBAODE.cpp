@@ -36,7 +36,7 @@ namespace platform {
         // Algorithm based on the adaboost algorithm for classification
         // as explained in Ensemble methods (Zhi-Hua Zhou, 2012)
         double alpha_t = 0;
-        torch::Tensor weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
+        weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
         bool finished = false;
         std::vector<int> featuresUsed;
         aode_.fit(X_train_, y_train_, features, className, states, weights_, false);

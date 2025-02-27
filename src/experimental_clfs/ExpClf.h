@@ -46,7 +46,6 @@ namespace platform {
         bool debug = false;
         Xaode aode_;
         torch::Tensor weights_;
-        bool fitted = false;
         const std::string CLASSIFIER_NOT_FITTED = "Classifier has not been fitted";
         inline void normalize_weights(int num_instances)
         {

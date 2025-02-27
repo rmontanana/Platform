@@ -182,7 +182,6 @@ namespace platform {
                 }
             }
         }
-
         // -------------------------------------------------------
         // computeProbabilities
         // -------------------------------------------------------
@@ -257,7 +256,6 @@ namespace platform {
             }
             matrixState_ = MatrixState::PROBS;
         }
-
         // -------------------------------------------------------
         // predict_proba_spode
         // -------------------------------------------------------
@@ -372,10 +370,7 @@ namespace platform {
         }
         void normalize(std::vector<double>& probs) const
         {
-            double sum = 0;
-            for (double d : probs) {
-                sum += d;
-            }
+            double sum = std::accumulate(probs.begin(), probs.end(), 0.0);
             if (std::isnan(sum)) {
                 throw std::runtime_error("Can't normalize array. Sum is NaN.");
             }
@@ -419,7 +414,6 @@ namespace platform {
         {
             active_parents.pop_back();
         }
-
 
     private:
         // -----------

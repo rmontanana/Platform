@@ -288,23 +288,23 @@ namespace platform {
                 base = (parent_offset + featureClassOffset_[child] + sc) * statesClass_;
                 for (int c = 0; c < statesClass_; ++c) {
                     /*
-                     * The probability P(xc|xp,c) is stored in dataOpp_, and
-                     * the probability P(xp|xc,c) is stored in data_
-                     */
-                     /*
-                        int base = pairOffset_[i * nFeatures_ + j];
-                        int blockSize = states_[i] * states_[j];
-                        return base + c * blockSize + (si * states_[j] + sj);
-                     */
-                     // index = compute_index(parent, instance[parent], child, instance[child], classVal);
+                    * The probability P(xc|xp,c) is stored in dataOpp_, and
+                    * the probability P(xp|xc,c) is stored in data_
+                    */
+                    /*
+                    int base = pairOffset_[i * nFeatures_ + j];
+                    int blockSize = states_[i] * states_[j];
+                    return base + c * blockSize + (si * states_[j] + sj);
+                    */
+                    // index = compute_index(parent, instance[parent], child, instance[child], classVal);
                     idx = base + c;
                     spodeProbs[c] *= data_[idx];
                     spodeProbs[c] *= dataOpp_[idx];
                 }
             }
             // Normalize the probabilities
-            normalize(probs);
-            return probs;
+            normalize(spodeProbs);
+            return spodeProbs;
         }
         int predict_spode(const std::vector<int>& instance, int parent)
         {

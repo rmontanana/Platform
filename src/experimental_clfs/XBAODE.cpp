@@ -76,9 +76,9 @@ namespace platform {
                 std::shuffle(featureSelection.begin(), featureSelection.end(), g);
             }
             // Remove used features
-            featureSelection.erase(remove_if(begin(featureSelection), end(featureSelection), [&](auto x)
-                { return std::find(begin(featuresUsed), end(featuresUsed), x) != end(featuresUsed);}),
-                end(featureSelection)
+            featureSelection.erase(remove_if(featureSelection.begin(), featureSelection.end(), [&](auto x)
+                { return std::find(featuresUsed.begin(), featuresUsed.end(), x) != featuresUsed.end();}),
+                featureSelection.end()
             );
             int k = bisection ? pow(2, tolerance) : 1;
             int counter = 0; // The model counter of the current pack

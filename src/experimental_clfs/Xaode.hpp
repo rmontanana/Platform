@@ -60,6 +60,8 @@ namespace platform {
             states_.push_back(*max_element(y.begin(), y.end()) + 1);
             //
             statesClass_ = states_.back();
+            classCounts_.resize(statesClass_, 0.0);
+            classPriors_.resize(statesClass_, 0.0);
             //
             // Initialize data structures
             //
@@ -93,9 +95,6 @@ namespace platform {
 
             classFeatureCounts_.resize(feature_offset * statesClass_);
             classFeatureProbs_.resize(feature_offset * statesClass_);
-
-            // classCounts_[c]
-            classCounts_.resize(statesClass_, 0.0);
 
             matrixState_ = MatrixState::COUNTS;
             //
@@ -187,8 +186,9 @@ namespace platform {
         // -------------------------------------------------------
         //
         // Once all samples are added in COUNTS mode, call this to:
-        //  1) compute p(x_i=si | c) => classFeatureProbs_
-        //  2) compute p(x_j=sj | c, x_i=si) => data_ (for i<j) dataOpp_ (for i>j)
+        //  1) compute p(c) => classPriors_
+        //  2) compute p(x_i=si | c) => classFeatureProbs_
+        //  3) compute p(x_j=sj | c, x_i=si) => data_ (for i<j) dataOpp_ (for i>j)
         //
         void computeProbabilities()
         {
@@ -196,32 +196,67 @@ namespace platform {
                 throw std::logic_error("computeProbabilities: must be in COUNTS mode.");
             }
             double totalCount = std::accumulate(classCounts_.begin(), classCounts_.end(), 0.0);
-            // (1) p(x_i=si | c) => classFeatureProbs_
+            // (1) p(c)
+            if (totalCount <= 0.0) {
+                // fallback => uniform
+                double unif = 1.0 / statesClass_;
+                for (int c = 0; c < statesClass_; ++c) {
+                    classPriors_[c] = unif;
+                }
+            } else {
+                for (int c = 0; c < statesClass_; ++c) {
+                    classPriors_[c] = classCounts_[c] / totalCount;
+                }
+            }
+            // (2) p(x_i=si | c) => classFeatureProbs_
             int idx, sf;
             double denom, countVal, p;
+            // for (int feature = 0; feature < nFeatures_; ++feature) {
+            //     sf = states_[feature];
+            //     for (int c = 0; c < statesClass_; ++c) {
+            //         denom = classCounts_[c] * sf;
+            //         if (denom <= 0.0) {
+            //             // fallback => uniform
+            //             for (int sf_value = 0; sf_value < sf; ++sf_value) {
+            //                 idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
+            //                 classFeatureProbs_[idx] = 1.0 / sf;
+            //             }
+            //         } else {
+            //             for (int sf_value = 0; sf_value < sf; ++sf_value) {
+            //                 idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
+            //                 countVal = classFeatureCounts_[idx];
+            //                 p = ((countVal + SMOOTHING / (statesClass_ * states_[feature])) / (totalCount + SMOOTHING));
+            //                 classFeatureProbs_[idx] = p;
+            //             }
+            //         }
+            //     }
+            // }
+            double alpha = SMOOTHING;
             for (int feature = 0; feature < nFeatures_; ++feature) {
-                sf = states_[feature];
+                int sf = states_[feature];
                 for (int c = 0; c < statesClass_; ++c) {
-                    denom = classCounts_[c] * sf;
-                    if (denom <= 0.0) {
+                    double denom = classCounts_[c] + alpha * sf; // typical Laplace smoothing denominator
+                    if (classCounts_[c] <= 0.0) {
                         // fallback => uniform
                         for (int sf_value = 0; sf_value < sf; ++sf_value) {
-                            idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
+                            int idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
                             classFeatureProbs_[idx] = 1.0 / sf;
                         }
                     } else {
                         for (int sf_value = 0; sf_value < sf; ++sf_value) {
-                            idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
-                            countVal = classFeatureCounts_[idx];
-                            p = ((countVal + SMOOTHING / (statesClass_ * states_[feature])) / (totalCount + SMOOTHING));
+                            int idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
+                            double countVal = classFeatureCounts_[idx];
+                            // standard NB with Laplace alpha
+                            double p = (countVal + alpha) / denom;
                             classFeatureProbs_[idx] = p;
                         }
                     }
                 }
             }
+
             // getCountFromTable(int classVal, int pIndex, int childIndex)
-            // (2) p(x_j=sj | c, x_i=si) => data_(i,si,j,sj,c)
-            // (2) p(x_i=si | c, x_j=sj) => dataOpp_(j,sj,i,si,c)
+            // (3) p(x_j=sj | c, x_i=si) => data_(i,si,j,sj,c)
+            // (3) p(x_i=si | c, x_j=sj) => dataOpp_(j,sj,i,si,c)
             double pccCount, pcCount, ccCount;
             double conditionalProb, oppositeCondProb;
             int part1, part2, p1, part2_class, p1_class;
@@ -231,13 +266,15 @@ namespace platform {
                     p1 = featureClassOffset_[parent] + sp;
                     part1 = pairOffset_[p1];
                     p1_class = p1 * statesClass_;
+
+                    // int parentStates = states_[parent];
+
                     for (int child = parent - 1; child >= 0; --child) {
                         // for (int child = 2; child >= 2; --child) {
                         for (int sc = 0; sc < states_[child]; ++sc) {
                             part2 = featureClassOffset_[child] + sc;
                             part2_class = part2 * statesClass_;
                             for (int c = 0; c < statesClass_; c++) {
-                                //idx = compute_index(parent, sp, child, sc, classval);
                                 idx = (part1 + part2) * statesClass_ + c;
                                 // Parent, Child, Class Count
                                 pccCount = data_[idx];
@@ -246,8 +283,19 @@ namespace platform {
                                 // Child, Class count
                                 ccCount = classFeatureCounts_[part2_class + c];
                                 conditionalProb = (pccCount + SMOOTHING / states_[parent]) / (ccCount + SMOOTHING);
+
+                                // pcCount = classFeatureCounts_[(featureClassOffset_[parent] + sp) * statesClass_ + c];
+                                // // This is the "parent, class" count
+                                // int childStates = states_[child];
+                                // conditionalProb = (pccCount + alpha) / (pcCount + alpha * childStates);
                                 data_[idx] = conditionalProb;
+
+
+
                                 oppositeCondProb = (pccCount + SMOOTHING / states_[child]) / (pcCount + SMOOTHING);
+
+                                // ccCount = classFeatureCounts_[(featureClassOffset_[child] + sc) * statesClass_ + c];
+                                // oppositeCondProb = (pccCount + alpha) / (ccCount + alpha * parentStates);
                                 dataOpp_[idx] = oppositeCondProb;
                             }
                         }
@@ -268,50 +316,55 @@ namespace platform {
         // We multiply p(c) * p(x_sp| c) * p(x_i| c, x_sp).
         // Then normalize the distribution.
         //
-        std::vector<double> predict_proba_spode(const std::vector<int>& instance, int parent)
-        {
-            // accumulates posterior probabilities for each class
-            auto probs = std::vector<double>(statesClass_);
-            auto spodeProbs = std::vector<double>(statesClass_);
-            // Initialize the probabilities with the feature|class probabilities
-            int localOffset;
-            int sp = instance[parent];
-            localOffset = (featureClassOffset_[parent] + sp) * statesClass_;
-            for (int c = 0; c < statesClass_; ++c) {
-                spodeProbs[c] = classFeatureProbs_[localOffset + c];
-            }
-            int idx, base, sc, parent_offset;
-            sp = instance[parent];
-            parent_offset = pairOffset_[featureClassOffset_[parent] + sp];
-            for (int child = 0; child < parent; ++child) {
-                sc = instance[child];
-                base = (parent_offset + featureClassOffset_[child] + sc) * statesClass_;
-                for (int c = 0; c < statesClass_; ++c) {
-                    /*
-                    * The probability P(xc|xp,c) is stored in dataOpp_, and
-                    * the probability P(xp|xc,c) is stored in data_
-                    */
-                    /*
-                    int base = pairOffset_[i * nFeatures_ + j];
-                    int blockSize = states_[i] * states_[j];
-                    return base + c * blockSize + (si * states_[j] + sj);
-                    */
-                    // index = compute_index(parent, instance[parent], child, instance[child], classVal);
-                    idx = base + c;
-                    spodeProbs[c] *= data_[idx];
-                    spodeProbs[c] *= dataOpp_[idx];
-                }
-            }
-            // Normalize the probabilities
-            normalize(spodeProbs);
-            return spodeProbs;
-        }
+        // std::vector<double> predict_proba_spode(const std::vector<int>& instance, int parent)
+        // {
+        //     // accumulates posterior probabilities for each class
+        //     auto probs = std::vector<double>(statesClass_);
+        //     auto spodeProbs = std::vector<double>(statesClass_);
+        //     // Initialize the probabilities with the feature|class probabilities
+        //     int localOffset;
+        //     int sp = instance[parent];
+        //     localOffset = (featureClassOffset_[parent] + sp) * statesClass_;
+        //     for (int c = 0; c < statesClass_; ++c) {
+        //         spodeProbs[c] = classFeatureProbs_[localOffset + c] * classPriors_[c];
+        //     }
+        //     int idx, base, sc, parent_offset;
+        //     sp = instance[parent];
+        //     parent_offset = pairOffset_[featureClassOffset_[parent] + sp];
+        //     for (int child = 0; child < parent; ++child) {
+        //         sc = instance[child];
+        //         base = (parent_offset + featureClassOffset_[child] + sc) * statesClass_;
+        //         for (int c = 0; c < statesClass_; ++c) {
+        //             /*
+        //             * The probability P(xc|xp,c) is stored in dataOpp_, and
+        //             * the probability P(xp|xc,c) is stored in data_
+        //             */
+        //             idx = base + c;
+        //             spodeProbs[c] *= data_[idx];
+        //             spodeProbs[c] *= dataOpp_[idx];
+        //         }
+        //     }
+        //     // Normalize the probabilities
+        //     normalize(spodeProbs);
+        //     return spodeProbs;
+        // }
         int predict_spode(const std::vector<int>& instance, int parent)
         {
-            auto probs = predict_proba_spode(instance, parent);
+            auto probs = predict_proba(instance, parent);
             return (int)std::distance(probs.begin(), std::max_element(probs.begin(), probs.end()));
         }
-        std::vector<double> predict_proba(const std::vector<int>& instance)
+        // -------------------------------------------------------
+        // predict_proba
+        // -------------------------------------------------------
+        //
+        // P(c | x) ∝ p(c) * ∏_{i} p(x_i | c) * ∏_{i<j} p(x_j | c, x_i) * p(x_i | c, x_j)
+        //
+        // 'instance' should have size == nFeatures_ (no class).
+        // We multiply p(c) * p(x_i| c) * p(x_j| c, x_i) for all i, j.
+        // Then normalize the distribution.
+        //
+        // if spode != -1, we only return the probabilities for that spode
+        std::vector<double> predict_proba(const std::vector<int>& instance, int spode = -1)
         {
             // accumulates posterior probabilities for each class
             auto probs = std::vector<double>(statesClass_);
@@ -325,7 +378,7 @@ namespace platform {
                 }
                 localOffset = (featureClassOffset_[feature] + instance[feature]) * statesClass_;
                 for (int c = 0; c < statesClass_; ++c) {
-                    spodeProbs[feature][c] = classFeatureProbs_[localOffset + c];
+                    spodeProbs[feature][c] = classFeatureProbs_[localOffset + c] * classPriors_[c];
                 }
             }
             int idx, base, sp, sc, parent_offset;
@@ -344,24 +397,21 @@ namespace platform {
                          * The probability P(xc|xp,c) is stored in dataOpp_, and
                          * the probability P(xp|xc,c) is stored in data_
                          */
-                         /*
-                            int base = pairOffset_[i * nFeatures_ + j];
-                            int blockSize = states_[i] * states_[j];
-                            return base + c * blockSize + (si * states_[j] + sj);
-                         */
-                         // index = compute_index(parent, instance[parent], child, instance[child], classVal);
                         idx = base + c;
                         spodeProbs[child][c] *= data_[idx];
-                        // spodeProbs[child][c] *= data_.at(index);
                         spodeProbs[parent][c] *= dataOpp_[idx];
-                        // spodeProbs[parent][c] *= dataOpp_.at(index);
                     }
                 }
+            }
+            if (spode != -1) {
+                // no need to use significance_models_ if we are predicting with a single spode
+                normalize(spodeProbs[spode]);
+                return spodeProbs[spode];
             }
             /* add all the probabilities for each class */
             for (int c = 0; c < statesClass_; ++c) {
                 for (int i = 0; i < nFeatures_; ++i) {
-                    probs[c] += spodeProbs[i][c];
+                    probs[c] += spodeProbs[i][c] * significance_models_[i];
                 }
             }
             // Normalize the probabilities
@@ -433,6 +483,7 @@ namespace platform {
 
         // classCounts_[c]
         std::vector<double> classCounts_;
+        std::vector<double> classPriors_;       // => p(c)
 
         // For p(x_i=si| c), we store counts in classFeatureCounts_ => offset by featureClassOffset_[i]
         std::vector<int> featureClassOffset_;

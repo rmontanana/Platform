@@ -316,41 +316,43 @@ namespace platform {
         // We multiply p(c) * p(x_sp| c) * p(x_i| c, x_sp).
         // Then normalize the distribution.
         //
-        // std::vector<double> predict_proba_spode(const std::vector<int>& instance, int parent)
-        // {
-        //     // accumulates posterior probabilities for each class
-        //     auto probs = std::vector<double>(statesClass_);
-        //     auto spodeProbs = std::vector<double>(statesClass_);
-        //     // Initialize the probabilities with the feature|class probabilities
-        //     int localOffset;
-        //     int sp = instance[parent];
-        //     localOffset = (featureClassOffset_[parent] + sp) * statesClass_;
-        //     for (int c = 0; c < statesClass_; ++c) {
-        //         spodeProbs[c] = classFeatureProbs_[localOffset + c] * classPriors_[c];
-        //     }
-        //     int idx, base, sc, parent_offset;
-        //     sp = instance[parent];
-        //     parent_offset = pairOffset_[featureClassOffset_[parent] + sp];
-        //     for (int child = 0; child < parent; ++child) {
-        //         sc = instance[child];
-        //         base = (parent_offset + featureClassOffset_[child] + sc) * statesClass_;
-        //         for (int c = 0; c < statesClass_; ++c) {
-        //             /*
-        //             * The probability P(xc|xp,c) is stored in dataOpp_, and
-        //             * the probability P(xp|xc,c) is stored in data_
-        //             */
-        //             idx = base + c;
-        //             spodeProbs[c] *= data_[idx];
-        //             spodeProbs[c] *= dataOpp_[idx];
-        //         }
-        //     }
-        //     // Normalize the probabilities
-        //     normalize(spodeProbs);
-        //     return spodeProbs;
-        // }
+        std::vector<double> predict_proba_spode(const std::vector<int>& instance, int parent)
+        {
+            // accumulates posterior probabilities for each class
+            auto probs = std::vector<double>(statesClass_);
+            auto spodeProbs = std::vector<double>(statesClass_);
+            // Initialize the probabilities with the feature|class probabilities x class priors
+            int localOffset;
+            int sp = instance[parent];
+            localOffset = (featureClassOffset_[parent] + sp) * statesClass_;
+            for (int c = 0; c < statesClass_; ++c) {
+                spodeProbs[c] = classFeatureProbs_[localOffset + c] * classPriors_[c];
+            }
+            int idx, base, sc, parent_offset;
+            sp = instance[parent];
+            parent_offset = pairOffset_[featureClassOffset_[parent] + sp];
+            for (int child = 0; child < nFeatures_; ++child) {
+                if (child == parent) {
+                    continue;
+                }
+                sc = instance[child];
+                base = (parent_offset + featureClassOffset_[child] + sc) * statesClass_;
+                for (int c = 0; c < statesClass_; ++c) {
+                    /*
+                    * The probability P(xc|xp,c) is stored in dataOpp_, and
+                    * the probability P(xp|xc,c) is stored in data_
+                    */
+                    idx = base + c;
+                    spodeProbs[c] *= child < parent ? dataOpp_[idx] : data_[idx];
+                }
+            }
+            // Normalize the probabilities
+            normalize(spodeProbs);
+            return spodeProbs;
+        }
         int predict_spode(const std::vector<int>& instance, int parent)
         {
-            auto probs = predict_proba(instance, parent);
+            auto probs = predict_proba_spode(instance, parent);
             return (int)std::distance(probs.begin(), std::max_element(probs.begin(), probs.end()));
         }
         // -------------------------------------------------------
@@ -363,8 +365,7 @@ namespace platform {
         // We multiply p(c) * p(x_i| c) * p(x_j| c, x_i) for all i, j.
         // Then normalize the distribution.
         //
-        // if spode != -1, we only return the probabilities for that spode
-        std::vector<double> predict_proba(const std::vector<int>& instance, int spode = -1)
+        std::vector<double> predict_proba(const std::vector<int>& instance)
         {
             // accumulates posterior probabilities for each class
             auto probs = std::vector<double>(statesClass_);
@@ -402,11 +403,6 @@ namespace platform {
                         spodeProbs[parent][c] *= dataOpp_[idx];
                     }
                 }
-            }
-            if (spode != -1) {
-                // no need to use significance_models_ if we are predicting with a single spode
-                normalize(spodeProbs[spode]);
-                return spodeProbs[spode];
             }
             /* add all the probabilities for each class */
             for (int c = 0; c < statesClass_; ++c) {

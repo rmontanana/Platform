@@ -225,39 +225,19 @@ namespace platform {
                         for (int sf_value = 0; sf_value < sf; ++sf_value) {
                             idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
                             countVal = classFeatureCounts_[idx];
-                            p = ((countVal + SMOOTHING / (statesClass_ * states_[feature])) / (totalCount + SMOOTHING));
+                            p = ((countVal + alpha_ / (statesClass_ * states_[feature])) / (totalCount + alpha_));
                             classFeatureProbs_[idx] = p;
                         }
                     }
                 }
             }
-            // double alpha = SMOOTHING;
-            // for (int feature = 0; feature < nFeatures_; ++feature) {
-            //     int sf = states_[feature];
-            //     for (int c = 0; c < statesClass_; ++c) {
-            //         double denom = classCounts_[c] + alpha * sf; // typical Laplace smoothing denominator
-            //         if (classCounts_[c] <= 0.0) {
-            //             // fallback => uniform
-            //             for (int sf_value = 0; sf_value < sf; ++sf_value) {
-            //                 int idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
-            //                 classFeatureProbs_[idx] = 1.0 / sf;
-            //             }
-            //         } else {
-            //             for (int sf_value = 0; sf_value < sf; ++sf_value) {
-            //                 int idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
-            //                 double countVal = classFeatureCounts_[idx];
-            //                 // standard NB with Laplace alpha
-            //                 double p = (countVal + alpha) / denom;
-            //                 classFeatureProbs_[idx] = p;
-            //             }
-            //         }
-            //     }
-            // }
-
             // getCountFromTable(int classVal, int pIndex, int childIndex)
-            // (3) p(x_j=sj | c, x_i=si) => data_(i,si,j,sj,c)
-            // (3) p(x_i=si | c, x_j=sj) => dataOpp_(j,sj,i,si,c)
-            double pccCount, pcCount, ccCount;
+            // (3) p(x_c=sc | c, x_p=sp) => data_(parent,sp,child,sc,c)
+            // (3) p(x_p=sp | c, x_c=sc) => dataOpp_(child,sc,parent,sp,c)
+            //                    C(x_c, x_p, c) + alpha_/Card(xp)
+            // P(x_p | x_c, c) = -----------------------------------
+            //                           C(x_c, c) + alpha_
+            double pcc_count, pc_count, cc_count;
             double conditionalProb, oppositeCondProb;
             int part1, part2, p1, part2_class, p1_class;
             for (int parent = 1; parent < nFeatures_; ++parent) {
@@ -265,9 +245,6 @@ namespace platform {
                     p1 = featureClassOffset_[parent] + sp;
                     part1 = pairOffset_[p1];
                     p1_class = p1 * statesClass_;
-
-                    // int parentStates = states_[parent];
-
                     for (int child = 0; child < parent; ++child) {
                         for (int sc = 0; sc < states_[child]; ++sc) {
                             part2 = featureClassOffset_[child] + sc;
@@ -275,25 +252,16 @@ namespace platform {
                             for (int c = 0; c < statesClass_; c++) {
                                 idx = (part1 + part2) * statesClass_ + c;
                                 // Parent, Child, Class Count
-                                pccCount = data_[idx];
+                                pcc_count = data_[idx];
                                 // Parent, Class count
-                                pcCount = classFeatureCounts_[p1_class + c];
+                                pc_count = classFeatureCounts_[p1_class + c];
                                 // Child, Class count
-                                ccCount = classFeatureCounts_[part2_class + c];
-                                conditionalProb = (pccCount + SMOOTHING / states_[parent]) / (ccCount + SMOOTHING);
-
-                                // pcCount = classFeatureCounts_[(featureClassOffset_[parent] + sp) * statesClass_ + c];
-                                // // This is the "parent, class" count
-                                // int childStates = states_[child];
-                                // conditionalProb = (pccCount + alpha) / (pcCount + alpha * childStates);
+                                cc_count = classFeatureCounts_[part2_class + c];
+                                // p(x_c=sc | c, x_p=sp)
+                                conditionalProb = (pcc_count + alpha_ / states_[parent]) / (cc_count + alpha_);
                                 data_[idx] = conditionalProb;
-
-
-
-                                oppositeCondProb = (pccCount + SMOOTHING / states_[child]) / (pcCount + SMOOTHING);
-
-                                // ccCount = classFeatureCounts_[(featureClassOffset_[child] + sc) * statesClass_ + c];
-                                // oppositeCondProb = (pccCount + alpha) / (ccCount + alpha * parentStates);
+                                // p(x_p=sp | c, x_c=sc)
+                                oppositeCondProb = (pcc_count + alpha_ / states_[child]) / (pc_count + alpha_);
                                 dataOpp_[idx] = oppositeCondProb;
                             }
                         }
@@ -486,7 +454,7 @@ namespace platform {
 
         MatrixState matrixState_;
 
-        double SMOOTHING = 1.0;
+        double alpha_ = 1.0;
         std::vector<int> active_parents;
     };
 }

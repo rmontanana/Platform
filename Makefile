@@ -38,7 +38,7 @@ setup: ## Install dependencies for tests and coverage
 	fi
 
 dest ?= ${HOME}/bin
-main: ## Build the main target
+main: ## Build only the b_main target
 	@cmake --build $(f_release) -t b_main --parallel
 	@cp $(f_release)/src/b_main $(dest)
 

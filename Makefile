@@ -38,6 +38,11 @@ setup: ## Install dependencies for tests and coverage
 	fi
 
 dest ?= ${HOME}/bin
+main: ## Build the main target
+	@cmake --build $(f_release) -t b_main --parallel
+	@cp $(f_release)/src/b_main $(dest)
+
+dest ?= ${HOME}/bin
 install: ## Copy binary files to bin folder
 	@echo "Destination folder: $(dest)"
 	@make buildr

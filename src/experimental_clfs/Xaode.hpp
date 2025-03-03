@@ -211,48 +211,48 @@ namespace platform {
             // (2) p(x_i=si | c) => classFeatureProbs_
             int idx, sf;
             double denom, countVal, p;
-            // for (int feature = 0; feature < nFeatures_; ++feature) {
-            //     sf = states_[feature];
-            //     for (int c = 0; c < statesClass_; ++c) {
-            //         denom = classCounts_[c] * sf;
-            //         if (denom <= 0.0) {
-            //             // fallback => uniform
-            //             for (int sf_value = 0; sf_value < sf; ++sf_value) {
-            //                 idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
-            //                 classFeatureProbs_[idx] = 1.0 / sf;
-            //             }
-            //         } else {
-            //             for (int sf_value = 0; sf_value < sf; ++sf_value) {
-            //                 idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
-            //                 countVal = classFeatureCounts_[idx];
-            //                 p = ((countVal + SMOOTHING / (statesClass_ * states_[feature])) / (totalCount + SMOOTHING));
-            //                 classFeatureProbs_[idx] = p;
-            //             }
-            //         }
-            //     }
-            // }
-            double alpha = SMOOTHING;
             for (int feature = 0; feature < nFeatures_; ++feature) {
-                int sf = states_[feature];
+                sf = states_[feature];
                 for (int c = 0; c < statesClass_; ++c) {
-                    double denom = classCounts_[c] + alpha * sf; // typical Laplace smoothing denominator
-                    if (classCounts_[c] <= 0.0) {
+                    denom = classCounts_[c] * sf;
+                    if (denom <= 0.0) {
                         // fallback => uniform
                         for (int sf_value = 0; sf_value < sf; ++sf_value) {
-                            int idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
+                            idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
                             classFeatureProbs_[idx] = 1.0 / sf;
                         }
                     } else {
                         for (int sf_value = 0; sf_value < sf; ++sf_value) {
-                            int idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
-                            double countVal = classFeatureCounts_[idx];
-                            // standard NB with Laplace alpha
-                            double p = (countVal + alpha) / denom;
+                            idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
+                            countVal = classFeatureCounts_[idx];
+                            p = ((countVal + SMOOTHING / (statesClass_ * states_[feature])) / (totalCount + SMOOTHING));
                             classFeatureProbs_[idx] = p;
                         }
                     }
                 }
             }
+            // double alpha = SMOOTHING;
+            // for (int feature = 0; feature < nFeatures_; ++feature) {
+            //     int sf = states_[feature];
+            //     for (int c = 0; c < statesClass_; ++c) {
+            //         double denom = classCounts_[c] + alpha * sf; // typical Laplace smoothing denominator
+            //         if (classCounts_[c] <= 0.0) {
+            //             // fallback => uniform
+            //             for (int sf_value = 0; sf_value < sf; ++sf_value) {
+            //                 int idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
+            //                 classFeatureProbs_[idx] = 1.0 / sf;
+            //             }
+            //         } else {
+            //             for (int sf_value = 0; sf_value < sf; ++sf_value) {
+            //                 int idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
+            //                 double countVal = classFeatureCounts_[idx];
+            //                 // standard NB with Laplace alpha
+            //                 double p = (countVal + alpha) / denom;
+            //                 classFeatureProbs_[idx] = p;
+            //             }
+            //         }
+            //     }
+            // }
 
             // getCountFromTable(int classVal, int pIndex, int childIndex)
             // (3) p(x_j=sj | c, x_i=si) => data_(i,si,j,sj,c)
@@ -260,8 +260,7 @@ namespace platform {
             double pccCount, pcCount, ccCount;
             double conditionalProb, oppositeCondProb;
             int part1, part2, p1, part2_class, p1_class;
-            for (int parent = nFeatures_ - 1; parent >= 0; --parent) {
-                // for (int parent = 3; parent >= 3; --parent) {
+            for (int parent = 1; parent < nFeatures_; ++parent) {
                 for (int sp = 0; sp < states_[parent]; ++sp) {
                     p1 = featureClassOffset_[parent] + sp;
                     part1 = pairOffset_[p1];
@@ -269,8 +268,7 @@ namespace platform {
 
                     // int parentStates = states_[parent];
 
-                    for (int child = parent - 1; child >= 0; --child) {
-                        // for (int child = 2; child >= 2; --child) {
+                    for (int child = 0; child < parent; ++child) {
                         for (int sc = 0; sc < states_[child]; ++sc) {
                             part2 = featureClassOffset_[child] + sc;
                             part2_class = part2 * statesClass_;

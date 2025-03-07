@@ -9,14 +9,16 @@
 #ifndef XAODE2_H
 #define XAODE2_H
 #include <vector>
+#include <map>
 #include <stdexcept>
 #include <algorithm>
 #include <numeric>
-#include <iostream>
 #include <string>
 #include <cmath>
 #include <limits>
-#include <torch/torch.h>
+#include <sstream>
+
+#include <iostream>
 
 namespace platform {
     class Xaode2 {
@@ -108,32 +110,39 @@ namespace platform {
                 instance[nFeatures_] = y[n_instance];
                 addSample(instance, weights[n_instance].item<double>());
             }
-            //alpha_ = 1 / num_instances;
+            // alpha_ Laplace smoothing adapted to the number of instances
+            alpha_ = 1.0 / static_cast<double>(num_instances);
             initializer_ = std::numeric_limits<double>::max() / (nFeatures_ * nFeatures_);
             computeProbabilities();
         }
-        // Optional: print a quick summary
-        void show() const
+        std::string to_string() const
         {
-            std::cout << "-------- Xaode.show() --------" << std::endl
+            std::ostringstream ostream;
+            ostream << "-------- Xaode.status --------" << std::endl
                 << "- nFeatures = " << nFeatures_ << std::endl
                 << "- statesClass = " << statesClass_ << std::endl
                 << "- matrixState = " << (matrixState_ == MatrixState::COUNTS ? "COUNTS" : "PROBS") << std::endl;
-            std::cout << "- states: size: " << states_.size() << std::endl;
-            for (int s : states_) std::cout << s << " "; std::cout << std::endl;
-            std::cout << "- classCounts: size: " << classCounts_.size() << std::endl;
-            for (double cc : classCounts_) std::cout << cc << " "; std::cout << std::endl;
-            std::cout << "- classFeatureCounts: size: " << classFeatureCounts_.size() << std::endl;
-            for (double cfc : classFeatureCounts_) std::cout << cfc << " "; std::cout << std::endl;
-            std::cout << "- classFeatureProbs: size: " << classFeatureProbs_.size() << std::endl;
-            for (double cfp : classFeatureProbs_) std::cout << cfp << " "; std::cout << std::endl;
-            std::cout << "- featureClassOffset: size: " << featureClassOffset_.size() << std::endl;
-            for (int f : featureClassOffset_) std::cout << f << " "; std::cout << std::endl;
-            std::cout << "- pairOffset_: size: " << pairOffset_.size() << std::endl;
-            for (int p : pairOffset_) std::cout << p << " "; std::cout << std::endl;
-            std::cout << "- data: size: " << data_.size() << std::endl;
-            for (double d : data_) std::cout << d << " "; std::cout << std::endl;
-            std::cout << "--------------------------------" << std::endl;
+            ostream << "- states: size: " << states_.size() << std::endl;
+            for (int s : states_) ostream << s << " "; ostream << std::endl;
+            ostream << "- classCounts: size: " << classCounts_.size() << std::endl;
+            for (double cc : classCounts_) ostream << cc << " "; ostream << std::endl;
+            ostream << "- classPriors: size: " << classPriors_.size() << std::endl;
+            for (double cp : classPriors_) ostream << cp << " "; ostream << std::endl;
+            ostream << "- classFeatureCounts: size: " << classFeatureCounts_.size() << std::endl;
+            for (double cfc : classFeatureCounts_) ostream << cfc << " "; ostream << std::endl;
+            ostream << "- classFeatureProbs: size: " << classFeatureProbs_.size() << std::endl;
+            for (double cfp : classFeatureProbs_) ostream << cfp << " "; ostream << std::endl;
+            ostream << "- featureClassOffset: size: " << featureClassOffset_.size() << std::endl;
+            for (int f : featureClassOffset_) ostream << f << " "; ostream << std::endl;
+            ostream << "- pairOffset_: size: " << pairOffset_.size() << std::endl;
+            for (int p : pairOffset_) ostream << p << " "; ostream << std::endl;
+            ostream << "- data: size: " << data_.size() << std::endl;
+            for (double d : data_) ostream << d << " "; ostream << std::endl;
+            ostream << "- dataOpp: size: " << dataOpp_.size() << std::endl;
+            for (double d : dataOpp_) ostream << d << " "; ostream << std::endl;
+            ostream << "--------------------------------" << std::endl;
+            std::string output = ostream.str();
+            return output;
         }
         // -------------------------------------------------------
         // addSample (only in COUNTS mode)
@@ -148,18 +157,7 @@ namespace platform {
             // (B) increment feature–class counts => for p(x_i|c)
             // (C) increment pair (superparent= i, child= j) counts => data_ 
             //
-
-            // if (matrixState_ != MatrixState::COUNTS) {
-            //     throw std::logic_error("addSample: not in COUNTS mode.");
-            // }
-            // if (static_cast<int>(instance.size()) != nFeatures_ + 1) {
-            //     throw std::invalid_argument("addSample: instance.size() must be nFeatures_ + 1.");
-            // }
-
             int c = instance.back();
-            // if (c < 0 || c >= statesClass_) {
-            //     throw std::out_of_range("addSample: class index out of range.");
-            // }
             if (weight <= 0.0) {
                 return;
             }
@@ -168,17 +166,17 @@ namespace platform {
 
             // (B,C)
             // We'll store raw counts now and turn them into p(child| c, superparent) later.
-            int idx, fcIndex, si, sj, i_offset;
-            for (int i = 0; i < nFeatures_; ++i) {
-                si = instance[i];
+            int idx, fcIndex, sp, sc, i_offset;
+            for (int parent = 0; parent < nFeatures_; ++parent) {
+                sp = instance[parent];
                 // (B) increment feature–class counts => for p(x_i|c)
-                fcIndex = (featureClassOffset_[i] + si) * statesClass_ + c;
+                fcIndex = (featureClassOffset_[parent] + sp) * statesClass_ + c;
                 classFeatureCounts_[fcIndex] += weight;
                 // (C) increment pair (superparent= i, child= j) counts => data_
-                i_offset = pairOffset_[featureClassOffset_[i] + si];
-                for (int j = 0; j < i; ++j) {
-                    sj = instance[j];
-                    idx = (i_offset + featureClassOffset_[j] + sj) * statesClass_ + c;
+                i_offset = pairOffset_[featureClassOffset_[parent] + sp];
+                for (int child = 0; child < parent; ++child) {
+                    sc = instance[child];
+                    idx = (i_offset + featureClassOffset_[child] + sc) * statesClass_ + c;
                     data_[idx] += weight;
                 }
             }
@@ -207,36 +205,26 @@ namespace platform {
                 }
             } else {
                 for (int c = 0; c < statesClass_; ++c) {
-                    classPriors_[c] = classCounts_[c] / totalCount;
+                    classPriors_[c] = (classCounts_[c] + alpha_) / (totalCount + alpha_ * statesClass_);
                 }
             }
             // (2) p(x_i=si | c) => classFeatureProbs_
             int idx, sf;
-            double denom, countVal, p;
+            double denom;
             for (int feature = 0; feature < nFeatures_; ++feature) {
                 sf = states_[feature];
                 for (int c = 0; c < statesClass_; ++c) {
-                    denom = classCounts_[c] * sf;
-                    if (denom <= 0.0) {
-                        // fallback => uniform
-                        for (int sf_value = 0; sf_value < sf; ++sf_value) {
-                            idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
-                            classFeatureProbs_[idx] = 1.0 / sf;
-                        }
-                    } else {
-                        for (int sf_value = 0; sf_value < sf; ++sf_value) {
-                            idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
-                            countVal = classFeatureCounts_[idx];
-                            p = ((countVal + alpha_ / (statesClass_ * states_[feature])) / (totalCount + alpha_));
-                            classFeatureProbs_[idx] = p;
-                        }
+                    denom = classCounts_[c] + alpha_ * sf;
+                    for (int sf_value = 0; sf_value < sf; ++sf_value) {
+                        idx = (featureClassOffset_[feature] + sf_value) * statesClass_ + c;
+                        classFeatureProbs_[idx] = (classFeatureCounts_[idx] + alpha_) / denom;
                     }
                 }
             }
             // getCountFromTable(int classVal, int pIndex, int childIndex)
             // (3) p(x_c=sc | c, x_p=sp) => data_(parent,sp,child,sc,c)
             // (3) p(x_p=sp | c, x_c=sc) => dataOpp_(child,sc,parent,sp,c)
-            //                    C(x_c, x_p, c) + alpha_/Card(xp)
+            //                    C(x_c, x_p, c) + alpha_
             // P(x_p | x_c, c) = -----------------------------------
             //                           C(x_c, c) + alpha_
             double pcc_count, pc_count, cc_count;
@@ -260,10 +248,10 @@ namespace platform {
                                 // Child, Class count
                                 cc_count = classFeatureCounts_[part2_class + c];
                                 // p(x_c=sc | c, x_p=sp)
-                                conditionalProb = (pcc_count + alpha_ / states_[parent]) / (cc_count + alpha_);
+                                conditionalProb = (pcc_count + alpha_) / (pc_count + alpha_ * states_[child]);
                                 data_[idx] = conditionalProb;
                                 // p(x_p=sp | c, x_c=sc)
-                                oppositeCondProb = (pcc_count + alpha_ / states_[child]) / (pc_count + alpha_);
+                                oppositeCondProb = (pcc_count + alpha_) / (cc_count + alpha_ * states_[parent]);
                                 dataOpp_[idx] = oppositeCondProb;
                             }
                         }
@@ -288,7 +276,10 @@ namespace platform {
         {
             // accumulates posterior probabilities for each class
             auto probs = std::vector<double>(statesClass_);
-            auto spodeProbs = std::vector<double>(statesClass_);
+            auto spodeProbs = std::vector<double>(statesClass_, 0.0);
+            if (std::find(active_parents.begin(), active_parents.end(), parent) == active_parents.end()) {
+                return spodeProbs;
+            }
             // Initialize the probabilities with the feature|class probabilities x class priors
             int localOffset;
             int sp = instance[parent];
@@ -297,21 +288,27 @@ namespace platform {
                 spodeProbs[c] = classFeatureProbs_[localOffset + c] * classPriors_[c] * initializer_;
             }
             int idx, base, sc, parent_offset;
-            sp = instance[parent];
-            parent_offset = pairOffset_[featureClassOffset_[parent] + sp];
             for (int child = 0; child < nFeatures_; ++child) {
                 if (child == parent) {
                     continue;
                 }
                 sc = instance[child];
-                base = (parent_offset + featureClassOffset_[child] + sc) * statesClass_;
+                if (child > parent) {
+                    parent_offset = pairOffset_[featureClassOffset_[child] + sc];
+                    base = (parent_offset + featureClassOffset_[parent] + sp) * statesClass_;
+                } else {
+                    parent_offset = pairOffset_[featureClassOffset_[parent] + sp];
+                    base = (parent_offset + featureClassOffset_[child] + sc) * statesClass_;
+                }
                 for (int c = 0; c < statesClass_; ++c) {
                     /*
                     * The probability P(xc|xp,c) is stored in dataOpp_, and
                     * the probability P(xp|xc,c) is stored in data_
                     */
                     idx = base + c;
-                    spodeProbs[c] *= child < parent ? dataOpp_[idx] : data_[idx];
+                    double factor = child > parent ? dataOpp_[idx] : data_[idx];
+                    // double factor = data_[idx];
+                    spodeProbs[c] *= factor;
                 }
             }
             // Normalize the probabilities
@@ -347,7 +344,7 @@ namespace platform {
                 }
                 localOffset = (featureClassOffset_[feature] + instance[feature]) * statesClass_;
                 for (int c = 0; c < statesClass_; ++c) {
-                    spodeProbs[feature][c] = classFeatureProbs_[localOffset + c] * classPriors_[c];
+                    spodeProbs[feature][c] = classFeatureProbs_[localOffset + c] * classPriors_[c] * initializer_;
                 }
             }
             int idx, base, sp, sc, parent_offset;
@@ -360,15 +357,23 @@ namespace platform {
                 parent_offset = pairOffset_[featureClassOffset_[parent] + sp];
                 for (int child = 0; child < parent; ++child) {
                     sc = instance[child];
-                    base = (parent_offset + featureClassOffset_[child] + sc) * statesClass_;
+                    if (child > parent) {
+                        parent_offset = pairOffset_[featureClassOffset_[child] + sc];
+                        base = (parent_offset + featureClassOffset_[parent] + sp) * statesClass_;
+                    } else {
+                        parent_offset = pairOffset_[featureClassOffset_[parent] + sp];
+                        base = (parent_offset + featureClassOffset_[child] + sc) * statesClass_;
+                    }
                     for (int c = 0; c < statesClass_; ++c) {
                         /*
                          * The probability P(xc|xp,c) is stored in dataOpp_, and
                          * the probability P(xp|xc,c) is stored in data_
                          */
                         idx = base + c;
-                        spodeProbs[child][c] *= data_[idx];
-                        spodeProbs[parent][c] *= dataOpp_[idx];
+                        double factor_child = child > parent ? data_[idx] : dataOpp_[idx];
+                        double factor_parent = child > parent ? dataOpp_[idx] : data_[idx];
+                        spodeProbs[child][c] *= factor_child;
+                        spodeProbs[parent][c] *= factor_parent;
                     }
                 }
             }
@@ -456,8 +461,8 @@ namespace platform {
 
         MatrixState matrixState_;
 
-        double alpha_ = 1.0;
-        double initializer_ = std::numeric_limits<double>::max();
+        double alpha_ = 1.0; // Laplace smoothing
+        double initializer_ = 1.0;
         std::vector<int> active_parents;
     };
 }

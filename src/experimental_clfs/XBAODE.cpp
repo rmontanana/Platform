@@ -9,6 +9,7 @@
 #include <limits.h>
 #include <tuple>
 #include "XBAODE.h"
+#include "XSpode.hpp"
 #include "TensorUtils.hpp"
 #include <loguru.hpp>
 
@@ -86,7 +87,8 @@ namespace platform {
             while (counter++ < k && featureSelection.size() > 0) {
                 auto feature = featureSelection[0];
                 featureSelection.erase(featureSelection.begin());
-                add_active_parent(feature);
+                auto model = XSpode(feature);
+                model.fit(X_train_, y_train_, weights_);
                 alpha_t = 0.0;
                 std::vector<int> ypred;
                 if (alpha_block) {
@@ -104,7 +106,7 @@ namespace platform {
                     aode_.remove_last_parent();
                     n_models--;
                 } else {
-                    ypred = predict_spode(X_train_, feature);
+                    ypred = model.predict(X_train_);
                 }
                 // Step 3.1: Compute the classifier amout of say
                 auto ypred_t = torch::tensor(ypred);

@@ -11,11 +11,11 @@
 #include <cmath>
 #include <algorithm>
 #include <limits>
-#include "bayesnet/ensembles/Boost.h"
+#include <bayesnet/ensembles/Boost.h>
+#include <bayesnet/network/Smoothing.h>
 #include "common/Timer.hpp"
 #include "CountingSemaphore.hpp"
 #include "Xaode.hpp"
-#include "Xaode2.hpp"
 
 namespace platform {
     class ExpClf : public bayesnet::Boost {
@@ -45,8 +45,7 @@ namespace platform {
         void remove_last_parent();
     protected:
         bool debug = false;
-        // Xaode aode;
-        Xaode2 aode_;
+        Xaode aode_;
         torch::Tensor weights_;
         const std::string CLASSIFIER_NOT_FITTED = "Classifier has not been fitted";
         inline void normalize_weights(int num_instances)

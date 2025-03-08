@@ -11,22 +11,13 @@
 #include <limits>
 #include <sstream>
 #include <iostream>
+#include "CountingSemaphore.hpp"
+
 
 namespace platform {
 
     class XSpode {
     public:
-        // --------------------------------------
-        // The SPODE can be EMPTY (just created),
-        // in COUNTS mode (accumulating raw counts),
-        // or in PROBS mode (storing conditional probabilities).
-        // --------------------------------------
-        enum class MatrixState {
-            EMPTY,
-            COUNTS,
-            PROBS
-        };
-
         // --------------------------------------
         // Constructor
         //
@@ -36,8 +27,8 @@ namespace platform {
             : superParent_{ spIndex },
             nFeatures_{ 0 },
             statesClass_{ 0 },
-            matrixState_{ MatrixState::EMPTY },
-            alpha_{ 1.0 }
+            alpha_{ 1.0 },
+            semaphore_{ CountingSemaphore::getInstance() }
         {
         }
 
@@ -61,7 +52,7 @@ namespace platform {
         // --------------------------------------
         void fit(const std::vector<std::vector<int>>& X,
             const std::vector<int>& y,
-            const torch::Tensor& weights)
+            const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing)
         {
             int numInstances = static_cast<int>(y.size());
             nFeatures_ = static_cast<int>(X.size());
@@ -99,9 +90,6 @@ namespace platform {
             }
             childCounts_.resize(totalSize, 0.0);
 
-            // Switch to COUNTS mode
-            matrixState_ = MatrixState::COUNTS;
-
             // Accumulate raw counts
             for (int n = 0; n < numInstances; n++) {
                 std::vector<int> instance(nFeatures_ + 1);
@@ -112,11 +100,20 @@ namespace platform {
                 addSample(instance, weights[n].item<double>());
             }
 
-            // Laplace smoothing scaled to #instances
-            alpha_ = 1.0 / static_cast<double>(numInstances);
+            switch (smoothing) {
+                case bayesnet::Smoothing_t::ORIGINAL:
+                    alpha_ = 1.0 / numInstances;
+                    break;
+                case bayesnet::Smoothing_t::LAPLACE:
+                    alpha_ = 1.0;
+                    break;
+                default:
+                    alpha_ = 0.0; // No smoothing 
+            }
             initializer_ = initializer_ = std::numeric_limits<double>::max() / (nFeatures_ * nFeatures_);
             // Convert raw counts to probabilities
             computeProbabilities();
+            fitted_ = true;
         }
 
         // --------------------------------------
@@ -128,9 +125,6 @@ namespace platform {
         //
         void addSample(const std::vector<int>& instance, double weight)
         {
-            if (matrixState_ != MatrixState::COUNTS) {
-                throw std::logic_error("addSample: Not in COUNTS mode!");
-            }
             if (weight <= 0.0) return;
 
             int c = instance.back();
@@ -167,10 +161,6 @@ namespace platform {
         // --------------------------------------
         void computeProbabilities()
         {
-            if (matrixState_ != MatrixState::COUNTS) {
-                throw std::logic_error("computeProbabilities: must be in COUNTS mode.");
-            }
-
             double totalCount = std::accumulate(classCounts_.begin(), classCounts_.end(), 0.0);
 
             // p(c) => classPriors_
@@ -225,7 +215,6 @@ namespace platform {
                 }
             }
 
-            matrixState_ = MatrixState::PROBS;
         }
 
         // --------------------------------------
@@ -239,10 +228,6 @@ namespace platform {
         // --------------------------------------
         std::vector<double> predict_proba(const std::vector<int>& instance) const
         {
-            if (matrixState_ != MatrixState::PROBS) {
-                throw std::logic_error("predict_proba: the model is not in PROBS mode.");
-            }
-
             std::vector<double> probs(statesClass_, 0.0);
 
             // Multiply p(c) × p(x_sp | c)
@@ -270,6 +255,41 @@ namespace platform {
             normalize(probs);
             return probs;
         }
+        std::vector<std::vector<double>> predict_proba(const std::vector<std::vector<int>>& test_data)
+        {
+            int test_size = test_data[0].size();
+            int sample_size = test_data.size();
+            auto probabilities = std::vector<std::vector<double>>(test_size, std::vector<double>(statesClass_));
+
+            int chunk_size = std::min(150, int(test_size / semaphore_.getMaxCount()) + 1);
+            std::vector<std::thread> threads;
+            auto worker = [&](const std::vector<std::vector<int>>& samples, int begin, int chunk, int sample_size, std::vector<std::vector<double>>& predictions) {
+                std::string threadName = "(V)PWorker-" + std::to_string(begin) + "-" + std::to_string(chunk);
+#if defined(__linux__)
+                pthread_setname_np(pthread_self(), threadName.c_str());
+#else
+                pthread_setname_np(threadName.c_str());
+#endif
+
+                std::vector<int> instance(sample_size);
+                for (int sample = begin; sample < begin + chunk; ++sample) {
+                    for (int feature = 0; feature < sample_size; ++feature) {
+                        instance[feature] = samples[feature][sample];
+                    }
+                    predictions[sample] = predict_proba(instance);
+                }
+                semaphore_.release();
+                };
+            for (int begin = 0; begin < test_size; begin += chunk_size) {
+                int chunk = std::min(chunk_size, test_size - begin);
+                semaphore_.acquire();
+                threads.emplace_back(worker, test_data, begin, chunk, sample_size, std::ref(probabilities));
+            }
+            for (auto& thread : threads) {
+                thread.join();
+            }
+            return probabilities;
+        }
 
         // --------------------------------------
         // predict
@@ -283,13 +303,19 @@ namespace platform {
             return static_cast<int>(std::distance(p.begin(),
                 std::max_element(p.begin(), p.end())));
         }
-        std::vector<int> predict(const std::vector<std::vector<int>>& X) const
+        std::vector<int> predict(std::vector<std::vector<int>>& test_data)
         {
-            std::vector<int> preds;
-            for (const auto& instance : X) {
-                preds.push_back(predict(instance));
+            if (!fitted_) {
+                throw std::logic_error(CLASSIFIER_NOT_FITTED);
             }
-            return preds;
+            auto probabilities = predict_proba(test_data);
+            std::vector<int> predictions(probabilities.size(), 0);
+
+            for (size_t i = 0; i < probabilities.size(); i++) {
+                predictions[i] = std::distance(probabilities[i].begin(), std::max_element(probabilities[i].begin(), probabilities[i].end()));
+            }
+
+            return predictions;
         }
 
         // --------------------------------------
@@ -317,9 +343,6 @@ namespace platform {
                 << "nFeatures_  = " << nFeatures_ << "\n"
                 << "superParent_ = " << superParent_ << "\n"
                 << "statesClass_ = " << statesClass_ << "\n"
-                << "matrixState_ = "
-                << (matrixState_ == MatrixState::EMPTY ? "EMPTY"
-                    : (matrixState_ == MatrixState::COUNTS ? "COUNTS" : "PROBS"))
                 << "\n";
 
             oss << "States: [";
@@ -366,7 +389,10 @@ namespace platform {
         int superParent_;                  // which feature is the single super-parent
         int nFeatures_;
         int statesClass_;
+        bool fitted_ = false;
         std::vector<int> states_;          // [states_feat0, ..., states_feat(N-1)] (class not included in this array)
+
+        const std::string CLASSIFIER_NOT_FITTED = "Classifier has not been fitted";
 
         // Class counts
         std::vector<double> classCounts_;  // [c], accumulative
@@ -384,9 +410,9 @@ namespace platform {
         std::vector<double> childProbs_;
         std::vector<int>    childOffsets_;
 
-        MatrixState matrixState_;
         double alpha_ = 1.0;
         double initializer_; // for numerical stability
+        CountingSemaphore& semaphore_;
     };
 
 } // namespace platform

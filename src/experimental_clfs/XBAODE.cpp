@@ -37,7 +37,7 @@ namespace platform {
         // Algorithm based on the adaboost algorithm for classification
         // as explained in Ensemble methods (Zhi-Hua Zhou, 2012)
         double alpha_t = 0;
-        weights_ = torch::full({ m }, 1.0 / m, torch::kFloat64);
+        weights_ = torch::full({ m }, 1.0 / static_cast<double>(m), torch::kFloat64);
         bool finished = false;
         std::vector<int> featuresUsed;
         aode_.fit(X_train_, y_train_, features, className, states, weights_, false);
@@ -88,8 +88,7 @@ namespace platform {
                 auto feature = featureSelection[0];
                 featureSelection.erase(featureSelection.begin());
                 auto model = XSpode(feature);
-                model.fit(X_train_, y_train_, weights_);
-                alpha_t = 0.0;
+                model.fit(X_train_, y_train_, weights_, smoothing);
                 std::vector<int> ypred;
                 if (alpha_block) {
                     //

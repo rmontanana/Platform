@@ -8,6 +8,7 @@
 #define XA1DE_H
 #include "Xaode.hpp"
 #include "ExpClf.h"
+#include <bayesnet/network/Smoothing.h>
 
 namespace platform {
     class XA1DE : public ExpClf {

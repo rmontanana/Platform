@@ -15,7 +15,10 @@
 #include "ExpClf.h"
 
 namespace platform {
-    class XBAODE : public ExpClf {
+    class XBAODE {
+
+        // Hay que hacer un vector de modelos entrenados y hacer un predict ensemble con todos ellos
+        // Probar XA1DE con smooth original y laplace y comprobar diferencias si se pasan pesos a 1 o a 1/m
     public:
         XBAODE();
         std::string getVersion() override { return version; };

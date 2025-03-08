@@ -18,6 +18,7 @@
 #include <limits>
 #include <sstream>
 #include <torch/torch.h>
+#include <bayesnet/network/Smoothing.h>
 
 
 namespace platform {
@@ -49,7 +50,7 @@ namespace platform {
         //
         // Internally, in COUNTS mode, data_ accumulates raw counts, then
         // computeProbabilities(...) normalizes them into conditionals.
-        void fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const bool all_parents)
+        void fit(std::vector<std::vector<int>>& X, std::vector<int>& y, const std::vector<std::string>& features, const std::string& className, std::map<std::string, std::vector<int>>& states, const torch::Tensor& weights, const bool all_parents, const bayesnet::Smoothing_t smoothing)
         {
             int num_instances = X[0].size();
             nFeatures_ = X.size();
@@ -110,8 +111,16 @@ namespace platform {
                 instance[nFeatures_] = y[n_instance];
                 addSample(instance, weights[n_instance].item<double>());
             }
-            // alpha_ Laplace smoothing adapted to the number of instances
-            alpha_ = 1.0 / static_cast<double>(num_instances);
+            switch (smoothing) {
+                case bayesnet::Smoothing_t::ORIGINAL:
+                    alpha_ = 1.0 / num_instances;
+                    break;
+                case bayesnet::Smoothing_t::LAPLACE:
+                    alpha_ = 1.0;
+                    break;
+                default:
+                    alpha_ = 0.0; // No smoothing 
+            }
             initializer_ = std::numeric_limits<double>::max() / (nFeatures_ * nFeatures_);
             computeProbabilities();
         }

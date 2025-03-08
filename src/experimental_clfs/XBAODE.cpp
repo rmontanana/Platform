@@ -26,7 +26,7 @@ namespace platform {
         y_train_ = TensorUtils::to_vector<int>(y_train);
         X_test_ = TensorUtils::to_matrix(X_test);
         y_test_ = TensorUtils::to_vector<int>(y_test);
-        maxTolerance = 5;
+        maxTolerance = 3;
         //
         // Logging setup
         //

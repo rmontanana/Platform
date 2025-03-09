@@ -11,24 +11,29 @@
 #include <limits>
 #include <sstream>
 #include <iostream>
+#include <torch/torch.h>
+#include <bayesnet/network/Smoothing.h>
+#include <bayesnet/classifiers/Classifier.h>
 #include "CountingSemaphore.hpp"
 
 
 namespace platform {
 
-    class XSpode {
+    class XSpode : public bayesnet::Classifier {
     public:
         // --------------------------------------
         // Constructor
         //
         // Supply which feature index is the single super-parent (“spIndex”).
         // --------------------------------------
-        XSpode(int spIndex)
+        explicit XSpode(int spIndex)
             : superParent_{ spIndex },
             nFeatures_{ 0 },
             statesClass_{ 0 },
+            fitted_{ false },
             alpha_{ 1.0 },
-            semaphore_{ CountingSemaphore::getInstance() }
+            initializer_{ 1.0 },
+            semaphore_{ CountingSemaphore::getInstance() } : bayesnet::Classifier(bayesnet::Network())
         {
         }
 
@@ -380,6 +385,17 @@ namespace platform {
             oss << "---------------------\n";
             return oss.str();
         }
+        int statesClass() const { return statesClass_; }
+        int getNFeatures() const { return nFeatures_; }
+        int getNumberOfStates() const
+        {
+            return std::accumulate(states_.begin(), states_.end(), 0) * nFeatures_;
+        }
+        int getNumberOfEdges() const
+        {
+            return nFeatures_ * (2 * nFeatures_ - 1);
+        }
+        std::vector<int>& getStates() { return states_; }
 
     private:
         // --------------------------------------

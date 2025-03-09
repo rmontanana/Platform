@@ -35,9 +35,11 @@ namespace platform {
         [](void) -> bayesnet::BaseClassifier* { return new pywrap::RandomForest();});
     static Registrar registrarXGB("XGBoost",
         [](void) -> bayesnet::BaseClassifier* { return new pywrap::XGBoost();});
-    static Registrar registrarXA1DE("XA1DE",
-        [](void) -> bayesnet::BaseClassifier* { return new XA1DE();});
+    static Registrar registrarXSPODE("XSPODE",
+        [](void) -> bayesnet::BaseClassifier* { return new bayesnet::XSpode(0);});
     static Registrar registrarXBAODE("XBAODE",
-        [](void) -> bayesnet::BaseClassifier* { return new XBAODE();});
+        [](void) -> bayesnet::BaseClassifier* { return new bayesnet::XBAODE();});
+    static Registrar registrarXA1DE("XA1DE",
+            [](void) -> bayesnet::BaseClassifier* { return new XA1DE();});
 }
 #endif

@@ -5,11 +5,13 @@
 #include <bayesnet/ensembles/AODE.h>
 #include <bayesnet/ensembles/A2DE.h>
 #include <bayesnet/ensembles/AODELd.h>
+#include <bayesnet/ensembles/XBAODE.h>
 #include <bayesnet/ensembles/BoostAODE.h>
 #include <bayesnet/ensembles/BoostA2DE.h>
 #include <bayesnet/classifiers/TAN.h>
 #include <bayesnet/classifiers/KDB.h>
 #include <bayesnet/classifiers/SPODE.h>
+#include <bayesnet/classifiers/XSPODE.h>
 #include <bayesnet/classifiers/SPnDE.h>
 #include <bayesnet/classifiers/TANLd.h>
 #include <bayesnet/classifiers/KDBLd.h>
@@ -21,7 +23,7 @@
 #include <pyclassifiers/XGBoost.h>
 #include <pyclassifiers/RandomForest.h>
 #include "../experimental_clfs/XA1DE.h"
-#include "../experimental_clfs/XBAODE.h"
+
 namespace platform {
     class Models {
     public:

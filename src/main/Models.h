@@ -12,6 +12,7 @@
 #include <bayesnet/classifiers/KDB.h>
 #include <bayesnet/classifiers/SPODE.h>
 #include <bayesnet/classifiers/XSPODE.h>
+#include <bayesnet/classifiers/XSPnDE.h>
 #include <bayesnet/classifiers/SPnDE.h>
 #include <bayesnet/classifiers/TANLd.h>
 #include <bayesnet/classifiers/KDBLd.h>

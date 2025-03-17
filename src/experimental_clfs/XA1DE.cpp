@@ -14,7 +14,7 @@ namespace platform {
         auto y = TensorUtils::to_vector<int>(dataset.index({ -1, "..." }));
         int num_instances = X[0].size();
         weights_ = torch::full({ num_instances }, 1.0);
-        normalize_weights(num_instances);
+        //normalize_weights(num_instances);
         aode_.fit(X, y, features, className, states, weights_, true, smoothing);
     }
 }

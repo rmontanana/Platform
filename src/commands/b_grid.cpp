@@ -1,14 +1,12 @@
 #include <iostream>
 #include <argparse/argparse.hpp>
 #include <map>
-#include <tuple>
 #include <nlohmann/json.hpp>
 #include <mpi.h>
 #include "main/Models.h"
-#include "main/modelRegister.h"
 #include "main/ArgumentsExperiment.h"
 #include "common/Paths.h"
-#include "common/Timer.h"
+#include "common/Timer.hpp"
 #include "common/Colors.h"
 #include "common/DotEnv.h"
 #include "grid/GridSearch.h"

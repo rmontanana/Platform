@@ -1,18 +1,14 @@
 #ifndef GRIDEXPERIMENT_H
 #define GRIDEXPERIMENT_H
 #include <string>
-#include <map>
 #include <mpi.h>
 #include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>
 #include "common/Datasets.h"
-#include "common/DotEnv.h"
 #include "main/Experiment.h"
 #include "main/HyperParameters.h"
 #include "main/ArgumentsExperiment.h"
-#include "GridData.h"
 #include "GridBase.h"
-#include "bayesnet/network/Network.h"
 
 
 namespace platform {

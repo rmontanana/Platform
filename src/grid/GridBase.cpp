@@ -2,8 +2,9 @@
 #include <cstddef>
 #include "common/DotEnv.h"
 #include "common/Paths.h"
-#include "common/DotEnv.h"
+#include "common/Colors.h"
 #include "GridBase.h"
+
 
 namespace platform {
 
@@ -63,13 +64,11 @@ namespace platform {
         * This way a task consists in process all combinations of hyperparameters for a dataset, seed and fold
         */
         auto tasks = json::array();
-        auto grid = GridData(Paths::grid_input(config.model));
         auto all_datasets = datasets.getNames();
         auto datasets_names = filterDatasets(datasets);
         for (int idx_dataset = 0; idx_dataset < datasets_names.size(); ++idx_dataset) {
             auto dataset = datasets_names[idx_dataset];
             for (const auto& seed : config.seeds) {
-                auto combinations = grid.getGrid(dataset);
                 for (int n_fold = 0; n_fold < config.n_folds; n_fold++) {
                     json task = {
                         { "dataset", dataset },

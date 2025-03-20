@@ -2,7 +2,7 @@
 #include <locale>
 #include "best/BestScore.h"
 #include "common/CLocale.h"
-#include "common/Timer.h"
+#include "common/Timer.hpp"
 #include "ReportConsole.h"
 #include "main/Scores.h"
 
@@ -84,7 +84,7 @@ namespace platform {
         }
         std::vector<std::string> header_labels = { " #", "Dataset", "Sampl.", "Feat.", "Cls", nodes_label, leaves_label, depth_label, "Score", "Time", "Hyperparameters" };
         sheader << Colors::GREEN();
-        std::vector<int> header_lengths = { 3, maxDataset, 6, 5, 3, 9, 9, 9, 15, 20, maxHyper };
+        std::vector<int> header_lengths = { 3, maxDataset, 6, 6, 3, 13, 13, 13, 15, 20, maxHyper };
         for (int i = 0; i < header_labels.size(); i++) {
             sheader << std::setw(header_lengths[i]) << std::left << header_labels[i] << " ";
         }
@@ -108,11 +108,11 @@ namespace platform {
             line << std::setw(3) << std::right << index++ << " ";
             line << std::setw(maxDataset) << std::left << r["dataset"].get<std::string>() << " ";
             line << std::setw(6) << std::right << r["samples"].get<int>() << " ";
-            line << std::setw(5) << std::right << r["features"].get<int>() << " ";
+            line << std::setw(6) << std::right << r["features"].get<int>() << " ";
             line << std::setw(3) << std::right << r["classes"].get<int>() << " ";
-            line << std::setw(9) << std::setprecision(2) << std::fixed << r["nodes"].get<float>() << " ";
-            line << std::setw(9) << std::setprecision(2) << std::fixed << r["leaves"].get<float>() << " ";
-            line << std::setw(9) << std::setprecision(2) << std::fixed << r["depth"].get<float>() << " ";
+            line << std::setw(13) << std::setprecision(2) << std::fixed << r["nodes"].get<float>() << " ";
+            line << std::setw(13) << std::setprecision(2) << std::fixed << r["leaves"].get<float>() << " ";
+            line << std::setw(13) << std::setprecision(2) << std::fixed << r["depth"].get<float>() << " ";
             line << std::setw(8) << std::right << std::setprecision(6) << std::fixed << r["score"].get<double>() << "±" << std::setw(6) << std::setprecision(4) << std::fixed << r["score_std"].get<double>();
             const std::string status = compareResult(r["dataset"].get<std::string>(), r["score"].get<double>());
             line << status;
@@ -251,7 +251,7 @@ namespace platform {
             if (train_data) {
                 oss << color_line << std::left << std::setw(maxLine) << output_train[i]
                     << suffix << Colors::BLUE() << " | " << color_line << std::left << std::setw(maxLine)
-                        << output_test[i] << std::endl;
+                    << output_test[i] << std::endl;
             } else {
                 oss << color_line << output_test[i] << std::endl;
             }

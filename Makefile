@@ -38,6 +38,11 @@ setup: ## Install dependencies for tests and coverage
 	fi
 
 dest ?= ${HOME}/bin
+main: ## Build only the b_main target
+	@cmake --build $(f_release) -t b_main --parallel
+	@cp $(f_release)/src/b_main $(dest)
+
+dest ?= ${HOME}/bin
 install: ## Copy binary files to bin folder
 	@echo "Destination folder: $(dest)"
 	@make buildr
@@ -98,8 +103,8 @@ test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximu
 fname = iris
 example: ## Build sample
 	@echo ">>> Building Sample...";
-	@cmake --build build_debug -t sample
-	build_debug/sample/PlatformSample --model BoostAODE --dataset $(fname) --discretize --stratified
+	@cmake --build $(f_release) -t sample
+	$(f_release)/sample/PlatformSample --model BoostAODE --dataset $(fname) --discretize --stratified
 	@echo ">>> Done";
 
 

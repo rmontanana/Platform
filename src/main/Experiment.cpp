@@ -82,8 +82,6 @@ namespace platform {
             std::cout << Colors::RESET() << std::endl;
         }
         int num = 0;
-        // Sort files to test to have a consistent order even if --datasets is used
-        std::stable_sort(filesToTest.begin(), filesToTest.end());
         for (auto fileName : filesToTest) {
             if (!quiet)
                 std::cout << " " << setw(3) << right << num++ << " " << setw(max_name) << left << fileName << right << flush;

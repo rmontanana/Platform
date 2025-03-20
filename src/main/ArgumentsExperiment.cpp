@@ -178,6 +178,11 @@ namespace platform {
                     }
                 }
                 filesToTest = file_names;
+                sort(filesToTest.begin(), filesToTest.end(), [](const auto& lhs, const auto& rhs) {
+                    const auto result = mismatch(lhs.cbegin(), lhs.cend(), rhs.cbegin(), rhs.cend(), [](const auto& lhs, const auto& rhs) {return tolower(lhs) == tolower(rhs);});
+
+                    return result.second != rhs.cend() && (result.first == lhs.cend() || tolower(*result.first) < tolower(*result.second));
+                    });
                 saveResults = true;
                 if (title == "") {
                     title = "Test " + to_string(file_names.size()) + " datasets " + model_name + " " + to_string(n_folds) + " folds";

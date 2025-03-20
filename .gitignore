@@ -41,3 +41,4 @@ puml/**
 *.dot
 diagrams/html/**
 diagrams/latex/**
+.cache

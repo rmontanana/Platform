@@ -1,16 +1,12 @@
 #ifndef GRIDBASE_H
 #define GRIDBASE_H
 #include <string>
-#include <map>
 #include <mpi.h>
 #include <nlohmann/json.hpp>
 #include "common/Datasets.h"
 #include "common/Timer.hpp"
-#include "common/Colors.h"
 #include "main/HyperParameters.h"
-#include "GridData.h"
 #include "GridConfig.h"
-#include "bayesnet/network/Network.h"
 
 
 namespace platform {

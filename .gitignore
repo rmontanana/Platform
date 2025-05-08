@@ -42,3 +42,4 @@ puml/**
 diagrams/html/**
 diagrams/latex/**
 .cache
+vcpkg_installed

@@ -9,9 +9,7 @@
       "folding",
       "bayesnet",
       "argparse",
-      "libxlsxwriter",
-      "zlib",
-      "libzip"
+      "libxlsxwriter"
     ],
     "overrides": [
       {

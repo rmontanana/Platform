@@ -1,12 +1,5 @@
 include_directories(
     ## Libs
-    ${Platform_SOURCE_DIR}/lib/log
-    ${Platform_SOURCE_DIR}/lib/Files
-    ${Platform_SOURCE_DIR}/lib/folding
-    ${Platform_SOURCE_DIR}/lib/mdlp/src
-    ${Platform_SOURCE_DIR}/lib/argparse/include
-    ${Platform_SOURCE_DIR}/lib/json/include
-    ${Platform_SOURCE_DIR}/lib/libxlsxwriter/include
     ${Python3_INCLUDE_DIRS}
     ${MPI_CXX_INCLUDE_DIRS}
     ${TORCH_INCLUDE_DIRS}
@@ -29,7 +22,7 @@ add_executable(
     experimental_clfs/XA1DE.cpp
     experimental_clfs/ExpClf.cpp
 )
-target_link_libraries(b_best Boost::boost "${PyClassifiers}" "${BayesNet}" fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
+target_link_libraries(b_best Boost::boost "${PyClassifiers}" bayesnet::bayesnet fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
 # b_grid
 set(grid_sources GridSearch.cpp GridData.cpp GridExperiment.cpp GridBase.cpp )
@@ -42,7 +35,7 @@ add_executable(b_grid commands/b_grid.cpp ${grid_sources}
     experimental_clfs/XA1DE.cpp
     experimental_clfs/ExpClf.cpp
 )
-target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} "${PyClassifiers}" "${BayesNet}" fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
+target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} "${PyClassifiers}" bayesnet::bayesnet fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 
 # b_list
 add_executable(b_list commands/b_list.cpp
@@ -53,7 +46,7 @@ add_executable(b_list commands/b_list.cpp
     experimental_clfs/XA1DE.cpp
     experimental_clfs/ExpClf.cpp
 )
-target_link_libraries(b_list "${PyClassifiers}" "${BayesNet}" fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
+target_link_libraries(b_list "${PyClassifiers}" bayesnet::bayesnet fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
 # b_main
 set(main_sources Experiment.cpp Models.cpp HyperParameters.cpp Scores.cpp ArgumentsExperiment.cpp)
@@ -65,7 +58,7 @@ add_executable(b_main commands/b_main.cpp ${main_sources}
     experimental_clfs/XA1DE.cpp
     experimental_clfs/ExpClf.cpp
 )
-target_link_libraries(b_main "${PyClassifiers}" "${BayesNet}" fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
+target_link_libraries(b_main "${PyClassifiers}" bayesnet::bayesnet fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" ${LIBTORCH_PYTHON} Boost::python Boost::numpy)
 
 # b_manage
 set(manage_sources ManageScreen.cpp OptionsMenu.cpp ResultsManager.cpp)
@@ -77,7 +70,7 @@ add_executable(
     results/Result.cpp results/ResultsDataset.cpp results/ResultsDatasetConsole.cpp
     main/Scores.cpp
 )
-target_link_libraries(b_manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" fimdlp "${BayesNet}")
+target_link_libraries(b_manage "${TORCH_LIBRARIES}" "${XLSXWRITER_LIB}" fimdlp bayesnet::bayesnet)
 
 # b_results
 add_executable(b_results commands/b_results.cpp)

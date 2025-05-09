@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-.PHONY: init clean coverage setup help build test clean debug release buildr buildd install dependency testp testb clang-uml
+.PHONY: init clean coverage setup help build test clean debug release buildr buildd install dependency testp testb clang-uml debug_local release_local example
 
 f_release = build_Release
 f_debug = build_Debug
@@ -76,18 +76,31 @@ buildr: ## Build the release targets
 clang-uml: ## Create uml class and sequence diagrams
 	clang-uml -p --add-compile-flag -I /usr/lib/gcc/x86_64-redhat-linux/8/include/
 
-debug: ## Build a debug version of the project
+debug: ## Build a debug version of the project with BayesNet from vcpkg
 	@echo ">>> Building Debug Platform...";
 	@if [ -d ./$(f_debug) ]; then rm -rf ./$(f_debug); fi
 	@mkdir $(f_debug); 
-	@cmake -S . -B $(f_debug) -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON -D CMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
+	@cmake -S . -B $(f_debug) -DBAYESNET_VCPKG_CONFIG=ON -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON -D CMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
 	@echo ">>> Done";
 
-release: ## Build a Release version of the project
+debug_local: ## Build a debug version of the project with BayesNet local
+	@echo ">>> Building Debug Platform...";
+	@if [ -d ./$(f_debug) ]; then rm -rf ./$(f_debug); fi
+	@mkdir $(f_debug); 
+	@cmake -S . -B $(f_debug) -DBAYESNET_VCPKG_CONFIG=OFF -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON -D CMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
+	@echo ">>> Done";
+
+release: ## Build a Release version of the project with BayesNet from vcpkg
 	@echo ">>> Building Release Platform...";
 	@if [ -d ./$(f_release) ]; then rm -rf ./$(f_release); fi
 	@mkdir $(f_release); 
-	@cmake -S . -B $(f_release) -D CMAKE_BUILD_TYPE=Release -D CMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
+	@cmake -S . -B $(f_release) -DBAYESNET_VCPKG_CONFIG=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
+	@echo ">>> Done";
+release_local: ## Build a Release version of the project with BayesNet local
+	@echo ">>> Building Release Platform...";
+	@if [ -d ./$(f_release) ]; then rm -rf ./$(f_release); fi
+	@mkdir $(f_release); 
+	@cmake -S . -B $(f_release) -DBAYESNET_VCPKG_CONFIG=OFF -D CMAKE_BUILD_TYPE=Release -D CMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
 	@echo ">>> Done";	
 
 opt = ""

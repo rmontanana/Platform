@@ -22,6 +22,7 @@ set(CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O
 
 # Options
 # -------
+option(BAYESNET_VCPKG_CONFIG "Use vcpkg version of BayesNet"       ON)
 option(ENABLE_TESTING "Unit testing build"                        OFF)
 option(CODE_COVERAGE "Collect coverage from test library"         OFF)
 
@@ -76,13 +77,32 @@ find_package(folding CONFIG REQUIRED)
 find_package(argparse CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS python)
 find_package(arff-files CONFIG REQUIRED)
-find_package(bayesnet CONFIG REQUIRED)
+
 find_package(ZLIB REQUIRED)
 find_library(LIBZIP_LIBRARY NAMES zip)
 
+# BayesNet
+# if set to ON it will use the vcpkg version of BayesNet else it will use the locally installed version
+if (BAYESNET_VCPKG_CONFIG)
+  message(STATUS "Using BayesNet vcpkg config")
+  find_package(bayesnet CONFIG REQUIRED)
+  set(BayesNet_LIBRARIES bayesnet::bayesnet)
+else(BAYESNET_VCPKG_CONFIG)
+  message(STATUS "Using BayesNet local library config")
+  find_library(bayesnet NAMES libbayesnet bayesnet libbayesnet.a PATHS ${Platform_SOURCE_DIR}/../lib/lib REQUIRED)
+  find_path(Bayesnet_INCLUDE_DIRS REQUIRED NAMES bayesnet PATHS ${Platform_SOURCE_DIR}/../lib/include)
+  add_library(bayesnet::bayesnet UNKNOWN IMPORTED)
+  set_target_properties(bayesnet::bayesnet PROPERTIES
+    IMPORTED_LOCATION ${bayesnet}
+    INTERFACE_INCLUDE_DIRECTORIES ${Bayesnet_INCLUDE_DIRS}
+  )
+endif(BAYESNET_VCPKG_CONFIG)
+message(STATUS "BayesNet_LIBRARIES=${BayesNet_LIBRARIES}")
+message(STATUS "BayesNet_INCLUDE_DIRS=${Bayesnet_INCLUDE_DIRS}")
+
+# PyClassifiers
 find_library(PyClassifiers NAMES libPyClassifiers PyClassifiers libPyClassifiers.a PATHS ${Platform_SOURCE_DIR}/../lib/lib REQUIRED)
 find_path(PyClassifiers_INCLUDE_DIRS REQUIRED NAMES pyclassifiers PATHS ${Platform_SOURCE_DIR}/../lib/include)
-
 message(STATUS "PyClassifiers=${PyClassifiers}")
 message(STATUS "PyClassifiers_INCLUDE_DIRS=${PyClassifiers_INCLUDE_DIRS}")
 

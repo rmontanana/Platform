@@ -262,13 +262,15 @@ namespace platform {
                     auto y_proba_train = clf->predict_proba(X_train);
                     Scores scores(y_train, y_proba_train, num_classes, labels);
                     score_train_value = score == score_t::ACCURACY ? scores.accuracy() : scores.auc();
-                    confusion_matrices_train.push_back(scores.get_confusion_matrix_json(true));
+                    if (discretized)
+                        confusion_matrices_train.push_back(scores.get_confusion_matrix_json(true));
                 }
                 //
                 // Test model
                 //
                 if (!quiet)
                     showProgress(nfold + 1, getColor(clf->getStatus()), "c");
+                std::cout << "Discretized: " << discretized << " " << score_train_value << std::endl;
                 test_timer.start();
                 // auto y_predict = clf->predict(X_test);
                 auto y_proba_test = clf->predict_proba(X_test);
@@ -277,7 +279,8 @@ namespace platform {
                 test_time[item] = test_timer.getDuration();
                 score_train[item] = score_train_value;
                 score_test[item] = score_test_value;
-                confusion_matrices.push_back(scores.get_confusion_matrix_json(true));
+                if (discretized)
+                    confusion_matrices.push_back(scores.get_confusion_matrix_json(true));
                 if (!quiet)
                     std::cout << "\b\b\b, " << flush;
                 //

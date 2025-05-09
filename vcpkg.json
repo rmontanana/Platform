@@ -1,0 +1,50 @@
+  {
+    "name": "platform",
+    "version-string": "1.1.0",
+    "dependencies": [
+      "arff-files",
+      "nlohmann-json",
+      "fimdlp",
+      "libtorch-bin",
+      "folding",
+      "bayesnet",
+      "argparse",
+      "libxlsxwriter",
+      "zlib",
+      "libzip"
+    ],
+    "overrides": [
+      {
+        "name": "arff-files",
+        "version": "1.1.0"
+      },
+      {
+        "name": "fimdlp",
+        "version": "2.0.1"
+      },
+      {
+        "name": "libtorch-bin",
+        "version": "2.7.0"
+      },
+      {
+        "name": "bayesnet",
+        "version": "1.1.1"
+      },
+      {
+        "name": "folding",
+        "version": "1.1.1"
+      },
+      {
+        "name": "argpase",
+        "version": "3.2"
+      },
+      {
+        "name": "libxlsxwriter",
+        "version": "1.2.2"
+      },
+      {
+        "name": "nlohmann-json",
+        "version": "3.11.3"
+      }
+    ]
+  }

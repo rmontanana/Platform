@@ -18,8 +18,8 @@ namespace platform {
     const std::string STATUS_OK = "Ok.";
     const std::string STATUS_COLOR = Colors::GREEN();
 
-    ManageScreen::ManageScreen(int rows, int cols, const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial, bool compare) :
-        rows{ rows }, cols{ cols }, complete{ complete }, partial{ partial }, compare{ compare }, didExcel(false), results(ResultsManager(model, score, platform, complete, partial))
+    ManageScreen::ManageScreen(const std::string path, int rows, int cols, const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial, bool compare) :
+        rows{ rows }, cols{ cols }, complete{ complete }, partial{ partial }, compare{ compare }, didExcel(false), results(ResultsManager(path, model, score, platform, complete, partial))
     {
         results.load();
         openExcel = false;

@@ -57,7 +57,7 @@ add_executable(b_main commands/b_main.cpp ${main_sources}
     experimental_clfs/XA1DE.cpp
     experimental_clfs/ExpClf.cpp
 )
-target_link_libraries(b_main "${PyClassifiers}" bayesnet::bayesnet fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" Boost::python Boost::numpy)
+target_link_libraries(b_main PRIVATE nlohmann_json::nlohmann_json "${PyClassifiers}" bayesnet::bayesnet fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" Boost::python Boost::numpy)
 
 # b_manage
 set(manage_sources ManageScreen.cpp OptionsMenu.cpp ResultsManager.cpp)

@@ -270,7 +270,6 @@ namespace platform {
                 //
                 if (!quiet)
                     showProgress(nfold + 1, getColor(clf->getStatus()), "c");
-                std::cout << "Discretized: " << discretized << " " << score_train_value << std::endl;
                 test_timer.start();
                 // auto y_predict = clf->predict(X_test);
                 auto y_proba_test = clf->predict_proba(X_test);

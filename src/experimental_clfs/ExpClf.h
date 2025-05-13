@@ -43,6 +43,7 @@ namespace platform {
         void add_active_parents(const std::vector<int>& active_parents);
         void add_active_parent(int parent);
         void remove_last_parent();
+        void setHyperparameters(const nlohmann::json& hyperparameters_) override {};
     protected:
         bool debug = false;
         Xaode aode_;

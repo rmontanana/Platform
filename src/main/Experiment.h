@@ -45,7 +45,7 @@ namespace platform {
         std::vector<int> getRandomSeeds() const { return randomSeeds; }
         void cross_validation(const std::string& fileName);
         void go();
-        void saveResult();
+        void saveResult(const std::string& path);
         void show();
         void saveGraph();
         void report();

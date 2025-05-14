@@ -7,12 +7,12 @@
 namespace platform {
     using json = nlohmann::ordered_json;
 
-    void Experiment::saveResult()
+    void Experiment::saveResult(const std::string& path)
     {
         result.setSchemaVersion("1.0");
         result.check();
-        result.save();
-        std::cout << "Result saved in " << Paths::results() << result.getFilename() << std::endl;
+        result.save(path);
+        std::cout << "Result saved in " << path << result.getFilename() << std::endl;
     }
     void Experiment::report()
     {

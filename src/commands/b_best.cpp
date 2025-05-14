@@ -44,6 +44,9 @@ int main(int argc, char** argv)
         program.parse_args(argc, argv);
         model = program.get<std::string>("model");
         folder = program.get<std::string>("folder");
+        if (folder.back() != '/') {
+            folder += '/';
+        }
         dataset = program.get<std::string>("dataset");
         score = program.get<std::string>("score");
         friedman = program.get<bool>("friedman");

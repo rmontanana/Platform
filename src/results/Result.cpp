@@ -69,9 +69,9 @@ namespace platform {
         platform::JsonValidator validator(platform::SchemaV1_0::schema);
         return validator.validate(data);
     }
-    void Result::save()
+    void Result::save(const std::string& path)
     {
-        std::ofstream file(Paths::results() + getFilename());
+        std::ofstream file(path + getFilename());
         file << data;
         file.close();
     }

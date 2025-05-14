@@ -22,11 +22,13 @@ namespace platform {
         bool isQuiet() const { return quiet; }
         bool haveToSaveResults() const { return saveResults; }
         bool doGraph() const { return graph; }
+        std::string getPathResults() const { return path_results; }
     private:
         Experiment experiment;
         experiment_t type;
         argparse::ArgumentParser& arguments;
-        std::string file_name, model_name, title, hyperparameters_file, datasets_file, discretize_algo, smooth_strat, score;
+        std::string file_name, model_name, title, hyperparameters_file, datasets_file, discretize_algo, smooth_strat;
+        std::string score, path_results;
         json hyperparameters_json;
         bool discretize_dataset, stratified, saveResults, quiet, no_train_score, generate_fold_files, graph, hyper_best;
         std::vector<int> seeds;

@@ -91,7 +91,7 @@ namespace platform {
     }
     void Statistics::computeWTL()
     {
-        // Compute the WTL matrix
+        // Compute the WTL matrix (Win Tie Loss)
         for (int i = 0; i < nModels; ++i) {
             wtl[i] = { 0, 0, 0 };
         }

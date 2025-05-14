@@ -59,7 +59,9 @@ install: ## Copy binary files to bin folder
 	@echo "*******************************************"
 	@for item in $(app_targets); do \
 		echo ">>> Copying $$item" ; \
-		cp $(f_release)/src/$$item $(dest) ; \
+		cp $(f_release)/src/$$item $(dest) || { \
+            echo "*** Error copying $$item" ; \
+        } ; \
 	done
 
 dependency: ## Create a dependency graph diagram of the project (build/dependency.png)

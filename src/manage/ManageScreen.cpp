@@ -18,8 +18,8 @@ namespace platform {
     const std::string STATUS_OK = "Ok.";
     const std::string STATUS_COLOR = Colors::GREEN();
 
-    ManageScreen::ManageScreen(const std::string path, int rows, int cols, const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial, bool compare) :
-        rows{ rows }, cols{ cols }, complete{ complete }, partial{ partial }, compare{ compare }, didExcel(false), results(ResultsManager(path, model, score, platform, complete, partial))
+    ManageScreen::ManageScreen(const std::string path_, int rows, int cols, const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial, bool compare) :
+        path{ path_ }, rows{ rows }, cols{ cols }, complete{ complete }, partial{ partial }, compare{ compare }, didExcel(false), results(ResultsManager(path_, model, score, platform, complete, partial))
     {
         results.load();
         openExcel = false;
@@ -329,11 +329,11 @@ namespace platform {
             return;
         }
         // Remove the old result file
-        std::string oldFile = Paths::results() + results.at(index).getFilename();
+        std::string oldFile = path + results.at(index).getFilename();
         std::filesystem::remove(oldFile);
         // Actually change the model
         results.at(index).setModel(newModel);
-        results.at(index).save();
+        results.at(index).save(path);
         int newModelSize = static_cast<int>(newModel.size());
         if (newModelSize > maxModel) {
             maxModel = newModelSize;
@@ -583,7 +583,7 @@ namespace platform {
                         getline(std::cin, newTitle);
                         if (!newTitle.empty()) {
                             results.at(index).setTitle(newTitle);
-                            results.at(index).save();
+                            results.at(index).save(path);
                             list("Title changed to " + newTitle, Colors::GREEN());
                             break;
                         }

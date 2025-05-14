@@ -59,7 +59,7 @@ namespace platform {
         std::vector<Paginator> paginator;
         ResultsManager results;
         lxw_workbook* workbook;
-        std::string excelFileName;
+        std::string path, excelFileName;
     };
 }
 #endif

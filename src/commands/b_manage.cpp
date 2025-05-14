@@ -119,6 +119,9 @@ int main(int argc, char** argv)
     manageArguments(program, argc, argv);
     std::string model = program.get<std::string>("model");
     std::string path = program.get<std::string>("folder");
+    if (path.back() != '/') {
+        path += '/';
+    }
     std::string score = program.get<std::string>("score");
     std::string platform = program.get<std::string>("platform");
     bool complete = program.get<bool>("complete");

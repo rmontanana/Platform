@@ -75,7 +75,7 @@ namespace platform {
 
         handler.close();
     }
-    void BestResultsMd::holm_test(struct HolmResult& holmResult, const std::string& date)
+    void BestResultsMd::postHoc_test(struct PostHocResult& postHocResult, const std::string& kind, const std::string& date)
     {
         auto file_name = Paths::tex() + Paths::md_post_hoc();
         openMdFile(file_name);
@@ -84,12 +84,12 @@ namespace platform {
         handler << std::endl;
         handler << "  Post-hoc handler test" << std::endl;
         handler << "-->" << std::endl;
-        handler << "Post-hoc Holm test: H<sub>0</sub>: There is no significant differences between the control model and the other models." << std::endl << std::endl;
+        handler << "Post-hoc " << kind << " test: H<sub>0</sub>: There is no significant differences between the control model and the other models." << std::endl << std::endl;
         handler << "| classifier | pvalue | rank | win | tie | loss | H<sub>0</sub> |" << std::endl;
         handler << "| :-- | --: | --: | --:| --: | --: | :--: |" << std::endl;
-        for (auto const& line : holmResult.holmLines) {
+        for (auto const& line : postHocResult.postHocLines) {
             auto textStatus = !line.reject ? "**" : " ";
-            if (line.model == holmResult.model) {
+            if (line.model == postHocResult.model) {
                 handler << "| " << line.model << " | - | " << std::fixed << std::setprecision(2) << line.rank << " | - | - | - |" << std::endl;
             } else {
                 handler << "| " << line.model << " | " << textStatus << std::scientific << std::setprecision(4) << line.pvalue << textStatus << " |";

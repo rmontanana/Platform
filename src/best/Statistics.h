@@ -19,24 +19,25 @@ namespace platform {
         long double pvalue;
         bool reject;
     };
-    struct HolmLine {
+    struct PostHocLine {
         std::string model;
         long double pvalue;
         double rank;
         WTL wtl;
         bool reject;
     };
-    struct HolmResult {
+    struct PostHocResult {
         std::string model;
-        std::vector<HolmLine> holmLines;
+        std::vector<PostHocLine> postHocLines;
     };
     class Statistics {
     public:
         Statistics(const std::vector<std::string>& models, const std::vector<std::string>& datasets, const json& data, double significance = 0.05, bool output = true);
         bool friedmanTest();
-        void postHocHolmTest(bool friedmanResult, bool tex=false);
+        void postHocHolmTest();
+        void postHocTestReport(const std::string& kind, const std::string& metric, bool friedmanResult, bool tex);
         FriedmanResult& getFriedmanResult();
-        HolmResult& getHolmResult();
+        PostHocResult& getPostHocResult();
         std::map<std::string, std::map<std::string, float>>& getRanks();
     private:
         void fit();
@@ -53,10 +54,11 @@ namespace platform {
         int controlIdx = 0;
         std::map<int, WTL> wtl;
         std::map<std::string, float> ranks;
+        std::vector<std::pair<int, double>> postHocData;
         int maxModelName = 0;
         int maxDatasetName = 0;
         FriedmanResult friedmanResult;
-        HolmResult holmResult;
+        PostHocResult postHocResult;
         std::map<std::string, std::map<std::string, float>> ranksModels;
     };
 }

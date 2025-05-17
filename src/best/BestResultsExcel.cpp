@@ -243,9 +243,10 @@ namespace platform {
         row = 2;
         Statistics stats(models, datasets, table, significance, false);
         auto result = stats.friedmanTest();
-        stats.postHocHolmTest(result);
+        stats.postHocHolmTest();
+        // stats.postHocTestReport("Holm", result, false);
         auto friedmanResult = stats.getFriedmanResult();
-        auto holmResult = stats.getHolmResult();
+        auto postHocResult = stats.getPostHocResult();
         worksheet_merge_range(worksheet, row, 0, row, 7, "Null hypothesis: H0 'There is no significant differences between all the classifiers.'", styles["headerSmall"]);
         row += 2;
         writeString(row, 1, "Friedman Q", "bodyHeader");
@@ -264,7 +265,7 @@ namespace platform {
         row += 2;
         worksheet_merge_range(worksheet, row, 0, row, 7, "Null hypothesis: H0 'There is no significant differences between the control model and the other models.'", styles["headerSmall"]);
         row += 2;
-        std::string controlModel = "Control Model: " + holmResult.model;
+        std::string controlModel = "Control Model: " + postHocResult.model;
         worksheet_merge_range(worksheet, row, 1, row, 7, controlModel.c_str(), styles["bodyHeader_odd"]);
         row++;
         writeString(row, 1, "Model", "bodyHeader");
@@ -276,7 +277,7 @@ namespace platform {
         writeString(row, 7, "Reject H0", "bodyHeader");
         row++;
         bool first = true;
-        for (const auto& item : holmResult.holmLines) {
+        for (const auto& item : postHocResult.postHocLines) {
             writeString(row, 1, item.model, "text");
             if (first) {
                 // Control model info

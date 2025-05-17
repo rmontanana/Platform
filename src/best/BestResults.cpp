@@ -222,7 +222,7 @@ namespace platform {
         std::cout << oss.str();
         std::cout << std::string(oss.str().size() - 8, '-') << std::endl;
         std::cout << Colors::GREEN() << " #  " << std::setw(maxDatasetName + 1) << std::left << std::string("Dataset");
-        auto bestResultsTex = BestResultsTex();
+        auto bestResultsTex = BestResultsTex(score);
         auto bestResultsMd = BestResultsMd();
         if (tex) {
             bestResultsTex.results_header(models, table.at("dateTable").get<std::string>(), index);
@@ -339,7 +339,8 @@ namespace platform {
         if (friedman) {
             Statistics stats(models, datasets, table, significance);
             auto result = stats.friedmanTest();
-            stats.postHocHolmTest(result, tex);
+            stats.postHocHolmTest();
+            stats.postHocTestReport("Holm", score, result, tex);
             ranksModels = stats.getRanks();
         }
         if (tex) {

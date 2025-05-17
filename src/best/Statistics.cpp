@@ -7,6 +7,7 @@
 #include "BestResultsTex.h"
 #include "BestResultsMd.h"
 #include "Statistics.h"
+#include "DeLong.h"
 
 
 namespace platform {
@@ -114,8 +115,7 @@ namespace platform {
             }
         }
     }
-
-    void Statistics::postHocHolmTest(bool friedmanResult, bool tex)
+    void Statistics::postHocHolmTest()
     {
         if (!fitted) {
             fit();
@@ -137,27 +137,33 @@ namespace platform {
             stats[i] = p_value;
         }
         // Sort the models by p-value
-        std::vector<std::pair<int, double>> statsOrder;
         for (const auto& stat : stats) {
-            statsOrder.push_back({ stat.first, stat.second });
+            postHocData.push_back({ stat.first, stat.second });
         }
-        std::sort(statsOrder.begin(), statsOrder.end(), [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
+        std::sort(postHocData.begin(), postHocData.end(), [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
             return a.second < b.second;
             });
 
         // Holm adjustment
-        for (int i = 0; i < statsOrder.size(); ++i) {
-            auto item = statsOrder.at(i);
-            double before = i == 0 ? 0.0 : statsOrder.at(i - 1).second;
+        for (int i = 0; i < postHocData.size(); ++i) {
+            auto item = postHocData.at(i);
+            double before = i == 0 ? 0.0 : postHocData.at(i - 1).second;
             double p_value = std::min((double)1.0, item.second * (nModels - i));
             p_value = std::max(before, p_value);
-            statsOrder[i] = { item.first, p_value };
+            postHocData[i] = { item.first, p_value };
         }
-        holmResult.model = models.at(controlIdx);
+        postHocResult.model = models.at(controlIdx);
+    }
+
+    void Statistics::postHocTestReport(const std::string& kind, const std::string& metric, bool friedmanResult, bool tex)
+    {
+
+        std::stringstream oss;
+        postHocResult.model = models.at(controlIdx);
         auto color = friedmanResult ? Colors::CYAN() : Colors::YELLOW();
         oss << color;
         oss << "  *************************************************************************************************************" << std::endl;
-        oss << "  Post-hoc Holm test: H0: 'There is no significant differences between the control model and the other models.'" << std::endl;
+        oss << "  Post-hoc " << kind << " test: H0: 'There is no significant differences between the control model and the other models.'" << std::endl;
         oss << "  Control model: " << models.at(controlIdx) << std::endl;
         oss << "  " << std::left << std::setw(maxModelName) << std::string("Model") << " p-value      rank      win tie loss Status" << std::endl;
         oss << "  " << std::string(maxModelName, '=') << " ============ ========= === === ==== =============" << std::endl;
@@ -175,12 +181,12 @@ namespace platform {
         for (const auto& item : ranksOrder) {
             auto idx = distance(models.begin(), find(models.begin(), models.end(), item.first));
             double pvalue = 0.0;
-            for (const auto& stat : statsOrder) {
+            for (const auto& stat : postHocData) {
                 if (stat.first == idx) {
                     pvalue = stat.second;
                 }
             }
-            holmResult.holmLines.push_back({ item.first, pvalue, item.second, wtl.at(idx), pvalue < significance });
+            postHocResult.postHocLines.push_back({ item.first, pvalue, item.second, wtl.at(idx), pvalue < significance });
             if (item.first == models.at(controlIdx)) {
                 continue;
             }
@@ -198,12 +204,77 @@ namespace platform {
             std::cout << oss.str();
         }
         if (tex) {
-            BestResultsTex bestResultsTex;
+            BestResultsTex bestResultsTex(metric);
             BestResultsMd bestResultsMd;
-            bestResultsTex.holm_test(holmResult, get_date() + " " + get_time());
-            bestResultsMd.holm_test(holmResult, get_date() + " " + get_time());
+            bestResultsTex.postHoc_test(postHocResult, kind, get_date() + " " + get_time());
+            bestResultsMd.postHoc_test(postHocResult, kind, get_date() + " " + get_time());
         }
     }
+    // void Statistics::postHocDeLongTest(const std::vector<std::vector<int>>& y_trues,
+    //     const std::vector<std::vector<std::vector<double>>>& y_probas,
+    //     bool tex)
+    // {
+    //     std::map<int, double> pvalues;
+    //     postHocResult.model = models.at(controlIdx);
+    //     postHocResult.postHocLines.clear();
+
+    //     for (size_t i = 0; i < models.size(); ++i) {
+    //         if ((int)i == controlIdx) continue;
+    //         double acc_p = 0.0;
+    //         int valid = 0;
+    //         for (size_t d = 0; d < y_trues.size(); ++d) {
+    //             try {
+    //                 auto result = compareModelsWithDeLong(y_probas[controlIdx][d], y_probas[i][d], y_trues[d]);
+    //                 acc_p += result.p_value;
+    //                 ++valid;
+    //             }
+    //             catch (...) {}
+    //         }
+    //         if (valid > 0) {
+    //             pvalues[i] = acc_p / valid;
+    //         }
+    //     }
+
+    //     std::vector<std::pair<int, double>> sorted_pvalues(pvalues.begin(), pvalues.end());
+    //     std::sort(sorted_pvalues.begin(), sorted_pvalues.end(), [](const auto& a, const auto& b) {
+    //         return a.second < b.second;
+    //         });
+
+    //     std::stringstream oss;
+    //     oss << "\n*************************************************************************************************************\n";
+    //     oss << "  Post-hoc DeLong-Holm test: H0: 'No significant differences in AUC with control model.'\n";
+    //     oss << "  Control model: " << models[controlIdx] << "\n";
+    //     oss << "  " << std::left << std::setw(maxModelName) << std::string("Model") << " p-value      Adjusted    Result\n";
+    //     oss << "  " << std::string(maxModelName, '=') << " ============ ========== =============\n";
+
+    //     double prev = 0.0;
+    //     for (size_t i = 0; i < sorted_pvalues.size(); ++i) {
+    //         int idx = sorted_pvalues[i].first;
+    //         double raw = sorted_pvalues[i].second;
+    //         double adj = std::min(1.0, raw * (models.size() - i - 1));
+    //         adj = std::max(prev, adj);
+    //         prev = adj;
+    //         bool reject = adj < significance;
+
+    //         postHocResult.postHocLines.push_back({ models[idx], adj, 0.0f, {}, reject });
+
+    //         auto color = reject ? Colors::MAGENTA() : Colors::GREEN();
+    //         auto status = reject ? Symbols::cross : Symbols::check_mark;
+    //         auto textStatus = reject ? " rejected H0" : " accepted H0";
+    //         oss << "  " << color << std::left << std::setw(maxModelName) << models[idx] << " ";
+    //         oss << std::setprecision(6) << std::scientific << raw << " ";
+    //         oss << std::setprecision(6) << std::scientific << adj << " " << status << textStatus << "\n";
+    //     }
+    //     oss << Colors::CYAN() << "  *************************************************************************************************************\n";
+    //     oss << Colors::RESET();
+    //     if (output) std::cout << oss.str();
+    //     if (tex) {
+    //         BestResultsTex bestResultsTex;
+    //         BestResultsMd bestResultsMd;
+    //         bestResultsTex.holm_test(postHocResult, get_date() + " " + get_time());
+    //         bestResultsMd.holm_test(postHocResult, get_date() + " " + get_time());
+    //     }
+    // }
     bool Statistics::friedmanTest()
     {
         if (!fitted) {
@@ -249,9 +320,9 @@ namespace platform {
     {
         return friedmanResult;
     }
-    HolmResult& Statistics::getHolmResult()
+    PostHocResult& Statistics::getPostHocResult()
     {
-        return holmResult;
+        return postHocResult;
     }
     std::map<std::string, std::map<std::string, float>>& Statistics::getRanks()
     {

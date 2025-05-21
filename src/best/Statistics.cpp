@@ -7,19 +7,25 @@
 #include "BestResultsTex.h"
 #include "BestResultsMd.h"
 #include "Statistics.h"
-#include "DeLong.h"
+#include "WilcoxonTest.hpp"
 
 
 namespace platform {
 
-    Statistics::Statistics(const std::vector<std::string>& models, const std::vector<std::string>& datasets, const json& data, double significance, bool output) :
-        models(models), datasets(datasets), data(data), significance(significance), output(output)
+    Statistics::Statistics(const std::string& score, const std::vector<std::string>& models, const std::vector<std::string>& datasets, const json& data, double significance, bool output) :
+        score(score), models(models), datasets(datasets), data(data), significance(significance), output(output)
     {
+        if (score == "accuracy") {
+            postHocType = "Holm";
+            hlen = 85;
+        } else {
+            postHocType = "Wilcoxon";
+            hlen = 88;
+        }
         nModels = models.size();
         nDatasets = datasets.size();
         auto temp = ConfigLocale();
     }
-
     void Statistics::fit()
     {
         if (nModels < 3 || nDatasets < 3) {
@@ -28,9 +34,11 @@ namespace platform {
             throw std::runtime_error("Can't make the Friedman test with less than 3 models and/or less than 3 datasets.");
         }
         ranksModels.clear();
-        computeRanks();
+        computeRanks(); // compute greaterAverage and ranks
         // Set the control model as the one with the lowest average rank
-        controlIdx = distance(ranks.begin(), min_element(ranks.begin(), ranks.end(), [](const auto& l, const auto& r) { return l.second < r.second; }));
+        controlIdx = score == "accuracy" ?
+            distance(ranks.begin(), min_element(ranks.begin(), ranks.end(), [](const auto& l, const auto& r) { return l.second < r.second; }))
+            : greaterAverage; // The model with the greater average score
         computeWTL();
         maxModelName = (*std::max_element(models.begin(), models.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
         maxDatasetName = (*std::max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
@@ -67,11 +75,16 @@ namespace platform {
     void Statistics::computeRanks()
     {
         std::map<std::string, float> ranksLine;
+        std::map<std::string, float> averages;
+        for (const auto& model : models) {
+            averages[model] = 0;
+        }
         for (const auto& dataset : datasets) {
             std::vector<std::pair<std::string, double>> ranksOrder;
             for (const auto& model : models) {
                 double value = data[model].at(dataset).at(0).get<double>();
                 ranksOrder.push_back({ model, value });
+                averages[model] += value;
             }
             // Assign the ranks
             ranksLine = assignRanks(ranksOrder);
@@ -89,6 +102,12 @@ namespace platform {
         for (const auto& rank : ranks) {
             ranks[rank.first] /= nDatasets;
         }
+        // Average the scores
+        for (const auto& average : averages) {
+            averages[average.first] /= nDatasets;
+        }
+        // Get the model with the greater average score
+        greaterAverage = distance(averages.begin(), max_element(averages.begin(), averages.end(), [](const auto& l, const auto& r) { return l.second < r.second; }));
     }
     void Statistics::computeWTL()
     {
@@ -115,12 +134,36 @@ namespace platform {
             }
         }
     }
+    int Statistics::getControlIdx()
+    {
+        if (!fitted) {
+            fit();
+        }
+        return controlIdx;
+    }
+    void Statistics::postHocTest()
+    {
+        // if (score == "accuracy") {
+        postHocHolmTest();
+        // } else {
+        //     postHocWilcoxonTest();
+        // }
+    }
+    void Statistics::postHocWilcoxonTest()
+    {
+        if (!fitted) {
+            fit();
+        }
+        // Reference: Wilcoxon, F. (1945). “Individual Comparisons by Ranking Methods”. Biometrics Bulletin, 1(6), 80-83.
+        auto wilcoxon = WilcoxonTest(models, datasets, data, significance);
+        controlIdx = wilcoxon.getControlIdx();
+        postHocResult = wilcoxon.getPostHocResult();
+    }
     void Statistics::postHocHolmTest()
     {
         if (!fitted) {
             fit();
         }
-        std::stringstream oss;
         // Reference https://link.springer.com/article/10.1007/s44196-022-00083-8
         // Post-hoc Holm test
         // Calculate the p-value for the models paired with the control model
@@ -155,15 +198,15 @@ namespace platform {
         postHocResult.model = models.at(controlIdx);
     }
 
-    void Statistics::postHocTestReport(const std::string& kind, const std::string& metric, bool friedmanResult, bool tex)
+    void Statistics::postHocTestReport(bool friedmanResult, bool tex)
     {
 
         std::stringstream oss;
         postHocResult.model = models.at(controlIdx);
         auto color = friedmanResult ? Colors::CYAN() : Colors::YELLOW();
         oss << color;
-        oss << "  *************************************************************************************************************" << std::endl;
-        oss << "  Post-hoc " << kind << " test: H0: 'There is no significant differences between the control model and the other models.'" << std::endl;
+        oss << "  " << std::string(hlen + 25, '*') << std::endl;
+        oss << "  Post-hoc " << postHocType << " test: H0: 'There is no significant differences between the control model and the other models.'" << std::endl;
         oss << "  Control model: " << models.at(controlIdx) << std::endl;
         oss << "  " << std::left << std::setw(maxModelName) << std::string("Model") << " p-value      rank      win tie loss Status" << std::endl;
         oss << "  " << std::string(maxModelName, '=') << " ============ ========= === === ==== =============" << std::endl;
@@ -198,83 +241,18 @@ namespace platform {
             oss << " " << std::right << std::setw(3) << wtl.at(idx).win << " " << std::setw(3) << wtl.at(idx).tie << " " << std::setw(4) << wtl.at(idx).loss;
             oss << " " << status << textStatus << std::endl;
         }
-        oss << color << "  *************************************************************************************************************" << std::endl;
+        oss << color << "  " << std::string(hlen + 25, '*') << std::endl;
         oss << Colors::RESET();
         if (output) {
             std::cout << oss.str();
         }
         if (tex) {
-            BestResultsTex bestResultsTex(metric);
+            BestResultsTex bestResultsTex(score);
             BestResultsMd bestResultsMd;
-            bestResultsTex.postHoc_test(postHocResult, kind, get_date() + " " + get_time());
-            bestResultsMd.postHoc_test(postHocResult, kind, get_date() + " " + get_time());
+            bestResultsTex.postHoc_test(postHocResult, postHocType, get_date() + " " + get_time());
+            bestResultsMd.postHoc_test(postHocResult, postHocType, get_date() + " " + get_time());
         }
     }
-    // void Statistics::postHocDeLongTest(const std::vector<std::vector<int>>& y_trues,
-    //     const std::vector<std::vector<std::vector<double>>>& y_probas,
-    //     bool tex)
-    // {
-    //     std::map<int, double> pvalues;
-    //     postHocResult.model = models.at(controlIdx);
-    //     postHocResult.postHocLines.clear();
-
-    //     for (size_t i = 0; i < models.size(); ++i) {
-    //         if ((int)i == controlIdx) continue;
-    //         double acc_p = 0.0;
-    //         int valid = 0;
-    //         for (size_t d = 0; d < y_trues.size(); ++d) {
-    //             try {
-    //                 auto result = compareModelsWithDeLong(y_probas[controlIdx][d], y_probas[i][d], y_trues[d]);
-    //                 acc_p += result.p_value;
-    //                 ++valid;
-    //             }
-    //             catch (...) {}
-    //         }
-    //         if (valid > 0) {
-    //             pvalues[i] = acc_p / valid;
-    //         }
-    //     }
-
-    //     std::vector<std::pair<int, double>> sorted_pvalues(pvalues.begin(), pvalues.end());
-    //     std::sort(sorted_pvalues.begin(), sorted_pvalues.end(), [](const auto& a, const auto& b) {
-    //         return a.second < b.second;
-    //         });
-
-    //     std::stringstream oss;
-    //     oss << "\n*************************************************************************************************************\n";
-    //     oss << "  Post-hoc DeLong-Holm test: H0: 'No significant differences in AUC with control model.'\n";
-    //     oss << "  Control model: " << models[controlIdx] << "\n";
-    //     oss << "  " << std::left << std::setw(maxModelName) << std::string("Model") << " p-value      Adjusted    Result\n";
-    //     oss << "  " << std::string(maxModelName, '=') << " ============ ========== =============\n";
-
-    //     double prev = 0.0;
-    //     for (size_t i = 0; i < sorted_pvalues.size(); ++i) {
-    //         int idx = sorted_pvalues[i].first;
-    //         double raw = sorted_pvalues[i].second;
-    //         double adj = std::min(1.0, raw * (models.size() - i - 1));
-    //         adj = std::max(prev, adj);
-    //         prev = adj;
-    //         bool reject = adj < significance;
-
-    //         postHocResult.postHocLines.push_back({ models[idx], adj, 0.0f, {}, reject });
-
-    //         auto color = reject ? Colors::MAGENTA() : Colors::GREEN();
-    //         auto status = reject ? Symbols::cross : Symbols::check_mark;
-    //         auto textStatus = reject ? " rejected H0" : " accepted H0";
-    //         oss << "  " << color << std::left << std::setw(maxModelName) << models[idx] << " ";
-    //         oss << std::setprecision(6) << std::scientific << raw << " ";
-    //         oss << std::setprecision(6) << std::scientific << adj << " " << status << textStatus << "\n";
-    //     }
-    //     oss << Colors::CYAN() << "  *************************************************************************************************************\n";
-    //     oss << Colors::RESET();
-    //     if (output) std::cout << oss.str();
-    //     if (tex) {
-    //         BestResultsTex bestResultsTex;
-    //         BestResultsMd bestResultsMd;
-    //         bestResultsTex.holm_test(postHocResult, get_date() + " " + get_time());
-    //         bestResultsMd.holm_test(postHocResult, get_date() + " " + get_time());
-    //     }
-    // }
     bool Statistics::friedmanTest()
     {
         if (!fitted) {
@@ -284,7 +262,7 @@ namespace platform {
         // Friedman test
         // Calculate the Friedman statistic
         oss << Colors::BLUE() << std::endl;
-        oss << "***************************************************************************************************************" << std::endl;
+        oss << std::string(hlen, '*') << std::endl;
         oss << Colors::GREEN() << "Friedman test: H0: 'There is no significant differences between all the classifiers.'" << Colors::BLUE() << std::endl;
         double degreesOfFreedom = nModels - 1.0;
         double sumSquared = 0;
@@ -309,7 +287,7 @@ namespace platform {
             oss << Colors::YELLOW() << "The null hypothesis H0 is accepted. Computed p-values will not be significant." << std::endl;
             result = false;
         }
-        oss << Colors::BLUE() << "***************************************************************************************************************" << Colors::RESET() << std::endl;
+        oss << Colors::BLUE() << std::string(hlen, '*') << Colors::RESET() << std::endl;
         if (output) {
             std::cout << oss.str();
         }

@@ -215,10 +215,35 @@ namespace platform {
             test_hyperparams = platform::HyperParameters(datasets.getNames(), hyperparameters_json);
         }
     }
+    std::string getGppVersion()
+    {
+        std::string result;
+        std::array<char, 128> buffer;
+
+        // Run g++ --version and capture the output
+        std::unique_ptr<FILE, decltype(&pclose)> pipe(popen("g++ --version", "r"), pclose);
+
+        if (!pipe) {
+            return "Error executing g++ --version command";
+        }
+
+        // Read the first line of output (which contains the version info)
+        if (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+            result = buffer.data();
+            // Remove trailing newline if present
+            if (!result.empty() && result[result.length() - 1] == '\n') {
+                result.erase(result.length() - 1);
+            }
+        } else {
+            return "No output from g++ --version command";
+        }
+
+        return result;
+    }
     Experiment& ArgumentsExperiment::initializedExperiment()
     {
         auto env = platform::DotEnv();
-        experiment.setTitle(title).setLanguage("c++").setLanguageVersion("gcc 14.1.1");
+        experiment.setTitle(title).setLanguage("c++").setLanguageVersion(getGppVersion());
         experiment.setDiscretizationAlgorithm(discretize_algo).setSmoothSrategy(smooth_strat);
         experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform(env.get("platform"));
         experiment.setStratified(stratified).setNFolds(n_folds).setScoreName(score);

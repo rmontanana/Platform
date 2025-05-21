@@ -321,7 +321,7 @@ namespace platform {
             // Build the table of results
             json table = buildTableResults(models);
             std::vector<std::string> datasets = getDatasets(table.begin().value());
-            BestResultsExcel excel_report(score, datasets);
+            BestResultsExcel excel_report(path, score, datasets);
             excel_report.reportSingle(model, path + Paths::bestResultsFile(score, model));
             messageOutputFile("Excel", excel_report.getFileName());
         }
@@ -337,10 +337,10 @@ namespace platform {
         // Compute the Friedman test
         std::map<std::string, std::map<std::string, float>> ranksModels;
         if (friedman) {
-            Statistics stats(models, datasets, table, significance);
+            Statistics stats(score, models, datasets, table, significance);
             auto result = stats.friedmanTest();
-            stats.postHocHolmTest();
-            stats.postHocTestReport("Holm", score, result, tex);
+            stats.postHocTest();
+            stats.postHocTestReport(result, tex);
             ranksModels = stats.getRanks();
         }
         if (tex) {
@@ -352,24 +352,11 @@ namespace platform {
             }
         }
         if (excel) {
-            BestResultsExcel excel(score, datasets);
+            BestResultsExcel excel(path, score, datasets);
             excel.reportAll(models, table, ranksModels, friedman, significance);
             if (friedman) {
-                int idx = -1;
-                double min = 2000;
-                // Find out the control model
-                auto totals = std::vector<double>(models.size(), 0.0);
-                for (const auto& dataset_ : datasets) {
-                    for (int i = 0; i < models.size(); ++i) {
-                        totals[i] += ranksModels[dataset_][models[i]];
-                    }
-                }
-                for (int i = 0; i < models.size(); ++i) {
-                    if (totals[i] < min) {
-                        min = totals[i];
-                        idx = i;
-                    }
-                }
+                Statistics stats(score, models, datasets, table, significance);
+                int idx = stats.getControlIdx();
                 model = models.at(idx);
                 excel.reportSingle(model, path + Paths::bestResultsFile(score, model));
             }
@@ -378,7 +365,7 @@ namespace platform {
     }
     void BestResults::messageOutputFile(const std::string& title, const std::string& fileName)
     {
-        std::cout << Colors::YELLOW() << "** " << std::setw(5) << std::left << title
+        std::cout << Colors::YELLOW() << "** " << std::setw(8) << std::left << title
             << " file generated: " << fileName << Colors::RESET() << std::endl;
     }
 }

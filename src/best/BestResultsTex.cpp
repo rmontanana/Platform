@@ -27,10 +27,10 @@ namespace platform {
         handler << "\\tiny " << std::endl;
         handler << "\\renewcommand{\\arraystretch }{1.2} " << std::endl;
         handler << "\\renewcommand{\\tabcolsep }{0.07cm} " << std::endl;
-        auto umetric = metric;
+        auto umetric = score;
         umetric[0] = toupper(umetric[0]);
         handler << "\\caption{" << umetric << " results(mean $\\pm$ std) for all the algorithms and datasets} " << std::endl;
-        handler << "\\label{tab:results_" << metric << "}" << std::endl;
+        handler << "\\label{tab:results_" << score << "}" << std::endl;
         std::string header_dataset_name = index ? "r" : "l";
         handler << "\\begin{tabular} {{" << header_dataset_name << std::string(models.size(), 'c').c_str() << "}}" << std::endl;
         handler << "\\hline " << std::endl;
@@ -100,7 +100,7 @@ namespace platform {
         handler << "%%" << std::endl;
         handler << "\\begin{table}[htbp]" << std::endl;
         handler << "\\centering" << std::endl;
-        handler << "\\caption{Results of the post-hoc " << kind << " test for the mean " << metric << " of the algorithms.}\\label{ tab:tests }" << std::endl;
+        handler << "\\caption{Results of the post-hoc " << kind << " test for the mean " << score << " of the algorithms.}\\label{ tab:tests }" << std::endl;
         handler << "\\begin{tabular}{lrrrrr}" << std::endl;
         handler << "\\hline" << std::endl;
         handler << "classifier & pvalue & rank & win & tie & loss\\\\" << std::endl;

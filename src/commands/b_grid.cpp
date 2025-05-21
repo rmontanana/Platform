@@ -231,8 +231,8 @@ void experiment(argparse::ArgumentParser& program)
 {
     struct platform::ConfigGrid config;
     auto arguments = platform::ArgumentsExperiment(program, platform::experiment_t::GRID);
-    auto path_results = arguments.getPathResults();
     arguments.parse();
+    auto path_results = arguments.getPathResults();
     auto grid_experiment = platform::GridExperiment(arguments, config);
     platform::Timer timer;
     timer.start();

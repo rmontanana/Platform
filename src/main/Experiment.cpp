@@ -245,8 +245,6 @@ namespace platform {
                 // Train model
                 //
                 clf->fit(X_train, y_train, features, className, states, smooth_type);
-                if (!quiet)
-                    showProgress(nfold + 1, getColor(clf->getStatus()), "b");
                 auto clf_notes = clf->getNotes();
                 std::transform(clf_notes.begin(), clf_notes.end(), std::back_inserter(notes), [nfold](const std::string& note)
                     { return "Fold " + std::to_string(nfold) + ": " + note; });
@@ -259,6 +257,8 @@ namespace platform {
                 // Score train
                 //
                 if (!no_train_score) {
+                    if (!quiet)
+                        showProgress(nfold + 1, getColor(clf->getStatus()), "b");
                     auto y_proba_train = clf->predict_proba(X_train);
                     Scores scores(y_train, y_proba_train, num_classes, labels);
                     score_train_value = score == score_t::ACCURACY ? scores.accuracy() : scores.auc();

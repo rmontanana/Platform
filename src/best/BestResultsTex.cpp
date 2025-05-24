@@ -89,7 +89,7 @@ namespace platform {
         handler << "\\end{table}" << std::endl;
         handler.close();
     }
-    void BestResultsTex::postHoc_test(struct PostHocResult& postHocResult, const std::string& kind, const std::string& date)
+    void BestResultsTex::postHoc_test(std::vector<PostHocLine>& postHocResults, const std::string& kind, const std::string& date)
     {
         auto file_name = Paths::tex() + Paths::tex_post_hoc();
         openTexFile(file_name);
@@ -105,10 +105,12 @@ namespace platform {
         handler << "\\hline" << std::endl;
         handler << "classifier & pvalue & rank & win & tie & loss\\\\" << std::endl;
         handler << "\\hline" << std::endl;
-        for (auto const& line : postHocResult.postHocLines) {
+        bool first = true;
+        for (auto const& line : postHocResults) {
             auto textStatus = !line.reject ? "\\bf " : " ";
-            if (line.model == postHocResult.model) {
+            if (first) {
                 handler << line.model << " & - & " << std::fixed << std::setprecision(2) << line.rank << " & - & - & - \\\\" << std::endl;
+                first = false;
             } else {
                 handler << line.model << " & " << textStatus << std::scientific << std::setprecision(4) << line.pvalue << " & ";
                 handler << std::fixed << std::setprecision(2) << line.rank << " & " << line.wtl.win << " & " << line.wtl.tie << " & " << line.wtl.loss << "\\\\" << std::endl;

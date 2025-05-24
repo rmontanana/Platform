@@ -111,6 +111,7 @@ namespace platform {
     }
     void Statistics::computeWTL()
     {
+        const double practical_threshold = 0.0005;
         // Compute the WTL matrix (Win Tie Loss)
         for (int i = 0; i < nModels; ++i) {
             wtl[i] = { 0, 0, 0 };
@@ -124,10 +125,11 @@ namespace platform {
                     continue;
                 }
                 double value = data[models[i]].at(item.key()).at(0).get<double>();
-                if (value < controlValue) {
-                    wtl[i].win++;
-                } else if (value == controlValue) {
+                double diff = controlValue - value; // control − comparison
+                if (std::fabs(diff) <= practical_threshold) {
                     wtl[i].tie++;
+                } else if (diff < 0) {
+                    wtl[i].win++;
                 } else {
                     wtl[i].loss++;
                 }
@@ -143,11 +145,11 @@ namespace platform {
     }
     void Statistics::postHocTest()
     {
-        // if (score == "accuracy") {
-        postHocHolmTest();
-        // } else {
-        //     postHocWilcoxonTest();
-        // }
+        if (score == "accuracy") {
+            postHocHolmTest();
+        } else {
+            postHocWilcoxonTest();
+        }
     }
     void Statistics::postHocWilcoxonTest()
     {
@@ -157,7 +159,42 @@ namespace platform {
         // Reference: Wilcoxon, F. (1945). “Individual Comparisons by Ranking Methods”. Biometrics Bulletin, 1(6), 80-83.
         auto wilcoxon = WilcoxonTest(models, datasets, data, significance);
         controlIdx = wilcoxon.getControlIdx();
-        postHocResult = wilcoxon.getPostHocResult();
+        postHocResults = wilcoxon.getPostHocResults();
+        std::cout << std::string(80, '=') << std::endl;
+        setResultsOrder();
+        Holm_Bonferroni();
+        restoreResultsOrder();
+    }
+    void Statistics::Holm_Bonferroni()
+    {
+        // The algorithm need the p-values sorted from the lowest to the highest
+        // Sort the models by p-value
+        std::sort(postHocResults.begin(), postHocResults.end(), [](const PostHocLine& a, const PostHocLine& b) {
+            return a.pvalue < b.pvalue;
+            });
+        // Holm adjustment
+        for (int i = 0; i < postHocResults.size(); ++i) {
+            auto item = postHocResults.at(i);
+            double before = i == 0 ? 0.0 : postHocResults.at(i - 1).pvalue;
+            double p_value = std::min((long double)1.0, item.pvalue * (nModels - i));
+            p_value = std::max(before, p_value);
+            postHocResults[i].pvalue = p_value;
+        }
+    }
+    void Statistics::setResultsOrder()
+    {
+        int c = 0;
+        for (auto& item : postHocResults) {
+            item.idx = c++;
+        }
+
+    }
+    void Statistics::restoreResultsOrder()
+    {
+        // Restore the order of the results
+        std::sort(postHocResults.begin(), postHocResults.end(), [](const PostHocLine& a, const PostHocLine& b) {
+            return a.idx < b.idx;
+            });
     }
     void Statistics::postHocHolmTest()
     {
@@ -171,38 +208,32 @@ namespace platform {
         boost::math::normal dist(0.0, 1.0);
         double diff = sqrt(nModels * (nModels + 1) / (6.0 * nDatasets));
         for (int i = 0; i < nModels; i++) {
+            PostHocLine line;
+            line.model = models[i];
+            line.rank = ranks.at(models[i]);
+            line.wtl = wtl.at(i);
+            line.reject = false;
             if (i == controlIdx) {
-                stats[i] = 0.0;
+                postHocResults.push_back(line);
                 continue;
             }
             double z = std::abs(ranks.at(models[controlIdx]) - ranks.at(models[i])) / diff;
-            double p_value = (long double)2 * (1 - cdf(dist, z));
-            stats[i] = p_value;
+            line.pvalue = (long double)2 * (1 - cdf(dist, z));
+            line.reject = (line.pvalue < significance);
+            postHocResults.push_back(line);
         }
-        // Sort the models by p-value
-        for (const auto& stat : stats) {
-            postHocData.push_back({ stat.first, stat.second });
-        }
-        std::sort(postHocData.begin(), postHocData.end(), [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
-            return a.second < b.second;
+        std::sort(postHocResults.begin(), postHocResults.end(), [](const PostHocLine& a, const PostHocLine& b) {
+            return a.rank < b.rank;
             });
-
-        // Holm adjustment
-        for (int i = 0; i < postHocData.size(); ++i) {
-            auto item = postHocData.at(i);
-            double before = i == 0 ? 0.0 : postHocData.at(i - 1).second;
-            double p_value = std::min((double)1.0, item.second * (nModels - i));
-            p_value = std::max(before, p_value);
-            postHocData[i] = { item.first, p_value };
-        }
-        postHocResult.model = models.at(controlIdx);
+        setResultsOrder();
+        Holm_Bonferroni();
+        restoreResultsOrder();
     }
 
     void Statistics::postHocTestReport(bool friedmanResult, bool tex)
     {
 
         std::stringstream oss;
-        postHocResult.model = models.at(controlIdx);
         auto color = friedmanResult ? Colors::CYAN() : Colors::YELLOW();
         oss << color;
         oss << "  " << std::string(hlen + 25, '*') << std::endl;
@@ -210,35 +241,21 @@ namespace platform {
         oss << "  Control model: " << models.at(controlIdx) << std::endl;
         oss << "  " << std::left << std::setw(maxModelName) << std::string("Model") << " p-value      rank      win tie loss Status" << std::endl;
         oss << "  " << std::string(maxModelName, '=') << " ============ ========= === === ==== =============" << std::endl;
-        // sort ranks from lowest to highest
-        std::vector<std::pair<std::string, float>> ranksOrder;
-        for (const auto& rank : ranks) {
-            ranksOrder.push_back({ rank.first, rank.second });
-        }
-        std::sort(ranksOrder.begin(), ranksOrder.end(), [](const std::pair<std::string, float>& a, const std::pair<std::string, float>& b) {
-            return a.second < b.second;
-            });
-        // Show the control model info.
-        oss << "  " << Colors::BLUE() << std::left << std::setw(maxModelName) << ranksOrder.at(0).first << " ";
-        oss << std::setw(12) << " " << std::setprecision(7) << std::fixed << " " << ranksOrder.at(0).second << std::endl;
-        for (const auto& item : ranksOrder) {
-            auto idx = distance(models.begin(), find(models.begin(), models.end(), item.first));
-            double pvalue = 0.0;
-            for (const auto& stat : postHocData) {
-                if (stat.first == idx) {
-                    pvalue = stat.second;
-                }
-            }
-            postHocResult.postHocLines.push_back({ item.first, pvalue, item.second, wtl.at(idx), pvalue < significance });
-            if (item.first == models.at(controlIdx)) {
+        bool first = true;
+        for (const auto& item : postHocResults) {
+            if (first) {
+                oss << "  " << Colors::BLUE() << std::left << std::setw(maxModelName) << item.model << " ";
+                oss << std::setw(12) << " " << std::setprecision(7) << std::fixed << " " << item.rank << std::endl;
+                first = false;
                 continue;
             }
+            auto pvalue = item.pvalue;
             auto colorStatus = pvalue > significance ? Colors::GREEN() : Colors::MAGENTA();
             auto status = pvalue > significance ? Symbols::check_mark : Symbols::cross;
             auto textStatus = pvalue > significance ? " accepted H0" : " rejected H0";
-            oss << "  " << colorStatus << std::left << std::setw(maxModelName) << item.first << " ";
-            oss << std::setprecision(6) << std::scientific << pvalue << std::setprecision(7) << std::fixed << " " << item.second;
-            oss << " " << std::right << std::setw(3) << wtl.at(idx).win << " " << std::setw(3) << wtl.at(idx).tie << " " << std::setw(4) << wtl.at(idx).loss;
+            oss << "  " << colorStatus << std::left << std::setw(maxModelName) << item.model << " ";
+            oss << std::setprecision(6) << std::scientific << pvalue << std::setprecision(7) << std::fixed << " " << item.rank;
+            oss << " " << std::right << std::setw(3) << item.wtl.win << " " << std::setw(3) << item.wtl.tie << " " << std::setw(4) << item.wtl.loss;
             oss << " " << status << textStatus << std::endl;
         }
         oss << color << "  " << std::string(hlen + 25, '*') << std::endl;
@@ -249,8 +266,8 @@ namespace platform {
         if (tex) {
             BestResultsTex bestResultsTex(score);
             BestResultsMd bestResultsMd;
-            bestResultsTex.postHoc_test(postHocResult, postHocType, get_date() + " " + get_time());
-            bestResultsMd.postHoc_test(postHocResult, postHocType, get_date() + " " + get_time());
+            bestResultsTex.postHoc_test(postHocResults, postHocType, get_date() + " " + get_time());
+            bestResultsMd.postHoc_test(postHocResults, postHocType, get_date() + " " + get_time());
         }
     }
     bool Statistics::friedmanTest()
@@ -293,17 +310,5 @@ namespace platform {
         }
         friedmanResult = { friedmanQ, criticalValue, p_value, result };
         return result;
-    }
-    FriedmanResult& Statistics::getFriedmanResult()
-    {
-        return friedmanResult;
-    }
-    PostHocResult& Statistics::getPostHocResult()
-    {
-        return postHocResult;
-    }
-    std::map<std::string, std::map<std::string, float>>& Statistics::getRanks()
-    {
-        return ranksModels;
     }
 } // namespace platform

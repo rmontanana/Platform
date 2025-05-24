@@ -75,7 +75,7 @@ namespace platform {
 
         handler.close();
     }
-    void BestResultsMd::postHoc_test(struct PostHocResult& postHocResult, const std::string& kind, const std::string& date)
+    void BestResultsMd::postHoc_test(std::vector<PostHocLine>& postHocResults, const std::string& kind, const std::string& date)
     {
         auto file_name = Paths::tex() + Paths::md_post_hoc();
         openMdFile(file_name);
@@ -87,10 +87,12 @@ namespace platform {
         handler << "Post-hoc " << kind << " test: H<sub>0</sub>: There is no significant differences between the control model and the other models." << std::endl << std::endl;
         handler << "| classifier | pvalue | rank | win | tie | loss | H<sub>0</sub> |" << std::endl;
         handler << "| :-- | --: | --: | --:| --: | --: | :--: |" << std::endl;
-        for (auto const& line : postHocResult.postHocLines) {
+        bool first = true;
+        for (auto const& line : postHocResults) {
             auto textStatus = !line.reject ? "**" : " ";
-            if (line.model == postHocResult.model) {
+            if (first) {
                 handler << "| " << line.model << " | - | " << std::fixed << std::setprecision(2) << line.rank << " | - | - | - |" << std::endl;
+                first = false;
             } else {
                 handler << "| " << line.model << " | " << textStatus << std::scientific << std::setprecision(4) << line.pvalue << textStatus << " |";
                 handler << std::fixed << std::setprecision(2) << line.rank << " | " << line.wtl.win << " | " << line.wtl.tie << " | " << line.wtl.loss << " |";

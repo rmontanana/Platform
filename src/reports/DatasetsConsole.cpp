@@ -26,6 +26,7 @@ namespace platform {
         auto datasets = platform::Datasets(false, platform::Paths::datasets());
         std::stringstream sheader;
         auto datasets_names = datasets.getNames();
+        std::cout << Colors::GREEN() << "Datasets available in the platform: " << datasets_names.size() << std::endl;
         int maxName = std::max(size_t(7), (*max_element(datasets_names.begin(), datasets_names.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size());
         std::vector<std::string> header_labels = { " #", "Dataset", "Sampl.", "Feat.", "#Num.", "Cls", "Balance" };
         std::vector<int> header_lengths = { 3, maxName, 6, 6, 6, 3, DatasetsConsole::BALANCE_LENGTH };
@@ -61,9 +62,13 @@ namespace platform {
             line << setw(header_lengths[5]) << right << nClasses << " ";
             std::string sep = "";
             oss.str("");
-            for (auto number : dataset.getClassesCounts()) {
-                oss << sep << std::setprecision(2) << fixed << (float)number / nSamples * 100.0 << "% (" << number << ")";
-                sep = " / ";
+            if (nSamples == 0) {
+                oss << "No samples";
+            } else {
+                for (auto number : dataset.getClassesCounts()) {
+                    oss << sep << std::setprecision(2) << fixed << (float)number / nSamples * 100.0 << "% (" << number << ")";
+                    sep = " / ";
+                }
             }
             split_lines(maxName, line.str(), oss.str());
             // Store data for Excel report

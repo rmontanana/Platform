@@ -164,13 +164,15 @@ namespace platform {
         addConditionalFormat("max");
         footer(false);
         if (friedman) {
-            // Create Sheet with ranks
-            worksheet = workbook_add_worksheet(workbook, "Ranks");
-            formatColumns();
-            header(true);
-            body(true);
-            addConditionalFormat("min");
-            footer(true);
+            if (score == "accuracy") {
+                // Create Sheet with ranks
+                worksheet = workbook_add_worksheet(workbook, "Ranks");
+                formatColumns();
+                header(true);
+                body(true);
+                addConditionalFormat("min");
+                footer(true);
+            }
             // Create Sheet with Friedman Test
             doFriedman();
         }
@@ -246,7 +248,7 @@ namespace platform {
         stats.postHocTest();
         stats.postHocTestReport(result, false); // No tex output
         auto friedmanResult = stats.getFriedmanResult();
-        auto postHocResult = stats.getPostHocResult();
+        auto postHocResults = stats.getPostHocResults();
         worksheet_merge_range(worksheet, row, 0, row, 7, "Null hypothesis: H0 'There is no significant differences between all the classifiers.'", styles["headerSmall"]);
         row += 2;
         writeString(row, 1, "Friedman Q", "bodyHeader");
@@ -265,7 +267,7 @@ namespace platform {
         row += 2;
         worksheet_merge_range(worksheet, row, 0, row, 7, "Null hypothesis: H0 'There is no significant differences between the control model and the other models.'", styles["headerSmall"]);
         row += 2;
-        std::string controlModel = "Control Model: " + postHocResult.model;
+        std::string controlModel = "Control Model: " + postHocResults.at(0).model;
         worksheet_merge_range(worksheet, row, 1, row, 7, controlModel.c_str(), styles["bodyHeader_odd"]);
         row++;
         writeString(row, 1, "Model", "bodyHeader");
@@ -277,7 +279,7 @@ namespace platform {
         writeString(row, 7, "Reject H0", "bodyHeader");
         row++;
         bool first = true;
-        for (const auto& item : postHocResult.postHocLines) {
+        for (const auto& item : postHocResults) {
             writeString(row, 1, item.model, "text");
             if (first) {
                 // Control model info

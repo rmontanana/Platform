@@ -9,9 +9,9 @@ namespace platform {
     using json = nlohmann::ordered_json;
 
     struct WTL {
-        int win;
-        int tie;
-        int loss;
+        uint win;
+        uint tie;
+        uint loss;
     };
     struct FriedmanResult {
         double statistic;
@@ -20,16 +20,14 @@ namespace platform {
         bool reject;
     };
     struct PostHocLine {
+        uint idx; //index of the main order
         std::string model;
         long double pvalue;
         double rank;
         WTL wtl;
         bool reject;
     };
-    struct PostHocResult {
-        std::string model;
-        std::vector<PostHocLine> postHocLines;
-    };
+
     class Statistics {
     public:
         Statistics(const std::string& score, const std::vector<std::string>& models, const std::vector<std::string>& datasets, const json& data, double significance = 0.05, bool output = true);
@@ -37,15 +35,18 @@ namespace platform {
         void postHocTest();
         void postHocTestReport(bool friedmanResult, bool tex);
         int getControlIdx();
-        FriedmanResult& getFriedmanResult();
-        PostHocResult& getPostHocResult();
-        std::map<std::string, std::map<std::string, float>>& getRanks();
+        FriedmanResult& getFriedmanResult() { return friedmanResult; }
+        std::vector<PostHocLine>& getPostHocResults() { return postHocResults; }
+        std::map<std::string, std::map<std::string, float>>& getRanks() { return ranksModels; } // ranks of the models per dataset
     private:
         void fit();
         void postHocHolmTest();
         void postHocWilcoxonTest();
         void computeRanks();
         void computeWTL();
+        void Holm_Bonferroni();
+        void setResultsOrder(); // Set the order of the results based on the statistic analysis needed
+        void restoreResultsOrder(); // Restore the order of the results after the Holm-Bonferroni adjustment
         const std::string& score;
         std::string postHocType;
         const std::vector<std::string>& models;
@@ -60,12 +61,11 @@ namespace platform {
         int greaterAverage = -1; // The model with the greater average score
         std::map<int, WTL> wtl;
         std::map<std::string, float> ranks;
-        std::vector<std::pair<int, double>> postHocData;
         int maxModelName = 0;
         int maxDatasetName = 0;
         int hlen; // length of the line
         FriedmanResult friedmanResult;
-        PostHocResult postHocResult;
+        std::vector<PostHocLine> postHocResults;
         std::map<std::string, std::map<std::string, float>> ranksModels;
     };
 }

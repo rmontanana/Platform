@@ -23,11 +23,8 @@
 namespace platform {
     class WilcoxonTest {
     public:
-        WilcoxonTest(const std::vector<std::string>& models,
-            const std::vector<std::string>& datasets,
-            const json& data,
-            double                          alpha = 0.05)
-            : models_(models), datasets_(datasets), data_(data), alpha_(alpha)
+        WilcoxonTest(const std::vector<std::string>& models, const std::vector<std::string>& datasets,
+            const json& data, double alpha = 0.05) : models_(models), datasets_(datasets), data_(data), alpha_(alpha)
         {
             buildAUCTable();              // extracts all AUCs into a dense matrix
             computeAverageAUCs();         // per‑model mean (→ control selection)
@@ -36,10 +33,8 @@ namespace platform {
             buildPostHocResult();         // fills postHocResult_
         }
 
-        //---------------------------------------------------- public API ----
         int getControlIdx() const noexcept { return control_idx_; }
-
-        const PostHocResult& getPostHocResult() const noexcept { return postHocResult_; }
+        const std::vector<PostHocLine>& getPostHocResults() const noexcept { return postHocResults_; }
 
     private:
         //-------------------------------------------------- helper structs ----
@@ -146,18 +141,14 @@ namespace platform {
             const std::size_t D = datasets_.size();
             const std::string& control_name = models_[control_idx_];
 
-            postHocResult_.model = control_name;
-
             const double practical_threshold = 0.0005; // same heuristic as original code
 
             for (std::size_t i = 0; i < M; ++i) {
-                if (static_cast<int>(i) == control_idx_) continue;
-
                 PostHocLine line;
                 line.model = models_[i];
-                line.rank = avg_rank_[i];
+                line.rank = avg_auc_[i];
 
-                WTL wtl;
+                WTL wtl = { 0, 0, 0 }; // win, tie, loss
                 std::vector<double> differences;
                 differences.reserve(D);
 
@@ -181,8 +172,12 @@ namespace platform {
                 line.pvalue = differences.empty() ? 1.0L : static_cast<long double>(wilcoxonSignedRankTest(differences));
                 line.reject = (line.pvalue < alpha_);
 
-                postHocResult_.postHocLines.push_back(std::move(line));
+                postHocResults_.push_back(std::move(line));
             }
+            // Sort results by rank (descending)
+            std::sort(postHocResults_.begin(), postHocResults_.end(), [](const PostHocLine& a, const PostHocLine& b) {
+                return a.rank > b.rank;
+                });
         }
 
         // ------------------------------------------------ Wilcoxon (private) --
@@ -243,8 +238,8 @@ namespace platform {
         std::vector<int>           rank_cnt_;    // datasets counted per model
 
         int                        control_idx_ = -1;
-        PostHocResult              postHocResult_;
+        std::vector<PostHocLine>   postHocResults_;
     };
 
-} // namespace stats
+} // namespace platform
 #endif // BEST_WILCOXON_TEST_HPP

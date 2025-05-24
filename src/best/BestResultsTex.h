@@ -14,7 +14,7 @@ namespace platform {
         void results_header(const std::vector<std::string>& models, const std::string& date, bool index);
         void results_body(const std::vector<std::string>& datasets, json& table, bool index);
         void results_footer(const std::map<std::string, std::vector<double>>& totals, const std::string& best_model);
-        void postHoc_test(struct PostHocResult& postHocResult, const std::string& kind, const std::string& date);
+        void postHoc_test(std::vector<PostHocLine>& postHocResults, const std::string& kind, const std::string& date);
     private:
         std::string score;
         bool dataset_name;

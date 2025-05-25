@@ -160,8 +160,11 @@ namespace platform {
         auto wilcoxon = WilcoxonTest(models, datasets, data, significance);
         controlIdx = wilcoxon.getControlIdx();
         postHocResults = wilcoxon.getPostHocResults();
-        std::cout << std::string(80, '=') << std::endl;
         setResultsOrder();
+        // Fill the ranks info
+        for (const auto& item : postHocResults) {
+            ranks[item.model] = item.rank;
+        }
         Holm_Bonferroni();
         restoreResultsOrder();
     }

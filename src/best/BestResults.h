@@ -32,6 +32,7 @@ namespace platform {
         double significance;
         int maxModelName = 0;
         int maxDatasetName = 0;
+        int minLength = 13; // Minimum length for scores
     };
 }
 #endif

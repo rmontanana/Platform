@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <cctype>
 #include "common/Colors.h"
 #include "common/CLocale.h"
 #include "common/Paths.h"
@@ -123,8 +124,14 @@ namespace platform {
         }
         result = std::vector<std::string>(models.begin(), models.end());
         maxModelName = (*max_element(result.begin(), result.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
-        maxModelName = std::max(12, maxModelName);
+        maxModelName = std::max(minLength, maxModelName);
         return result;
+    }
+    std::string toLower(std::string data)
+    {
+        std::transform(data.begin(), data.end(), data.begin(),
+            [](unsigned char c) { return std::tolower(c); });
+        return data;
     }
     std::vector<std::string> BestResults::getDatasets(json table)
     {
@@ -132,7 +139,9 @@ namespace platform {
         for (const auto& dataset_ : table.items()) {
             datasets.push_back(dataset_.key());
         }
-        std::stable_sort(datasets.begin(), datasets.end());
+        std::stable_sort(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) {
+            return toLower(a) < toLower(b);
+            });
         maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
         maxDatasetName = std::max(7, maxDatasetName);
         return datasets;
@@ -266,12 +275,14 @@ namespace platform {
             // Print the row with red colors on max values
             for (const auto& model : models) {
                 std::string efectiveColor = color;
-                double value;
+                double value, std;
                 try {
                     value = table[model].at(dataset_).at(0).get<double>();
+                    std = table[model].at(dataset_).at(3).get<double>();
                 }
                 catch (nlohmann::json_abi_v3_11_3::detail::out_of_range err) {
                     value = -1.0;
+                    std = -1.0;
                 }
                 if (value == maxValue) {
                     efectiveColor = Colors::RED();
@@ -280,7 +291,8 @@ namespace platform {
                     std::cout << Colors::YELLOW() << std::setw(maxModelName) << std::right << "N/A" << " ";
                 } else {
                     totals[model].push_back(value);
-                    std::cout << efectiveColor << std::setw(maxModelName) << std::setprecision(maxModelName - 2) << std::fixed << value << " ";
+                    std::cout << efectiveColor << std::setw(maxModelName - 6) << std::setprecision(maxModelName - 8) << std::fixed << value;
+                    std::cout << efectiveColor << "±" << std::setw(5) << std::setprecision(3) << std::fixed << std << " ";
                 }
             }
             std::cout << std::endl;
@@ -307,9 +319,9 @@ namespace platform {
         for (const auto& model : models) {
             std::string efectiveColor = model == best_model ? Colors::RED() : Colors::GREEN();
             double value = std::reduce(totals[model].begin(), totals[model].end()) / nDatasets;
-            double std_value = compute_std(totals[model], value);
-            std::cout << efectiveColor << std::right << std::setw(maxModelName) << std::setprecision(maxModelName - 4) << std::fixed << value << " ";
-
+            double std = compute_std(totals[model], value);
+            std::cout << efectiveColor << std::right << std::setw(maxModelName - 6) << std::setprecision(maxModelName - 8) << std::fixed << value;
+            std::cout << efectiveColor << "±" << std::setw(5) << std::setprecision(3) << std::fixed << std << " ";
         }
         std::cout << std::endl;
     }

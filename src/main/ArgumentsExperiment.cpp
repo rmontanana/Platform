@@ -221,7 +221,8 @@ namespace platform {
         std::array<char, 128> buffer;
 
         // Run g++ --version and capture the output
-        std::unique_ptr<FILE, decltype(&pclose)> pipe(popen("g++ --version", "r"), pclose);
+        using pclose_t = int(*)(FILE*);
+        std::unique_ptr<FILE, pclose_t> pipe(popen("g++ --version", "r"), pclose);
 
         if (!pipe) {
             return "Error executing g++ --version command";

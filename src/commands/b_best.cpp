@@ -5,14 +5,16 @@
 #include "common/Paths.h"
 #include "common/Colors.h"
 #include "best/BestResults.h"
+#include "common/DotEnv.h"
 #include "config_platform.h"
 
 void manageArguments(argparse::ArgumentParser& program)
 {
+    auto env = platform::DotEnv();
     program.add_argument("-m", "--model").help("Model to use or any").default_value("any");
     program.add_argument("--folder").help("Results folder to use").default_value(platform::Paths::results());
     program.add_argument("-d", "--dataset").default_value("any").help("Filter results of the selected model) (any for all datasets)");
-    program.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
+    program.add_argument("-s", "--score").default_value(env.get("score")).help("Filter results of the score name supplied");
     program.add_argument("--friedman").help("Friedman test").default_value(false).implicit_value(true);
     program.add_argument("--excel").help("Output to excel").default_value(false).implicit_value(true);
     program.add_argument("--tex").help("Output results to TeX & Markdown files").default_value(false).implicit_value(true);

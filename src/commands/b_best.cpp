@@ -4,6 +4,7 @@
 #include "main/modelRegister.h"
 #include "common/Paths.h"
 #include "common/Colors.h"
+#include "common/Utils.h"
 #include "best/BestResults.h"
 #include "common/DotEnv.h"
 #include "config_platform.h"
@@ -79,6 +80,11 @@ int main(int argc, char** argv)
         std::string fileName = results.build();
         std::cout << Colors::GREEN() << fileName << " created!" << Colors::RESET() << std::endl;
         results.reportSingle(excel);
+    }
+    if (excel) {
+        auto fileName = results.getExcelFileName();
+        std::cout << "Opening " << fileName << std::endl;
+        platform::openFile(fileName);
     }
     std::cout << Colors::RESET();
     return 0;

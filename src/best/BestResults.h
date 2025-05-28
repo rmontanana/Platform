@@ -15,6 +15,7 @@ namespace platform {
         void reportSingle(bool excel);
         void reportAll(bool excel, bool tex, bool index);
         void buildAll();
+        std::string getExcelFileName() const { return excelFileName; }
     private:
         std::vector<std::string> getModels();
         std::vector<std::string> getDatasets(json table);
@@ -33,6 +34,7 @@ namespace platform {
         int maxModelName = 0;
         int maxDatasetName = 0;
         int minLength = 13; // Minimum length for scores
+        std::string excelFileName;
     };
 }
 #endif

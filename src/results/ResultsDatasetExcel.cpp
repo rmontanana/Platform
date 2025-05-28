@@ -1,8 +1,9 @@
+#include "common/Paths.h"
 #include "ResultsDatasetExcel.h"
 namespace platform {
     ResultsDatasetExcel::ResultsDatasetExcel()
     {
-        file_name = "some_results.xlsx";
+        file_name = Paths::excelResults();
         workbook = workbook_new(getFileName().c_str());
         createFormats();
         setProperties("Results");

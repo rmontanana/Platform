@@ -336,6 +336,7 @@ namespace platform {
             BestResultsExcel excel_report(path, score, datasets);
             excel_report.reportSingle(model, path + Paths::bestResultsFile(score, model));
             messageOutputFile("Excel", excel_report.getFileName());
+            excelFileName = excel_report.getFileName();
         }
     }
     void BestResults::reportAll(bool excel, bool tex, bool index)
@@ -373,6 +374,7 @@ namespace platform {
                 excel.reportSingle(model, path + Paths::bestResultsFile(score, model));
             }
             messageOutputFile("Excel", excel.getFileName());
+            excelFileName = excel.getFileName();
         }
     }
     void BestResults::messageOutputFile(const std::string& title, const std::string& fileName)

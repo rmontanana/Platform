@@ -26,6 +26,7 @@
 #include <pyclassifiers/AdaBoost.h>
 #include <pyclassifiers/RandomForest.h>
 #include "../experimental_clfs/XA1DE.h"
+#include "../experimental_clfs/AdaBoost.h"
 
 namespace platform {
     class Models {

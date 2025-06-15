@@ -35,8 +35,10 @@ namespace platform {
         [](void) -> bayesnet::BaseClassifier* { return new pywrap::RandomForest();});
     static Registrar registrarXGB("XGBoost",
         [](void) -> bayesnet::BaseClassifier* { return new pywrap::XGBoost();});
-    static Registrar registrarAda("AdaBoost",
+    static Registrar registrarAda("AdaBoostPy",
         [](void) -> bayesnet::BaseClassifier* { return new pywrap::AdaBoost();});
+    // static Registrar registrarAda2("AdaBoost",
+    //     [](void) -> bayesnet::BaseClassifier* { return new platform::AdaBoost();});
     static Registrar registrarXSPODE("XSPODE",
         [](void) -> bayesnet::BaseClassifier* { return new bayesnet::XSpode(0);});
     static Registrar registrarXSP2DE("XSP2DE",

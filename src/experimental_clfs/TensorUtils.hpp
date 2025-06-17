@@ -45,6 +45,19 @@ namespace platform {
 
             return data;
         }
+        static torch::Tensor to_matrix(const std::vector<std::vector<int>>& data)
+        {
+            if (data.empty()) return torch::empty({ 0, 0 }, torch::kInt64);
+            size_t rows = data.size();
+            size_t cols = data[0].size();
+            torch::Tensor tensor = torch::empty({ static_cast<long>(rows), static_cast<long>(cols) }, torch::kInt64);
+            for (size_t i = 0; i < rows; ++i) {
+                for (size_t j = 0; j < cols; ++j) {
+                    tensor.index_put_({ static_cast<long>(i), static_cast<long>(j) }, data[i][j]);
+                }
+            }
+            return tensor;
+        }
     };
 }
 

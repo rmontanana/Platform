@@ -5,18 +5,19 @@
 // ***************************************************************
 
 #include "AdaBoost.h"
+#include "DecisionTree.h"
 #include <cmath>
 #include <algorithm>
 #include <numeric>
 #include <sstream>
 #include <iomanip>
 
-namespace platform {
+namespace bayesnet {
 
-    AdaBoost::AdaBoost(int n_estimators)
-        : Ensemble(true), n_estimators(n_estimators)
+    AdaBoost::AdaBoost(int n_estimators, int max_depth)
+        : Ensemble(true), n_estimators(n_estimators), base_max_depth(max_depth)
     {
-        validHyperparameters = { "n_estimators" };
+        validHyperparameters = { "n_estimators", "base_max_depth" };
     }
 
     void AdaBoost::buildModel(const torch::Tensor& weights)
@@ -89,20 +90,14 @@ namespace platform {
 
     std::unique_ptr<Classifier> AdaBoost::trainBaseEstimator(const torch::Tensor& weights)
     {
-        // Create a new classifier instance
-        // You need to implement this based on your specific base classifier
-        // For example, if using Decision Trees:
-        // auto classifier = std::make_unique<DecisionTree>();
+        // Create a decision tree with specified max depth
+        // For AdaBoost, we typically use shallow trees (stumps with max_depth=1)
+        auto tree = std::make_unique<DecisionTree>(base_max_depth);
 
-        // Or if using a factory method:
-        // auto classifier = ClassifierFactory::create("DecisionTree");
+        // Fit the tree with the current sample weights
+        tree->fit(dataset, features, className, states, weights, Smoothing_t::NONE);
 
-        // Placeholder - replace with actual classifier creation
-        throw std::runtime_error("AdaBoost::trainBaseEstimator - You need to implement base classifier creation");
-
-        // Once you have the classifier creation implemented, uncomment:
-        // classifier->fit(dataset, features, className, states, weights, Smoothing_t::NONE);
-        // return classifier;
+        return tree;
     }
 
     double AdaBoost::calculateWeightedError(Classifier* estimator, const torch::Tensor& weights)
@@ -192,8 +187,9 @@ namespace platform {
         return graph_lines;
     }
 
-    void AdaBoost::setHyperparameters(const nlohmann::json& hyperparameters)
+    void AdaBoost::setHyperparameters(const nlohmann::json& hyperparameters_)
     {
+        auto hyperparameters = hyperparameters_;
         // Set hyperparameters from JSON
         auto it = hyperparameters.find("n_estimators");
         if (it != hyperparameters.end()) {
@@ -201,14 +197,18 @@ namespace platform {
             if (n_estimators <= 0) {
                 throw std::invalid_argument("n_estimators must be positive");
             }
+            hyperparameters.erase("n_estimators");  // Remove 'n_estimators' if present 
         }
 
-        // Check for invalid hyperparameters
-        for (auto& [key, value] : hyperparameters.items()) {
-            if (std::find(validHyperparameters.begin(), validHyperparameters.end(), key) == validHyperparameters.end()) {
-                throw std::invalid_argument("Invalid hyperparameter: " + key);
+        it = hyperparameters.find("base_max_depth");
+        if (it != hyperparameters.end()) {
+            base_max_depth = it->get<int>();
+            if (base_max_depth <= 0) {
+                throw std::invalid_argument("base_max_depth must be positive");
             }
+            hyperparameters.erase("base_max_depth");  // Remove 'base_max_depth' if present 
         }
+        Ensemble::setHyperparameters(hyperparameters);
     }
 
 } // namespace bayesnet

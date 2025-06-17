@@ -20,6 +20,8 @@ add_executable(
     results/Result.cpp
     experimental_clfs/XA1DE.cpp
     experimental_clfs/ExpClf.cpp
+    experimental_clfs/DecisionTree.cpp
+
 )
 target_link_libraries(b_best Boost::boost "${PyClassifiers}" bayesnet::bayesnet fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
@@ -33,7 +35,7 @@ add_executable(b_grid commands/b_grid.cpp ${grid_sources}
     results/Result.cpp
     experimental_clfs/XA1DE.cpp
     experimental_clfs/ExpClf.cpp
-    experimental_clfs/AdaBoost.cpp
+    experimental_clfs/DecisionTree.cpp
 )
 target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} "${PyClassifiers}" bayesnet::bayesnet fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" Boost::python Boost::numpy)
 
@@ -45,6 +47,8 @@ add_executable(b_list commands/b_list.cpp
     results/Result.cpp results/ResultsDatasetExcel.cpp results/ResultsDataset.cpp results/ResultsDatasetConsole.cpp
     experimental_clfs/XA1DE.cpp
     experimental_clfs/ExpClf.cpp
+    experimental_clfs/DecisionTree.cpp
+
 )
 target_link_libraries(b_list "${PyClassifiers}" bayesnet::bayesnet fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" Boost::python Boost::numpy "${XLSXWRITER_LIB}")
 
@@ -58,6 +62,8 @@ add_executable(b_main commands/b_main.cpp ${main_sources}
     experimental_clfs/XA1DE.cpp
     experimental_clfs/ExpClf.cpp
     experimental_clfs/ExpClf.cpp
+    experimental_clfs/DecisionTree.cpp
+
 )
 target_link_libraries(b_main PRIVATE nlohmann_json::nlohmann_json "${PyClassifiers}" bayesnet::bayesnet fimdlp ${Python3_LIBRARIES} "${TORCH_LIBRARIES}" Boost::python Boost::numpy)
 

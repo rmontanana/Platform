@@ -96,6 +96,7 @@ opt = ""
 test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
 	@echo ">>> Running Platform tests...";
 	@$(MAKE) clean
+	@$(MAKE) debug
 	@cmake --build $(f_debug) -t $(test_targets) --parallel
 	@for t in $(test_targets); do \
 		if [ -f $(f_debug)/tests/$$t ]; then \

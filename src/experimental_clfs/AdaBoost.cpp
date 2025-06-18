@@ -43,12 +43,15 @@ namespace bayesnet {
         }
 
         // Debug information
-        std::cout << "Starting AdaBoost training with " << n_estimators << " estimators" << std::endl;
-        std::cout << "Number of classes: " << n_classes << std::endl;
-        std::cout << "Number of features: " << n << std::endl;
-        std::cout << "Number of samples: " << n_samples << std::endl;
+        if (debug) {
+            std::cout << "Starting AdaBoost training with " << n_estimators << " estimators" << std::endl;
+            std::cout << "Number of classes: " << n_classes << std::endl;
+            std::cout << "Number of features: " << n << std::endl;
+            std::cout << "Number of samples: " << n_samples << std::endl;
+        }
 
-        // Main AdaBoost training loop (SAMME algorithm)
+        // Main AdaBoost training loop (SAMME algorithm) 
+        // (Stagewise Additive Modeling using a Multi - class Exponential loss)
         for (int iter = 0; iter < n_estimators; ++iter) {
             // Train base estimator with current sample weights
             auto estimator = trainBaseEstimator(sample_weights);
@@ -57,16 +60,12 @@ namespace bayesnet {
             double weighted_error = calculateWeightedError(estimator.get(), sample_weights);
             training_errors.push_back(weighted_error);
 
-            // Debug output
-            std::cout << "Iteration " << iter + 1 << ":" << std::endl;
-            std::cout << "  Weighted error: " << weighted_error << std::endl;
-
             // Check if error is too high (worse than random guessing)
             double random_guess_error = 1.0 - (1.0 / n_classes);
 
             // According to SAMME, we need error < random_guess_error
             if (weighted_error >= random_guess_error) {
-                std::cout << "  Error >= random guess (" << random_guess_error << "), stopping" << std::endl;
+                if (debug) std::cout << "  Error >= random guess (" << random_guess_error << "), stopping" << std::endl;
                 // If only one estimator and it's worse than random, keep it with zero weight
                 if (models.empty()) {
                     models.push_back(std::move(estimator));
@@ -80,8 +79,6 @@ namespace bayesnet {
             double alpha = std::log((1.0 - weighted_error) / weighted_error) +
                 std::log(static_cast<double>(n_classes - 1));
 
-            std::cout << "  Alpha: " << alpha << std::endl;
-
             // Store the estimator and its weight
             models.push_back(std::move(estimator));
             alphas.push_back(alpha);
@@ -92,16 +89,23 @@ namespace bayesnet {
             // Normalize weights
             normalizeWeights();
 
+            if (debug) {
+                std::cout << "Iteration " << iter << ":" << std::endl;
+                std::cout << "  Weighted error: " << weighted_error << std::endl;
+                std::cout << "  Alpha: " << alpha << std::endl;
+                std::cout << "  Random guess error: " << random_guess_error << std::endl;
+            }
+
             // Check for perfect classification
             if (weighted_error < 1e-10) {
-                std::cout << "  Perfect classification achieved, stopping" << std::endl;
+                if (debug) std::cout << "  Perfect classification achieved, stopping" << std::endl;
                 break;
             }
         }
 
         // Set the number of models actually trained
         n_models = models.size();
-        std::cout << "AdaBoost training completed with " << n_models << " models" << std::endl;
+        if (debug) std::cout << "AdaBoost training completed with " << n_models << " models" << std::endl;
     }
 
     void AdaBoost::trainModel(const torch::Tensor& weights, const Smoothing_t smoothing)
@@ -305,7 +309,7 @@ namespace bayesnet {
     std::vector<int> AdaBoost::predict(std::vector<std::vector<int>>& X)
     {
         // Convert to tensor - X is samples x features, need to transpose
-        torch::Tensor X_tensor = platform::TensorUtils::to_matrix(X).t();
+        torch::Tensor X_tensor = platform::TensorUtils::to_matrix(X);
         auto predictions = predict(X_tensor);
         std::vector<int> result = platform::TensorUtils::to_vector<int>(predictions);
         return result;
@@ -313,9 +317,9 @@ namespace bayesnet {
 
     std::vector<std::vector<double>> AdaBoost::predict_proba(std::vector<std::vector<int>>& X)
     {
-        auto n_samples = X.size();
+        auto n_samples = X[0].size();
         // Convert to tensor - X is samples x features, need to transpose
-        torch::Tensor X_tensor = platform::TensorUtils::to_matrix(X).t();
+        torch::Tensor X_tensor = platform::TensorUtils::to_matrix(X);
         auto proba_tensor = predict_proba(X_tensor);
 
         std::vector<std::vector<double>> result(n_samples, std::vector<double>(n_classes, 0.0));
@@ -351,14 +355,9 @@ namespace bayesnet {
         // Accumulate weighted votes from all estimators
         for (size_t i = 0; i < models.size(); i++) {
             if (alphas[i] <= 0) continue;  // Skip estimators with zero or negative weight
-
             try {
-                // Create a matrix with the sample as a column vector
-                auto x_matrix = x.unsqueeze(1);  // Shape: (n_features, 1)
-
                 // Get prediction from this estimator
-                auto prediction = models[i]->predict(x_matrix);
-                int predicted_class = prediction[0].item<int>();
+                int predicted_class = static_cast<DecisionTree*>(models[i].get())->predictSample(x);
 
                 // Add weighted vote for this class
                 if (predicted_class >= 0 && predicted_class < n_classes) {
@@ -392,28 +391,23 @@ namespace bayesnet {
                 std::to_string(n) + " but got " + std::to_string(x.size(0)));
         }
 
-        // Initialize probability accumulator
-        torch::Tensor class_probs = torch::zeros({ n_classes }, torch::kDouble);
+        // Initialize class votes (same logic as predictSample)
+        std::vector<double> class_votes(n_classes, 0.0);
 
-        // Sum weighted probabilities from all estimators
+        // Accumulate weighted votes from all estimators (SAMME voting)
         double total_alpha = 0.0;
-
         for (size_t i = 0; i < models.size(); i++) {
             if (alphas[i] <= 0) continue;  // Skip estimators with zero or negative weight
 
             try {
-                // Create a matrix with the sample as a column vector
-                auto x_matrix = x.unsqueeze(1);  // Shape: (n_features, 1)
+                // Get class prediction from this estimator (not probabilities!)
+                int predicted_class = static_cast<DecisionTree*>(models[i].get())->predictSample(x);
 
-                // Get probability predictions from this estimator
-                auto proba = models[i]->predict_proba(x_matrix);
-
-                // Add weighted probabilities
-                for (int j = 0; j < n_classes; j++) {
-                    class_probs[j] += alphas[i] * proba[0][j].item<double>();
+                // Add weighted vote for this class (SAMME algorithm)
+                if (predicted_class >= 0 && predicted_class < n_classes) {
+                    class_votes[predicted_class] += alphas[i];
+                    total_alpha += alphas[i];
                 }
-
-                total_alpha += alphas[i];
             }
             catch (const std::exception& e) {
                 std::cerr << "Error in estimator " << i << ": " << e.what() << std::endl;
@@ -421,24 +415,31 @@ namespace bayesnet {
             }
         }
 
-        // Normalize probabilities
+        // Convert votes to probabilities
+        torch::Tensor class_probs = torch::zeros({ n_classes }, torch::kFloat);
+
         if (total_alpha > 0) {
-            class_probs = class_probs / total_alpha;
+            // Normalize votes to get probabilities
+            for (int j = 0; j < n_classes; j++) {
+                class_probs[j] = static_cast<float>(class_votes[j] / total_alpha);
+            }
         } else {
             // If no valid estimators, return uniform distribution
-            class_probs.fill_(1.0 / n_classes);
+            class_probs.fill_(1.0f / n_classes);
         }
 
-        // Ensure probabilities are valid (non-negative and sum to 1)
-        class_probs = torch::clamp(class_probs, 0.0, 1.0);
-        double sum_probs = torch::sum(class_probs).item<double>();
-        if (sum_probs > 1e-15) {
+        // Ensure probabilities are valid (they should be already, but just in case)
+        class_probs = torch::clamp(class_probs, 0.0f, 1.0f);
+
+        // Verify they sum to 1 (they should, but normalize if needed due to floating point errors)
+        float sum_probs = torch::sum(class_probs).item<float>();
+        if (sum_probs > 1e-15f) {
             class_probs = class_probs / sum_probs;
         } else {
-            class_probs.fill_(1.0 / n_classes);
+            class_probs.fill_(1.0f / n_classes);
         }
 
-        return class_probs.to(torch::kFloat);  // Convert back to float for consistency
+        return class_probs;
     }
 
 } // namespace bayesnet

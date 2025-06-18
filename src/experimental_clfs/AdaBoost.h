@@ -39,6 +39,7 @@ namespace bayesnet {
         std::vector<int> predict(std::vector<std::vector<int>>& X) override;
         torch::Tensor predict_proba(torch::Tensor& X) override;
         std::vector<std::vector<double>> predict_proba(std::vector<std::vector<int>>& X);
+        void setDebug(bool debug) { this->debug = debug; }
 
     protected:
         void buildModel(const torch::Tensor& weights) override;
@@ -73,6 +74,7 @@ namespace bayesnet {
 
         // Make probabilistic predictions for a single sample
         torch::Tensor predictProbaSample(const torch::Tensor& x) const;
+        bool debug = false;  // Enable debug mode for debug output
     };
 }
 

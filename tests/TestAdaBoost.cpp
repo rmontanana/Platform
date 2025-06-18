@@ -184,10 +184,9 @@ TEST_CASE("AdaBoost Basic Functionality", "[AdaBoost]")
             }
 
             // Check that predict_proba matches the expected predict value
-            // REQUIRE(pred == (p[0] > p[1] ? 0 : 1));
+            REQUIRE(pred == (p[0] > p[1] ? 0 : 1));
         }
         double accuracy = static_cast<double>(correct) / n_samples;
-        std::cout << "Probability accuracy: " << accuracy << std::endl;
         REQUIRE(accuracy > 0.99);  // Should achieve good accuracy on this simple dataset
     }
 }
@@ -711,6 +710,8 @@ TEST_CASE("AdaBoost SAMME Algorithm Validation", "[AdaBoost]")
         for (size_t i = 0; i < predictions.size(); i++) {
             int pred = predictions[i];
             auto probs = probabilities[i];
+            INFO("Sample " << i << ": predicted=" << pred
+                << ", probabilities=[" << probs[0] << ", " << probs[1] << "]");
 
             REQUIRE(pred == (probs[0] > probs[1] ? 0 : 1));
             REQUIRE(probs[0] + probs[1] == Catch::Approx(1.0).epsilon(1e-6));

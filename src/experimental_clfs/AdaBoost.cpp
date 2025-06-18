@@ -294,28 +294,185 @@ namespace bayesnet {
         Ensemble::setHyperparameters(hyperparameters);
     }
 
-    torch::Tensor AdaBoost::predict(torch::Tensor& X)
+    int AdaBoost::predictSample(const torch::Tensor& x) const
     {
-        if (!fitted) {
+        // Early validation (keep essential checks only)
+        if (!fitted || models.empty()) {
             throw std::runtime_error(CLASSIFIER_NOT_FITTED);
         }
 
-        if (models.empty()) {
-            throw std::runtime_error("No models have been trained");
+        // Pre-allocate and reuse memory
+        static thread_local std::vector<double> class_votes_cache;
+        if (class_votes_cache.size() != static_cast<size_t>(n_classes)) {
+            class_votes_cache.resize(n_classes);
+        }
+        std::fill(class_votes_cache.begin(), class_votes_cache.end(), 0.0);
+
+        // Optimized voting loop - avoid exception handling in hot path
+        for (size_t i = 0; i < models.size(); ++i) {
+            double alpha = alphas[i];
+            if (alpha <= 0 || !std::isfinite(alpha)) continue;
+
+            // Direct cast and call - avoid virtual dispatch overhead
+            int predicted_class = static_cast<DecisionTree*>(models[i].get())->predictSample(x);
+
+            // Bounds check with branch prediction hint
+            if (__builtin_expect(predicted_class >= 0 && predicted_class < n_classes, 1)) {
+                class_votes_cache[predicted_class] += alpha;
+            }
         }
 
-        // X should be (n_features, n_samples)
+        // Fast argmax using iterators
+        return std::distance(class_votes_cache.begin(),
+            std::max_element(class_votes_cache.begin(), class_votes_cache.end()));
+    }
+
+    torch::Tensor AdaBoost::predictProbaSample(const torch::Tensor& x) const
+    {
+        // Early validation
+        if (!fitted || models.empty()) {
+            throw std::runtime_error(CLASSIFIER_NOT_FITTED);
+        }
+
+        // Use stack allocation for small arrays (typical case: n_classes <= 32)
+        constexpr int STACK_THRESHOLD = 32;
+        double stack_votes[STACK_THRESHOLD];
+        std::vector<double> heap_votes;
+        double* class_votes;
+
+        if (n_classes <= STACK_THRESHOLD) {
+            class_votes = stack_votes;
+            std::fill_n(class_votes, n_classes, 0.0);
+        } else {
+            heap_votes.resize(n_classes, 0.0);
+            class_votes = heap_votes.data();
+        }
+
+        double total_votes = 0.0;
+
+        // Optimized voting loop
+        for (size_t i = 0; i < models.size(); ++i) {
+            double alpha = alphas[i];
+            if (alpha <= 0 || !std::isfinite(alpha)) continue;
+
+            int predicted_class = static_cast<DecisionTree*>(models[i].get())->predictSample(x);
+
+            if (__builtin_expect(predicted_class >= 0 && predicted_class < n_classes, 1)) {
+                class_votes[predicted_class] += alpha;
+                total_votes += alpha;
+            }
+        }
+
+        // Direct tensor creation with pre-computed size
+        torch::Tensor class_probs = torch::empty({ n_classes }, torch::TensorOptions().dtype(torch::kFloat32));
+        auto probs_accessor = class_probs.accessor<float, 1>();
+
+        if (__builtin_expect(total_votes > 0.0, 1)) {
+            // Vectorized probability calculation
+            const double inv_total = 1.0 / total_votes;
+            for (int j = 0; j < n_classes; ++j) {
+                probs_accessor[j] = static_cast<float>(class_votes[j] * inv_total);
+            }
+        } else {
+            // Uniform distribution fallback
+            const float uniform_prob = 1.0f / n_classes;
+            for (int j = 0; j < n_classes; ++j) {
+                probs_accessor[j] = uniform_prob;
+            }
+        }
+
+        return class_probs;
+    }
+
+    torch::Tensor AdaBoost::predict_proba(torch::Tensor& X)
+    {
+        if (!fitted || models.empty()) {
+            throw std::runtime_error(CLASSIFIER_NOT_FITTED);
+        }
+
+        // Input validation
         if (X.size(0) != n) {
             throw std::runtime_error("Input has wrong number of features. Expected " +
                 std::to_string(n) + " but got " + std::to_string(X.size(0)));
         }
 
-        int n_samples = X.size(1);
-        torch::Tensor predictions = torch::zeros({ n_samples }, torch::kInt32);
+        const int n_samples = X.size(1);
 
-        for (int i = 0; i < n_samples; i++) {
-            auto sample = X.index({ torch::indexing::Slice(), i });
-            predictions[i] = predictSample(sample);
+        // Pre-allocate output tensor with correct layout
+        torch::Tensor probabilities = torch::empty({ n_samples, n_classes },
+            torch::TensorOptions().dtype(torch::kFloat32));
+
+        // Convert to contiguous memory if needed (optimization for memory access)
+        if (!X.is_contiguous()) {
+            X = X.contiguous();
+        }
+
+        // Batch processing with memory-efficient sample extraction
+        for (int i = 0; i < n_samples; ++i) {
+            // Extract sample without unnecessary copies
+            auto sample = X.select(1, i);
+
+            // Direct assignment to pre-allocated tensor
+            probabilities[i] = predictProbaSample(sample);
+        }
+
+        return probabilities;
+    }
+
+    std::vector<std::vector<double>> AdaBoost::predict_proba(std::vector<std::vector<int>>& X)
+    {
+        const size_t n_samples = X[0].size();
+
+        // Pre-allocate result with exact size
+        std::vector<std::vector<double>> result;
+        result.reserve(n_samples);
+
+        // Avoid repeated allocations
+        for (size_t i = 0; i < n_samples; ++i) {
+            result.emplace_back(n_classes, 0.0);
+        }
+
+        // Convert to tensor only once (batch conversion is more efficient)
+        torch::Tensor X_tensor = platform::TensorUtils::to_matrix(X);
+        torch::Tensor proba_tensor = predict_proba(X_tensor);
+
+        // Optimized tensor-to-vector conversion
+        auto proba_accessor = proba_tensor.accessor<float, 2>();
+        for (size_t i = 0; i < n_samples; ++i) {
+            for (int j = 0; j < n_classes; ++j) {
+                result[i][j] = static_cast<double>(proba_accessor[i][j]);
+            }
+        }
+
+        return result;
+    }
+
+    torch::Tensor AdaBoost::predict(torch::Tensor& X)
+    {
+        if (!fitted || models.empty()) {
+            throw std::runtime_error(CLASSIFIER_NOT_FITTED);
+        }
+
+        if (X.size(0) != n) {
+            throw std::runtime_error("Input has wrong number of features. Expected " +
+                std::to_string(n) + " but got " + std::to_string(X.size(0)));
+        }
+
+        const int n_samples = X.size(1);
+
+        // Pre-allocate with correct dtype
+        torch::Tensor predictions = torch::empty({ n_samples }, torch::TensorOptions().dtype(torch::kInt32));
+        auto pred_accessor = predictions.accessor<int32_t, 1>();
+
+        // Ensure contiguous memory layout
+        if (!X.is_contiguous()) {
+            X = X.contiguous();
+        }
+
+        // Optimized prediction loop
+        for (int i = 0; i < n_samples; ++i) {
+            auto sample = X.select(1, i);
+            pred_accessor[i] = predictSample(sample);
         }
 
         return predictions;
@@ -323,300 +480,13 @@ namespace bayesnet {
 
     std::vector<int> AdaBoost::predict(std::vector<std::vector<int>>& X)
     {
-        // Convert to tensor - X is samples x features, need to transpose
+        // Single tensor conversion for batch processing
         torch::Tensor X_tensor = platform::TensorUtils::to_matrix(X);
-        auto predictions = predict(X_tensor);
-        std::vector<int> result = platform::TensorUtils::to_vector<int>(predictions);
+        torch::Tensor predictions_tensor = predict(X_tensor);
+
+        // Optimized tensor-to-vector conversion
+        std::vector<int> result = platform::TensorUtils::to_vector<int>(predictions_tensor);
         return result;
-    }
-
-    std::vector<std::vector<double>> AdaBoost::predict_proba(std::vector<std::vector<int>>& X)
-    {
-        auto n_samples = X[0].size();
-
-        if (debug) {
-            std::cout << "=== predict_proba vector method debug ===" << std::endl;
-            std::cout << "Input X dimensions: " << X.size() << " features x " << n_samples << " samples" << std::endl;
-            std::cout << "Input data:" << std::endl;
-            for (size_t i = 0; i < X.size(); i++) {
-                std::cout << "  Feature " << i << ": [";
-                for (size_t j = 0; j < X[i].size(); j++) {
-                    std::cout << X[i][j];
-                    if (j < X[i].size() - 1) std::cout << ", ";
-                }
-                std::cout << "]" << std::endl;
-            }
-        }
-
-        // Convert to tensor - X is features x samples, need to transpose for tensor format
-        torch::Tensor X_tensor = platform::TensorUtils::to_matrix(X);
-
-        if (debug) {
-            std::cout << "Converted tensor shape: " << X_tensor.sizes() << std::endl;
-            std::cout << "Tensor data: " << X_tensor << std::endl;
-        }
-
-        auto proba_tensor = predict_proba(X_tensor);  // Call tensor method
-
-        if (debug) {
-            std::cout << "Proba tensor shape: " << proba_tensor.sizes() << std::endl;
-            std::cout << "Proba tensor data: " << proba_tensor << std::endl;
-        }
-
-        std::vector<std::vector<double>> result(n_samples, std::vector<double>(n_classes, 0.0));
-
-        for (size_t i = 0; i < n_samples; i++) {
-            for (int j = 0; j < n_classes; j++) {
-                result[i][j] = proba_tensor[i][j].item<double>();
-            }
-
-            if (debug) {
-                std::cout << "Sample " << i << " converted: [";
-                for (int j = 0; j < n_classes; j++) {
-                    std::cout << result[i][j];
-                    if (j < n_classes - 1) std::cout << ", ";
-                }
-                std::cout << "]" << std::endl;
-            }
-        }
-
-        if (debug) {
-            std::cout << "=== End predict_proba vector method debug ===" << std::endl;
-        }
-
-        return result;
-    }
-
-    // También agregar debug al método tensor predict_proba:
-
-    torch::Tensor AdaBoost::predict_proba(torch::Tensor& X)
-    {
-        if (!fitted) {
-            throw std::runtime_error(CLASSIFIER_NOT_FITTED);
-        }
-
-        if (models.empty()) {
-            throw std::runtime_error("No models have been trained");
-        }
-
-        // X should be (n_features, n_samples)
-        if (X.size(0) != n) {
-            throw std::runtime_error("Input has wrong number of features. Expected " +
-                std::to_string(n) + " but got " + std::to_string(X.size(0)));
-        }
-
-        int n_samples = X.size(1);
-
-        if (debug) {
-            std::cout << "=== predict_proba tensor method debug ===" << std::endl;
-            std::cout << "Input tensor shape: " << X.sizes() << std::endl;
-            std::cout << "Number of samples: " << n_samples << std::endl;
-            std::cout << "Number of classes: " << n_classes << std::endl;
-        }
-
-        torch::Tensor probabilities = torch::zeros({ n_samples, n_classes });
-
-        for (int i = 0; i < n_samples; i++) {
-            auto sample = X.index({ torch::indexing::Slice(), i });
-
-            if (debug) {
-                std::cout << "Processing sample " << i << ": " << sample << std::endl;
-            }
-
-            auto sample_probs = predictProbaSample(sample);
-
-            if (debug) {
-                std::cout << "Sample " << i << " probabilities from predictProbaSample: " << sample_probs << std::endl;
-            }
-
-            probabilities[i] = sample_probs;
-
-            if (debug) {
-                std::cout << "Assigned to probabilities[" << i << "]: " << probabilities[i] << std::endl;
-            }
-        }
-
-        if (debug) {
-            std::cout << "Final probabilities tensor: " << probabilities << std::endl;
-            std::cout << "=== End predict_proba tensor method debug ===" << std::endl;
-        }
-
-        return probabilities;
-    }
-
-    int AdaBoost::predictSample(const torch::Tensor& x) const
-    {
-        if (!fitted) {
-            throw std::runtime_error(CLASSIFIER_NOT_FITTED);
-        }
-
-        if (models.empty()) {
-            throw std::runtime_error("No models have been trained");
-        }
-
-        // x should be a 1D tensor with n features
-        if (x.size(0) != n) {
-            throw std::runtime_error("Input sample has wrong number of features. Expected " +
-                std::to_string(n) + " but got " + std::to_string(x.size(0)));
-        }
-
-        // Initialize class votes with zeros  
-        std::vector<double> class_votes(n_classes, 0.0);
-
-        if (debug) {
-            std::cout << "=== predictSample Debug ===" << std::endl;
-            std::cout << "Number of models: " << models.size() << std::endl;
-        }
-
-        // Accumulate votes from all estimators (same logic as predictProbaSample)
-        for (size_t i = 0; i < models.size(); i++) {
-            double alpha = alphas[i];
-
-            // Skip invalid estimators
-            if (alpha <= 0 || !std::isfinite(alpha)) {
-                if (debug) std::cout << "Skipping model " << i << " (alpha=" << alpha << ")" << std::endl;
-                continue;
-            }
-
-            try {
-                // Get class prediction from this estimator
-                int predicted_class = static_cast<DecisionTree*>(models[i].get())->predictSample(x);
-
-                if (debug) {
-                    std::cout << "Model " << i << ": predicts class " << predicted_class
-                        << " with alpha " << alpha << std::endl;
-                }
-
-                // Add weighted vote for this class
-                if (predicted_class >= 0 && predicted_class < n_classes) {
-                    class_votes[predicted_class] += alpha;
-                }
-            }
-            catch (const std::exception& e) {
-                if (debug) std::cout << "Error in model " << i << ": " << e.what() << std::endl;
-                continue;
-            }
-        }
-
-        // Find class with maximum votes
-        int best_class = 0;
-        double max_votes = class_votes[0];
-
-        for (int j = 1; j < n_classes; j++) {
-            if (class_votes[j] > max_votes) {
-                max_votes = class_votes[j];
-                best_class = j;
-            }
-        }
-
-        if (debug) {
-            std::cout << "Class votes: [";
-            for (int j = 0; j < n_classes; j++) {
-                std::cout << class_votes[j];
-                if (j < n_classes - 1) std::cout << ", ";
-            }
-            std::cout << "]" << std::endl;
-            std::cout << "Best class: " << best_class << " with " << max_votes << " votes" << std::endl;
-            std::cout << "=== End predictSample Debug ===" << std::endl;
-        }
-
-        return best_class;
-    }
-
-    torch::Tensor AdaBoost::predictProbaSample(const torch::Tensor& x) const
-    {
-        if (!fitted) {
-            throw std::runtime_error(CLASSIFIER_NOT_FITTED);
-        }
-
-        if (models.empty()) {
-            throw std::runtime_error("No models have been trained");
-        }
-
-        // x should be a 1D tensor with n features
-        if (x.size(0) != n) {
-            throw std::runtime_error("Input sample has wrong number of features. Expected " +
-                std::to_string(n) + " but got " + std::to_string(x.size(0)));
-        }
-
-        // Initialize class votes with zeros
-        std::vector<double> class_votes(n_classes, 0.0);
-        double total_votes = 0.0;
-
-        if (debug) {
-            std::cout << "=== predictProbaSample Debug ===" << std::endl;
-            std::cout << "Number of models: " << models.size() << std::endl;
-            std::cout << "Number of classes: " << n_classes << std::endl;
-        }
-
-        // Accumulate votes from all estimators
-        for (size_t i = 0; i < models.size(); i++) {
-            double alpha = alphas[i];
-
-            // Skip invalid estimators
-            if (alpha <= 0 || !std::isfinite(alpha)) {
-                if (debug) std::cout << "Skipping model " << i << " (alpha=" << alpha << ")" << std::endl;
-                continue;
-            }
-
-            try {
-                // Get class prediction from this estimator
-                int predicted_class = static_cast<DecisionTree*>(models[i].get())->predictSample(x);
-
-                if (debug) {
-                    std::cout << "Model " << i << ": predicts class " << predicted_class
-                        << " with alpha " << alpha << std::endl;
-                }
-
-                // Add weighted vote for this class
-                if (predicted_class >= 0 && predicted_class < n_classes) {
-                    class_votes[predicted_class] += alpha;
-                    total_votes += alpha;
-                } else {
-                    if (debug) std::cout << "Invalid class prediction: " << predicted_class << std::endl;
-                }
-            }
-            catch (const std::exception& e) {
-                if (debug) std::cout << "Error in model " << i << ": " << e.what() << std::endl;
-                continue;
-            }
-        }
-
-        if (debug) {
-            std::cout << "Total votes: " << total_votes << std::endl;
-            std::cout << "Class votes: [";
-            for (int j = 0; j < n_classes; j++) {
-                std::cout << class_votes[j];
-                if (j < n_classes - 1) std::cout << ", ";
-            }
-            std::cout << "]" << std::endl;
-        }
-
-        // Convert votes to probabilities
-        torch::Tensor class_probs = torch::zeros({ n_classes }, torch::kDouble);
-
-        if (total_votes > 0) {
-            // Simple division to get probabilities
-            for (int j = 0; j < n_classes; j++) {
-                class_probs[j] = static_cast<double>(class_votes[j] / total_votes);
-            }
-        } else {
-            // If no valid votes, uniform distribution
-            if (debug) std::cout << "No valid votes, using uniform distribution" << std::endl;
-            class_probs.fill_(1.0f / n_classes);
-        }
-
-        if (debug) {
-            std::cout << "Final probabilities: [";
-            for (int j = 0; j < n_classes; j++) {
-                std::cout << class_probs[j].item<double>();
-                if (j < n_classes - 1) std::cout << ", ";
-            }
-            std::cout << "]" << std::endl;
-            std::cout << "=== End predictProbaSample Debug ===" << std::endl;
-        }
-
-        return class_probs;
     }
 
 } // namespace bayesnet

@@ -14,7 +14,7 @@
 namespace bayesnet {
     class AdaBoost : public Ensemble {
     public:
-        explicit AdaBoost(int n_estimators = 50, int max_depth = 1);
+        explicit AdaBoost(int n_estimators = 100, int max_depth = 1);
         virtual ~AdaBoost() = default;
 
         // Override base class methods

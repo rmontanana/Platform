@@ -327,30 +327,6 @@ namespace bayesnet {
 
         return predictions;
     }
-    void dumpTensor(const torch::Tensor& tensor, const std::string& name)
-    {
-        std::cout << name << ": " << std::endl;
-        for (int i = 0; i < tensor.size(0); i++) {
-            std::cout << "[";
-            for (int j = 0; j < tensor.size(1); j++) {
-                std::cout << tensor[i][j].item<int>() << " ";
-            }
-            std::cout << "]" << std::endl;
-        }
-        std::cout << std::endl;
-    }
-    void dumpVector(const std::vector<std::vector<int>>& vec, const std::string& name)
-    {
-        std::cout << name << ": " << std::endl;;
-        for (const auto& row : vec) {
-            std::cout << "[";
-            for (const auto& val : row) {
-                std::cout << val << " ";
-            }
-            std::cout << "] " << std::endl;
-        }
-        std::cout << std::endl;
-    }
 
     std::vector<int> DecisionTree::predict(std::vector<std::vector<int>>& X)
     {

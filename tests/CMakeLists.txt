@@ -12,9 +12,11 @@ if(ENABLE_TESTING)
         ${Bayesnet_INCLUDE_DIRS}
     )
     set(TEST_SOURCES_PLATFORM 
-        TestUtils.cpp TestPlatform.cpp TestResult.cpp TestScores.cpp TestDecisionTree.cpp
+        TestUtils.cpp TestPlatform.cpp TestResult.cpp TestScores.cpp TestDecisionTree.cpp TestAdaBoost.cpp
         ${Platform_SOURCE_DIR}/src/common/Datasets.cpp ${Platform_SOURCE_DIR}/src/common/Dataset.cpp ${Platform_SOURCE_DIR}/src/common/Discretization.cpp
-        ${Platform_SOURCE_DIR}/src/main/Scores.cpp ${Platform_SOURCE_DIR}/src/experimental_clfs/DecisionTree.cpp
+        ${Platform_SOURCE_DIR}/src/main/Scores.cpp 
+        ${Platform_SOURCE_DIR}/src/experimental_clfs/DecisionTree.cpp
+        ${Platform_SOURCE_DIR}/src/experimental_clfs/AdaBoost.cpp
     )
     add_executable(${TEST_PLATFORM} ${TEST_SOURCES_PLATFORM})
     target_link_libraries(${TEST_PLATFORM} PUBLIC "${TORCH_LIBRARIES}" fimdlp Catch2::Catch2WithMain bayesnet)

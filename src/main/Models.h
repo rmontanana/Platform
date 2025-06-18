@@ -26,7 +26,7 @@
 #include <pyclassifiers/AdaBoostPy.h>
 #include <pyclassifiers/RandomForest.h>
 #include "../experimental_clfs/XA1DE.h"
-// #include "../experimental_clfs/AdaBoost.h"
+#include "../experimental_clfs/AdaBoost.h"
 #include "../experimental_clfs/DecisionTree.h"
 
 namespace platform {

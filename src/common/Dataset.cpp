@@ -1,4 +1,4 @@
-#include <ArffFiles/ArffFiles.hpp>
+#include <ArffFiles.hpp>
 #include <fstream>
 #include "Dataset.h"
 namespace platform {

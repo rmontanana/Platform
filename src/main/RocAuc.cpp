@@ -3,6 +3,7 @@
 #include <numeric>
 #include <utility>
 #include "RocAuc.h"
+#include "common/TensorUtils.h" // tensorToVector
 namespace platform {
 
     double RocAuc::compute(const torch::Tensor& y_proba, const torch::Tensor& labels)

@@ -15,7 +15,7 @@ set(CMAKE_CXX_EXTENSIONS                  OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS          ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 set(CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -O0 -g")
 
 # Options
@@ -43,8 +43,6 @@ find_package(Boost 1.66.0 REQUIRED COMPONENTS python3 numpy3)
 
 # # Python
 find_package(Python3 REQUIRED COMPONENTS Development)
-# # target_include_directories(MyTarget SYSTEM PRIVATE ${Python3_INCLUDE_DIRS})
-# message("Python_LIBRARIES=${Python_LIBRARIES}")
 
 # # Boost Python
 # find_package(boost_python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR} CONFIG REQUIRED COMPONENTS python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
@@ -63,28 +61,23 @@ endif()
 # External libraries - dependencies of Platform
 # ---------------------------------------------
 
-find_library(XLSXWRITER_LIB NAMES libxlsxwriter.dylib libxlsxwriter.so PATHS ${Platform_SOURCE_DIR}/lib/libxlsxwriter/lib)
+# find_library(XLSXWRITER_LIB NAMES libxlsxwriter.dylib libxlsxwriter.so PATHS ${Platform_SOURCE_DIR}/lib/libxlsxwriter/lib)
 # find_path(XLSXWRITER_INCLUDE_DIR xlsxwriter.h)
 # find_library(XLSXWRITER_LIBRARY xlsxwriter)
 # message("XLSXWRITER_INCLUDE_DIR=${XLSXWRITER_INCLUDE_DIR}")
 # message("XLSXWRITER_LIBRARY=${XLSXWRITER_LIBRARY}")
+# Conan dependencies
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Catch2 CONFIG REQUIRED)
+find_package(argparse CONFIG REQUIRED)
 find_package(Torch CONFIG REQUIRED)
+find_package(arff-files CONFIG REQUIRED)
 find_package(fimdlp CONFIG REQUIRED)
 find_package(folding CONFIG REQUIRED)
-find_package(argparse CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(Boost REQUIRED COMPONENTS python)
-find_package(arff-files CONFIG REQUIRED)
+find_package(bayesnet CONFIG REQUIRED)
+find_package(libxlsxwriter CONFIG REQUIRED)
 
-# BayesNet
-find_library(bayesnet NAMES libbayesnet bayesnet libbayesnet.a PATHS ${Platform_SOURCE_DIR}/../lib/lib REQUIRED)
-find_path(Bayesnet_INCLUDE_DIRS REQUIRED NAMES bayesnet PATHS ${Platform_SOURCE_DIR}/../lib/include)
-add_library(bayesnet::bayesnet UNKNOWN IMPORTED)
-set_target_properties(bayesnet::bayesnet PROPERTIES
-  IMPORTED_LOCATION ${bayesnet}
-  INTERFACE_INCLUDE_DIRECTORIES ${Bayesnet_INCLUDE_DIRS})
-message(STATUS "BayesNet=${bayesnet}")
-message(STATUS "BayesNet_INCLUDE_DIRS=${Bayesnet_INCLUDE_DIRS}")
+find_package(Boost REQUIRED COMPONENTS python)
 
 # PyClassifiers
 find_library(PyClassifiers NAMES libPyClassifiers PyClassifiers libPyClassifiers.a PATHS ${Platform_SOURCE_DIR}/../lib/lib REQUIRED)
@@ -106,8 +99,9 @@ file(GLOB Platform_SOURCES CONFIGURE_DEPENDS ${Platform_SOURCE_DIR}/src/*.cpp)
 # -------
 if (ENABLE_TESTING)
   enable_testing()
+  set(CODE_COVERAGE ON)
   MESSAGE("Testing enabled")
-  find_package(Catch2 CONFIG REQUIRED)
+  # Catch2 is already found above via Conan
   include(CTest)
   add_subdirectory(tests)
 endif (ENABLE_TESTING)

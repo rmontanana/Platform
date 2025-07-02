@@ -2,8 +2,8 @@
 #include <filesystem>
 #include <fstream>
 #include <vector>
-#include <argparse/argparse.hpp>
-#include <nlohmann/json.hpp>
+#include "nlohmann/json.hpp"
+#include "argparse/argparse.hpp"
 #include "common/Paths.h"
 #include "results/JsonValidator.h"
 #include "results/SchemaV1_0.h"

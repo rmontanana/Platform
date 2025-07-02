@@ -7,7 +7,7 @@
 #include <string>
 #include "TestUtils.h"
 #include "folding.hpp"
-#include <ArffFiles/ArffFiles.hpp>
+#include <ArffFiles.hpp>
 #include <bayesnet/classifiers/TAN.h>
 #include "config_platform.h"
 

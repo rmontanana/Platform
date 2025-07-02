@@ -1,6 +1,6 @@
 #include <sstream>
 #include "Scores.h"
-#include "common/Utils.h" // tensorToVector
+#include "common/TensorUtils.h" // tensorToVector
 #include "common/Colors.h"
 namespace platform {
     Scores::Scores(torch::Tensor& y_test, torch::Tensor& y_proba, int num_classes, std::vector<std::string> labels) : num_classes(num_classes), labels(labels), y_test(y_test), y_proba(y_proba)

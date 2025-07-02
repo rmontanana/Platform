@@ -20,15 +20,33 @@ define ClearTests
 	fi ; 
 endef
 
+define build_target
+	@echo ">>> Building the project for $(1)..."
+	@if [ -d $(2) ]; then rm -fr $(2); fi
+	@conan install . --build=missing -of $(2) -s build_type=$(1)
+	@cmake -S . -B $(2) -DCMAKE_TOOLCHAIN_FILE=$(2)/build/$(1)/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$(1) -D$(3)
+endef
+
+define compile_target
+	@echo ">>> Compiling for $(1)..."
+		if [ "$(3)" != "" ]; then \
+		target="-t$(3)"; \
+	else \
+		target=""; \
+	fi
+	@cmake --build $(2) --config $(1) --parallel $(target)
+endef
+
 init: ## Initialize the project installing dependencies
-	@echo ">>> Installing dependencies"
-	@vcpkg install
+	@echo ">>> Installing dependencies with Conan"
+	@conan install . --output-folder=build --build=missing -s build_type=Release
+	@conan install . --output-folder=build_debug --build=missing -s build_type=Debug
 	@echo ">>> Done";
 
 clean: ## Clean the project
 	@echo ">>> Cleaning the project..."
 	@if test -f CMakeCache.txt ; then echo "- Deleting CMakeCache.txt"; rm -f CMakeCache.txt; fi
-	@for folder in $(f_release) $(f_debug) vpcpkg_installed install_test ; do \
+	@for folder in $(f_release) $(f_debug) build build_debug install_test ; do \
 	if test -d "$$folder" ; then \
 		echo "- Deleting $$folder folder" ; \
 		rm -rf "$$folder"; \
@@ -44,11 +62,6 @@ setup: ## Install dependencies for tests and coverage
 	@if [ "$(shell uname)" = "Linux" ]; then \
 		pip install gcovr; \
 	fi
-
-dest ?= ${HOME}/bin
-main: ## Build only the b_main target
-	@cmake --build $(f_release) -t b_main --parallel
-	@cp $(f_release)/src/b_main $(dest)
 
 dest ?= ${HOME}/bin
 install: ## Copy binary files to bin folder
@@ -70,34 +83,27 @@ dependency: ## Create a dependency graph diagram of the project (build/dependenc
 	cd $(f_debug) && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
 
 buildd: ## Build the debug targets
-	@cmake --build $(f_debug) -t $(app_targets) PlatformSample --parallel 
+	@$(call compile_target,"Debug","$(f_debug)")
 
 buildr: ## Build the release targets
-	@cmake --build $(f_release) -t $(app_targets) --parallel
+	@$(call compile_target,"Release","$(f_release)")
 
 clang-uml: ## Create uml class and sequence diagrams
 	clang-uml -p --add-compile-flag -I /usr/lib/gcc/x86_64-redhat-linux/8/include/
 
-debug: ## Build a debug version of the project with BayesNet from vcpkg
-	@echo ">>> Building Debug Platform...";
-	@if [ -d ./$(f_debug) ]; then rm -rf ./$(f_debug); fi
-	@mkdir $(f_debug); 
-	@cmake -S . -B $(f_debug) -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON -D CMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
-	@echo ">>> Done";
+debug: ## Build a debug version of the project with Conan
+	@$(call build_target,"Debug","$(f_debug)", "ENABLE_TESTING=ON")
 
-release: ## Build a Release version of the project with BayesNet from vcpkg
-	@echo ">>> Building Release Platform...";
-	@if [ -d ./$(f_release) ]; then rm -rf ./$(f_release); fi
-	@mkdir $(f_release); 
-	@cmake -S . -B $(f_release) -D CMAKE_BUILD_TYPE=Release -D CMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
-	@echo ">>> Done";
+release: ## Build a Release version of the project with Conan
+	@$(call build_target,"Release","$(f_release)", "ENABLE_TESTING=OFF")
+
 
 opt = ""
 test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
 	@echo ">>> Running Platform tests...";
 	@$(MAKE) clean
 	@$(MAKE) debug
-	@cmake --build $(f_debug) -t $(test_targets) --parallel
+	@$(call "Compile_target", "Debug", "$(f_debug)", $(test_targets))
 	@for t in $(test_targets); do \
 		if [ -f $(f_debug)/tests/$$t ]; then \
 			cd $(f_debug)/tests ; \

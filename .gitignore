@@ -43,3 +43,5 @@ diagrams/html/**
 diagrams/latex/**
 .cache
 vcpkg_installed
+.claude/settings.local.json
+CMakeUserPresets.json

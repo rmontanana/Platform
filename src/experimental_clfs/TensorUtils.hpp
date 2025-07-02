@@ -45,7 +45,53 @@ namespace platform {
 
             return data;
         }
+        static torch::Tensor to_matrix(const std::vector<std::vector<int>>& data)
+        {
+            if (data.empty()) return torch::empty({ 0, 0 }, torch::kInt64);
+            size_t rows = data.size();
+            size_t cols = data[0].size();
+            torch::Tensor tensor = torch::empty({ static_cast<long>(rows), static_cast<long>(cols) }, torch::kInt64);
+            for (size_t i = 0; i < rows; ++i) {
+                for (size_t j = 0; j < cols; ++j) {
+                    tensor.index_put_({ static_cast<long>(i), static_cast<long>(j) }, data[i][j]);
+                }
+            }
+            return tensor;
+        }
     };
+    static void dumpVector(const std::vector<std::vector<int>>& vec, const std::string& name)
+    {
+        std::cout << name << ": " << std::endl;
+        for (const auto& row : vec) {
+            std::cout << "[";
+            for (const auto& val : row) {
+                std::cout << val << " ";
+            }
+            std::cout << "]" << std::endl;
+        }
+        std::cout << std::endl;
+    }
+    static void dumpTensor(const torch::Tensor& tensor, const std::string& name)
+    {
+        std::cout << name << ": " << std::endl;
+        for (auto i = 0; i < tensor.size(0); i++) {
+            std::cout << "[";
+            for (auto j = 0; j < tensor.size(1); j++) {
+                std::cout << tensor[i][j].item<int>() << " ";
+            }
+            std::cout << "]" << std::endl;
+        }
+        std::cout << std::endl;
+    }
+    static void dumpTensorV(const torch::Tensor& tensor, const std::string& name)
+    {
+        std::cout << name << ": " << std::endl;
+        std::cout << "[";
+        for (int i = 0; i < tensor.size(0); i++) {
+            std::cout << tensor[i].item<int>() << " ";
+        }
+        std::cout << "]" << std::endl;
+    }
 }
 
 #endif // TENSORUTILS_HPP

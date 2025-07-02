@@ -232,6 +232,7 @@ void experiment(argparse::ArgumentParser& program)
     struct platform::ConfigGrid config;
     auto arguments = platform::ArgumentsExperiment(program, platform::experiment_t::GRID);
     arguments.parse();
+    auto path_results = arguments.getPathResults();
     auto grid_experiment = platform::GridExperiment(arguments, config);
     platform::Timer timer;
     timer.start();
@@ -250,7 +251,7 @@ void experiment(argparse::ArgumentParser& program)
         auto duration = timer.getDuration();
         experiment.setDuration(duration);
         if (grid_experiment.haveToSaveResults()) {
-            experiment.saveResult();
+            experiment.saveResult(path_results);
         }
         experiment.report();
         std::cout << "Process took " << duration << std::endl;

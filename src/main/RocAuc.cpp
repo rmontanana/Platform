@@ -4,7 +4,7 @@
 #include <utility>
 #include "RocAuc.h"
 namespace platform {
-    
+
     double RocAuc::compute(const torch::Tensor& y_proba, const torch::Tensor& labels)
     {
         size_t nClasses = y_proba.size(1);
@@ -48,6 +48,7 @@ namespace platform {
         double tp = 0, fp = 0;
         double totalPos = std::count(y_test.begin(), y_test.end(), classIdx);
         double totalNeg = nSamples - totalPos;
+        if (totalPos == 0 || totalNeg == 0) return 0.5; // neutral AUC
 
         for (const auto& [score, label] : scoresAndLabels) {
             if (label == 1) {

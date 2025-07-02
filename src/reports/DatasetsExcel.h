@@ -11,6 +11,7 @@ namespace platform {
         DatasetsExcel();
         ~DatasetsExcel();
         void report(json& data);
+        std::string getExcelFileName() { return getFileName(); }
     };
 }
 #endif

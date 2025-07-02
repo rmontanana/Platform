@@ -4,16 +4,18 @@
 #include "main/modelRegister.h"
 #include "common/Paths.h"
 #include "common/Colors.h"
+#include "common/Utils.h"
 #include "best/BestResults.h"
+#include "common/DotEnv.h"
 #include "config_platform.h"
 
 void manageArguments(argparse::ArgumentParser& program)
 {
-    program.add_argument("-m", "--model")
-        .help("Model to use or any")
-        .default_value("any");
+    auto env = platform::DotEnv();
+    program.add_argument("-m", "--model").help("Model to use or any").default_value("any");
+    program.add_argument("--folder").help("Results folder to use").default_value(platform::Paths::results());
     program.add_argument("-d", "--dataset").default_value("any").help("Filter results of the selected model) (any for all datasets)");
-    program.add_argument("-s", "--score").default_value("accuracy").help("Filter results of the score name supplied");
+    program.add_argument("-s", "--score").default_value(env.get("score")).help("Filter results of the score name supplied");
     program.add_argument("--friedman").help("Friedman test").default_value(false).implicit_value(true);
     program.add_argument("--excel").help("Output to excel").default_value(false).implicit_value(true);
     program.add_argument("--tex").help("Output results to TeX & Markdown files").default_value(false).implicit_value(true);
@@ -38,12 +40,16 @@ int main(int argc, char** argv)
 {
     argparse::ArgumentParser program("b_best", { platform_project_version.begin(), platform_project_version.end() });
     manageArguments(program);
-    std::string model, dataset, score;
+    std::string model, dataset, score, folder;
     bool build, report, friedman, excel, tex, index;
     double level;
     try {
         program.parse_args(argc, argv);
         model = program.get<std::string>("model");
+        folder = program.get<std::string>("folder");
+        if (folder.back() != '/') {
+            folder += '/';
+        }
         dataset = program.get<std::string>("dataset");
         score = program.get<std::string>("score");
         friedman = program.get<bool>("friedman");
@@ -66,7 +72,7 @@ int main(int argc, char** argv)
         exit(1);
     }
     // Generate report
-    auto results = platform::BestResults(platform::Paths::results(), score, model, dataset, friedman, level);
+    auto results = platform::BestResults(folder, score, model, dataset, friedman, level);
     if (model == "any") {
         results.buildAll();
         results.reportAll(excel, tex, index);
@@ -74,6 +80,11 @@ int main(int argc, char** argv)
         std::string fileName = results.build();
         std::cout << Colors::GREEN() << fileName << " created!" << Colors::RESET() << std::endl;
         results.reportSingle(excel);
+    }
+    if (excel) {
+        auto fileName = results.getExcelFileName();
+        std::cout << "Opening " << fileName << std::endl;
+        platform::openFile(fileName);
     }
     std::cout << Colors::RESET();
     return 0;

@@ -13,6 +13,7 @@ namespace platform {
         auto env = platform::DotEnv();
         auto datasets = platform::Datasets(false, platform::Paths::datasets());
         auto& group = arguments.add_mutually_exclusive_group(true);
+
         group.add_argument("-d", "--dataset")
             .help("Dataset file name: " + datasets.toString())
             .default_value("all")
@@ -43,6 +44,7 @@ namespace platform {
                 }
             );
         arguments.add_argument("--title").default_value("").help("Experiment title");
+        arguments.add_argument("--folder").help("Results folder to use").default_value(platform::Paths::results());
         arguments.add_argument("--discretize").help("Discretize input dataset").default_value((bool)stoi(env.get("discretize"))).implicit_value(true);
         auto valid_choices = env.valid_tokens("discretize_algo");
         auto& disc_arg = arguments.add_argument("--discretize-algo").help("Algorithm to use in discretization. Valid values: " + env.valid_values("discretize_algo")).default_value(env.get("discretize_algo"));
@@ -103,6 +105,10 @@ namespace platform {
             file_name = arguments.get<std::string>("dataset");
             file_names = arguments.get<std::vector<std::string>>("datasets");
             datasets_file = arguments.get<std::string>("datasets-file");
+            path_results = arguments.get<std::string>("folder");
+            if (path_results.back() != '/') {
+                path_results += '/';
+            }
             model_name = arguments.get<std::string>("model");
             discretize_dataset = arguments.get<bool>("discretize");
             discretize_algo = arguments.get<std::string>("discretize-algo");
@@ -119,7 +125,7 @@ namespace platform {
             hyper_best = arguments.get<bool>("hyper-best");
             if (hyper_best) {
                 // Build the best results file_name
-                hyperparameters_file = platform::Paths::results() + platform::Paths::bestResultsFile(score, model_name);
+                hyperparameters_file = path_results + platform::Paths::bestResultsFile(score, model_name);
                 // ignore this parameter
                 hyperparameters = "{}";
             } else {
@@ -209,10 +215,36 @@ namespace platform {
             test_hyperparams = platform::HyperParameters(datasets.getNames(), hyperparameters_json);
         }
     }
+    std::string getGppVersion()
+    {
+        std::string result;
+        std::array<char, 128> buffer;
+
+        // Run g++ --version and capture the output
+        using pclose_t = int(*)(FILE*);
+        std::unique_ptr<FILE, pclose_t> pipe(popen("g++ --version", "r"), pclose);
+
+        if (!pipe) {
+            return "Error executing g++ --version command";
+        }
+
+        // Read the first line of output (which contains the version info)
+        if (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+            result = buffer.data();
+            // Remove trailing newline if present
+            if (!result.empty() && result[result.length() - 1] == '\n') {
+                result.erase(result.length() - 1);
+            }
+        } else {
+            return "No output from g++ --version command";
+        }
+
+        return result;
+    }
     Experiment& ArgumentsExperiment::initializedExperiment()
     {
         auto env = platform::DotEnv();
-        experiment.setTitle(title).setLanguage("c++").setLanguageVersion("gcc 14.1.1");
+        experiment.setTitle(title).setLanguage("c++").setLanguageVersion(getGppVersion());
         experiment.setDiscretizationAlgorithm(discretize_algo).setSmoothSrategy(smooth_strat);
         experiment.setDiscretized(discretize_dataset).setModel(model_name).setPlatform(env.get("platform"));
         experiment.setStratified(stratified).setNFolds(n_folds).setScoreName(score);

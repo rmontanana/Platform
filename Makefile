@@ -1,9 +1,9 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
-.PHONY: coverage setup help build test clean debug release submodules buildr buildd install dependency testp testb clang-uml
+.PHONY: init clean coverage setup help build test clean debug release buildr buildd install dependency testp testb clang-uml example
 
-f_release = build_release
-f_debug = build_debug
+f_release = build_Release
+f_debug = build_Debug
 app_targets = b_best b_list b_main b_manage b_grid b_results
 test_targets = unit_tests_platform
 
@@ -20,14 +20,22 @@ define ClearTests
 	fi ; 
 endef
 
+init: ## Initialize the project installing dependencies
+	@echo ">>> Installing dependencies"
+	@vcpkg install
+	@echo ">>> Done";
 
-sub-init: ## Initialize submodules
-	@git submodule update --init --recursive
-
-sub-update: ## Initialize submodules
-	@git submodule update --remote --merge
-	@git submodule foreach git pull origin master
-
+clean: ## Clean the project
+	@echo ">>> Cleaning the project..."
+	@if test -f CMakeCache.txt ; then echo "- Deleting CMakeCache.txt"; rm -f CMakeCache.txt; fi
+	@for folder in $(f_release) $(f_debug) vpcpkg_installed install_test ; do \
+	if test -d "$$folder" ; then \
+		echo "- Deleting $$folder folder" ; \
+		rm -rf "$$folder"; \
+	fi; \
+	done
+	$(call ClearTests)
+	@echo ">>> Done";
 setup: ## Install dependencies for tests and coverage
 	@if [ "$(shell uname)" = "Darwin" ]; then \
 		brew install gcovr; \
@@ -51,7 +59,9 @@ install: ## Copy binary files to bin folder
 	@echo "*******************************************"
 	@for item in $(app_targets); do \
 		echo ">>> Copying $$item" ; \
-		cp $(f_release)/src/$$item $(dest) ; \
+		cp $(f_release)/src/$$item $(dest) || { \
+            echo "*** Error copying $$item" ; \
+        } ; \
 	done
 
 dependency: ## Create a dependency graph diagram of the project (build/dependency.png)
@@ -60,37 +70,33 @@ dependency: ## Create a dependency graph diagram of the project (build/dependenc
 	cd $(f_debug) && cmake .. --graphviz=dependency.dot && dot -Tpng dependency.dot -o dependency.png
 
 buildd: ## Build the debug targets
-	@cmake --build $(f_debug) -t $(app_targets) PlatformSample --parallel
+	@cmake --build $(f_debug) -t $(app_targets) PlatformSample --parallel 
 
 buildr: ## Build the release targets
 	@cmake --build $(f_release) -t $(app_targets) --parallel
 
-clean: ## Clean the tests info
-	@echo ">>> Cleaning Debug Platform tests...";
-	$(call ClearTests)
-	@echo ">>> Done";
-
 clang-uml: ## Create uml class and sequence diagrams
 	clang-uml -p --add-compile-flag -I /usr/lib/gcc/x86_64-redhat-linux/8/include/
 
-debug: ## Build a debug version of the project
+debug: ## Build a debug version of the project with BayesNet from vcpkg
 	@echo ">>> Building Debug Platform...";
 	@if [ -d ./$(f_debug) ]; then rm -rf ./$(f_debug); fi
 	@mkdir $(f_debug); 
-	@cmake -S . -B $(f_debug) -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON
+	@cmake -S . -B $(f_debug) -D CMAKE_BUILD_TYPE=Debug -D ENABLE_TESTING=ON -D CODE_COVERAGE=ON -D CMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
 	@echo ">>> Done";
 
-release: ## Build a Release version of the project
+release: ## Build a Release version of the project with BayesNet from vcpkg
 	@echo ">>> Building Release Platform...";
 	@if [ -d ./$(f_release) ]; then rm -rf ./$(f_release); fi
 	@mkdir $(f_release); 
-	@cmake -S . -B $(f_release) -D CMAKE_BUILD_TYPE=Release
-	@echo ">>> Done";	
+	@cmake -S . -B $(f_release) -D CMAKE_BUILD_TYPE=Release -D CMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake
+	@echo ">>> Done";
 
 opt = ""
 test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
 	@echo ">>> Running Platform tests...";
 	@$(MAKE) clean
+	@$(MAKE) debug
 	@cmake --build $(f_debug) -t $(test_targets) --parallel
 	@for t in $(test_targets); do \
 		if [ -f $(f_debug)/tests/$$t ]; then \

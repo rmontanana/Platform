@@ -1,10 +1,9 @@
 #include <algorithm>
-#include "common/Paths.h"
 #include "ResultsManager.h"
 
 namespace platform {
-    ResultsManager::ResultsManager(const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial) :
-        path(Paths::results()), model(model), scoreName(score), platform(platform), complete(complete), partial(partial), maxModel(0), maxTitle(0)
+    ResultsManager::ResultsManager(const std::string& path_, const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial) :
+        path(path_), model(model), scoreName(score), platform(platform), complete(complete), partial(partial), maxModel(0), maxTitle(0)
     {
     }
     void ResultsManager::load()

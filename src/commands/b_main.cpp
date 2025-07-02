@@ -18,6 +18,7 @@ int main(int argc, char** argv)
      */
      // Initialize the experiment class with the command line arguments
     auto experiment = arguments.initializedExperiment();
+    auto path_results = arguments.getPathResults();
     platform::Timer timer;
     timer.start();
     experiment.go();
@@ -27,7 +28,7 @@ int main(int argc, char** argv)
         experiment.report();
     }
     if (arguments.haveToSaveResults()) {
-        experiment.saveResult();
+        experiment.saveResult(path_results);
     }
     if (arguments.doGraph()) {
         experiment.saveGraph();

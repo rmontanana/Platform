@@ -49,6 +49,7 @@ namespace platform {
             return "BestResults_" + score + ".xlsx";
         }
         static std::string excelResults() { return "some_results.xlsx"; }
+        static std::string excelDatasets() { return "datasets.xlsx"; }
         static std::string grid_input(const std::string& model)
         {
             return grid() + "grid_" + model + "_input.json";
@@ -73,6 +74,7 @@ namespace platform {
         {
             return "post_hoc.md";
         }
+
     };
 }
 #endif

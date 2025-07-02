@@ -8,6 +8,7 @@
 #include "common/Paths.h"
 #include "common/Colors.h"
 #include "common/Datasets.h"
+#include "common/Utils.h"
 #include "reports/DatasetsExcel.h"
 #include "reports/DatasetsConsole.h"
 #include "results/ResultsDatasetConsole.h"
@@ -24,9 +25,13 @@ void list_datasets(argparse::ArgumentParser& program)
     std::cout << report.getOutput();
     if (excel) {
         auto data = report.getData();
-        auto report = platform::DatasetsExcel();
-        report.report(data);
-        std::cout << std::endl << Colors::GREEN() << "Output saved in " << report.getFileName() << std::endl;
+        auto ereport = new platform::DatasetsExcel();
+        ereport->report(data);
+        std::cout << std::endl << Colors::GREEN() << "Output saved in " << ereport->getFileName() << std::endl;
+        auto fileName = ereport->getExcelFileName();
+        delete ereport;
+        std::cout << "Opening " << fileName << std::endl;
+        platform::openFile(fileName);
     }
 }
 
@@ -42,9 +47,13 @@ void list_results(argparse::ArgumentParser& program)
     std::cout << report.getOutput();
     if (excel) {
         auto data = report.getData();
-        auto report = platform::ResultsDatasetExcel();
-        report.report(data);
-        std::cout << std::endl << Colors::GREEN() << "Output saved in " << report.getFileName() << std::endl;
+        auto ereport = new platform::ResultsDatasetExcel();
+        ereport->report(data);
+        std::cout << std::endl << Colors::GREEN() << "Output saved in " << ereport->getFileName() << std::endl;
+        auto fileName = ereport->getExcelFileName();
+        delete ereport;
+        std::cout << "Opening " << fileName << std::endl;
+        platform::openFile(fileName);
     }
 }
 

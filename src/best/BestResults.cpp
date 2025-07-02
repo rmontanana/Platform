@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <cctype>
 #include "common/Colors.h"
 #include "common/CLocale.h"
 #include "common/Paths.h"
@@ -123,8 +124,14 @@ namespace platform {
         }
         result = std::vector<std::string>(models.begin(), models.end());
         maxModelName = (*max_element(result.begin(), result.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
-        maxModelName = std::max(12, maxModelName);
+        maxModelName = std::max(minLength, maxModelName);
         return result;
+    }
+    std::string toLower(std::string data)
+    {
+        std::transform(data.begin(), data.end(), data.begin(),
+            [](unsigned char c) { return std::tolower(c); });
+        return data;
     }
     std::vector<std::string> BestResults::getDatasets(json table)
     {
@@ -132,7 +139,9 @@ namespace platform {
         for (const auto& dataset_ : table.items()) {
             datasets.push_back(dataset_.key());
         }
-        std::stable_sort(datasets.begin(), datasets.end());
+        std::stable_sort(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) {
+            return toLower(a) < toLower(b);
+            });
         maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
         maxDatasetName = std::max(7, maxDatasetName);
         return datasets;
@@ -222,7 +231,7 @@ namespace platform {
         std::cout << oss.str();
         std::cout << std::string(oss.str().size() - 8, '-') << std::endl;
         std::cout << Colors::GREEN() << " #  " << std::setw(maxDatasetName + 1) << std::left << std::string("Dataset");
-        auto bestResultsTex = BestResultsTex();
+        auto bestResultsTex = BestResultsTex(score);
         auto bestResultsMd = BestResultsMd();
         if (tex) {
             bestResultsTex.results_header(models, table.at("dateTable").get<std::string>(), index);
@@ -266,12 +275,14 @@ namespace platform {
             // Print the row with red colors on max values
             for (const auto& model : models) {
                 std::string efectiveColor = color;
-                double value;
+                double value, std;
                 try {
                     value = table[model].at(dataset_).at(0).get<double>();
+                    std = table[model].at(dataset_).at(3).get<double>();
                 }
                 catch (nlohmann::json_abi_v3_11_3::detail::out_of_range err) {
                     value = -1.0;
+                    std = -1.0;
                 }
                 if (value == maxValue) {
                     efectiveColor = Colors::RED();
@@ -280,7 +291,8 @@ namespace platform {
                     std::cout << Colors::YELLOW() << std::setw(maxModelName) << std::right << "N/A" << " ";
                 } else {
                     totals[model].push_back(value);
-                    std::cout << efectiveColor << std::setw(maxModelName) << std::setprecision(maxModelName - 2) << std::fixed << value << " ";
+                    std::cout << efectiveColor << std::setw(maxModelName - 6) << std::setprecision(maxModelName - 8) << std::fixed << value;
+                    std::cout << efectiveColor << "±" << std::setw(5) << std::setprecision(3) << std::fixed << std << " ";
                 }
             }
             std::cout << std::endl;
@@ -307,9 +319,9 @@ namespace platform {
         for (const auto& model : models) {
             std::string efectiveColor = model == best_model ? Colors::RED() : Colors::GREEN();
             double value = std::reduce(totals[model].begin(), totals[model].end()) / nDatasets;
-            double std_value = compute_std(totals[model], value);
-            std::cout << efectiveColor << std::right << std::setw(maxModelName) << std::setprecision(maxModelName - 4) << std::fixed << value << " ";
-
+            double std = compute_std(totals[model], value);
+            std::cout << efectiveColor << std::right << std::setw(maxModelName - 6) << std::setprecision(maxModelName - 8) << std::fixed << value;
+            std::cout << efectiveColor << "±" << std::setw(5) << std::setprecision(3) << std::fixed << std << " ";
         }
         std::cout << std::endl;
     }
@@ -321,9 +333,10 @@ namespace platform {
             // Build the table of results
             json table = buildTableResults(models);
             std::vector<std::string> datasets = getDatasets(table.begin().value());
-            BestResultsExcel excel_report(score, datasets);
+            BestResultsExcel excel_report(path, score, datasets);
             excel_report.reportSingle(model, path + Paths::bestResultsFile(score, model));
             messageOutputFile("Excel", excel_report.getFileName());
+            excelFileName = excel_report.getFileName();
         }
     }
     void BestResults::reportAll(bool excel, bool tex, bool index)
@@ -337,9 +350,10 @@ namespace platform {
         // Compute the Friedman test
         std::map<std::string, std::map<std::string, float>> ranksModels;
         if (friedman) {
-            Statistics stats(models, datasets, table, significance);
+            Statistics stats(score, models, datasets, table, significance);
             auto result = stats.friedmanTest();
-            stats.postHocHolmTest(result, tex);
+            stats.postHocTest();
+            stats.postHocTestReport(result, tex);
             ranksModels = stats.getRanks();
         }
         if (tex) {
@@ -351,33 +365,21 @@ namespace platform {
             }
         }
         if (excel) {
-            BestResultsExcel excel(score, datasets);
+            BestResultsExcel excel(path, score, datasets);
             excel.reportAll(models, table, ranksModels, friedman, significance);
             if (friedman) {
-                int idx = -1;
-                double min = 2000;
-                // Find out the control model
-                auto totals = std::vector<double>(models.size(), 0.0);
-                for (const auto& dataset_ : datasets) {
-                    for (int i = 0; i < models.size(); ++i) {
-                        totals[i] += ranksModels[dataset_][models[i]];
-                    }
-                }
-                for (int i = 0; i < models.size(); ++i) {
-                    if (totals[i] < min) {
-                        min = totals[i];
-                        idx = i;
-                    }
-                }
+                Statistics stats(score, models, datasets, table, significance);
+                int idx = stats.getControlIdx();
                 model = models.at(idx);
                 excel.reportSingle(model, path + Paths::bestResultsFile(score, model));
             }
             messageOutputFile("Excel", excel.getFileName());
+            excelFileName = excel.getFileName();
         }
     }
     void BestResults::messageOutputFile(const std::string& title, const std::string& fileName)
     {
-        std::cout << Colors::YELLOW() << "** " << std::setw(5) << std::left << title
+        std::cout << Colors::YELLOW() << "** " << std::setw(8) << std::left << title
             << " file generated: " << fileName << Colors::RESET() << std::endl;
     }
 }

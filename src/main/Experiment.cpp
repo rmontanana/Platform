@@ -7,12 +7,12 @@
 namespace platform {
     using json = nlohmann::ordered_json;
 
-    void Experiment::saveResult()
+    void Experiment::saveResult(const std::string& path)
     {
         result.setSchemaVersion("1.0");
         result.check();
-        result.save();
-        std::cout << "Result saved in " << Paths::results() << result.getFilename() << std::endl;
+        result.save(path);
+        std::cout << "Result saved in " << path << result.getFilename() << std::endl;
     }
     void Experiment::report()
     {
@@ -245,8 +245,6 @@ namespace platform {
                 // Train model
                 //
                 clf->fit(X_train, y_train, features, className, states, smooth_type);
-                if (!quiet)
-                    showProgress(nfold + 1, getColor(clf->getStatus()), "b");
                 auto clf_notes = clf->getNotes();
                 std::transform(clf_notes.begin(), clf_notes.end(), std::back_inserter(notes), [nfold](const std::string& note)
                     { return "Fold " + std::to_string(nfold) + ": " + note; });
@@ -259,10 +257,13 @@ namespace platform {
                 // Score train
                 //
                 if (!no_train_score) {
+                    if (!quiet)
+                        showProgress(nfold + 1, getColor(clf->getStatus()), "b");
                     auto y_proba_train = clf->predict_proba(X_train);
                     Scores scores(y_train, y_proba_train, num_classes, labels);
                     score_train_value = score == score_t::ACCURACY ? scores.accuracy() : scores.auc();
-                    confusion_matrices_train.push_back(scores.get_confusion_matrix_json(true));
+                    if (discretized)
+                        confusion_matrices_train.push_back(scores.get_confusion_matrix_json(true));
                 }
                 //
                 // Test model
@@ -277,7 +278,8 @@ namespace platform {
                 test_time[item] = test_timer.getDuration();
                 score_train[item] = score_train_value;
                 score_test[item] = score_test_value;
-                confusion_matrices.push_back(scores.get_confusion_matrix_json(true));
+                if (discretized)
+                    confusion_matrices.push_back(scores.get_confusion_matrix_json(true));
                 if (!quiet)
                     std::cout << "\b\b\b, " << flush;
                 //

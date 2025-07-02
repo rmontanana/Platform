@@ -15,7 +15,7 @@ namespace platform {
     };
     class ManageScreen {
     public:
-        ManageScreen(int rows, int cols, const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial, bool compare);
+        ManageScreen(const std::string path, int rows, int cols, const std::string& model, const std::string& score, const std::string& platform, bool complete, bool partial, bool compare);
         ~ManageScreen() = default;
         void doMenu();
         void updateSize(int rows, int cols);
@@ -59,7 +59,7 @@ namespace platform {
         std::vector<Paginator> paginator;
         ResultsManager results;
         lxw_workbook* workbook;
-        std::string excelFileName;
+        std::string path, excelFileName;
     };
 }
 #endif

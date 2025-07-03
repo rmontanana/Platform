@@ -21,7 +21,7 @@ add_executable(
     experimental_clfs/DecisionTree.cpp
     experimental_clfs/AdaBoost.cpp
 )
-target_link_libraries(b_best Boost::boost "${PyClassifiers}" bayesnet::bayesnet argparse::argparse fimdlp::fimdlp ${Python3_LIBRARIES} torch::torch Boost::python Boost::numpy "${XLSXWRITER_LIB}")
+target_link_libraries(b_best Boost::boost "${PyClassifiers}" bayesnet::bayesnet argparse::argparse fimdlp::fimdlp ${Python3_LIBRARIES} torch::torch Boost::python Boost::numpy libxlsxwriter::libxlsxwriter)
 
 # b_grid
 set(grid_sources GridSearch.cpp GridData.cpp GridExperiment.cpp GridBase.cpp )
@@ -49,7 +49,7 @@ add_executable(b_list commands/b_list.cpp
     experimental_clfs/DecisionTree.cpp
     experimental_clfs/AdaBoost.cpp
 )
-target_link_libraries(b_list "${PyClassifiers}" bayesnet::bayesnet argparse::argparse fimdlp::fimdlp ${Python3_LIBRARIES} torch::torch Boost::python Boost::numpy "${XLSXWRITER_LIB}")
+target_link_libraries(b_list "${PyClassifiers}" bayesnet::bayesnet argparse::argparse fimdlp::fimdlp ${Python3_LIBRARIES} torch::torch Boost::python Boost::numpy libxlsxwriter::libxlsxwriter)
 
 # b_main
 set(main_sources Experiment.cpp Models.cpp HyperParameters.cpp Scores.cpp ArgumentsExperiment.cpp)
@@ -76,8 +76,8 @@ add_executable(
     results/Result.cpp results/ResultsDataset.cpp results/ResultsDatasetConsole.cpp
     main/Scores.cpp
 )
-target_link_libraries(b_manage torch::torch "${XLSXWRITER_LIB}" fimdlp::fimdlp bayesnet::bayesnet argparse::argparse)
+target_link_libraries(b_manage torch::torch libxlsxwriter::libxlsxwriter fimdlp::fimdlp bayesnet::bayesnet argparse::argparse)
 
 # b_results
 add_executable(b_results commands/b_results.cpp)
-target_link_libraries(b_results torch::torch "${XLSXWRITER_LIB}" fimdlp::fimdlp bayesnet::bayesnet argparse::argparse)
+target_link_libraries(b_results torch::torch libxlsxwriter::libxlsxwriter fimdlp::fimdlp bayesnet::bayesnet argparse::argparse)

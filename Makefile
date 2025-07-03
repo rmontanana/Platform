@@ -6,6 +6,13 @@ f_release = build_Release
 f_debug = build_Debug
 app_targets = b_best b_list b_main b_manage b_grid b_results
 test_targets = unit_tests_platform
+# Set the number of parallel jobs to the number of available processors minus 7
+CPUS := $(shell getconf _NPROCESSORS_ONLN 2>/dev/null \
+                 || nproc --all 2>/dev/null \
+                 || sysctl -n hw.ncpu)
+
+# --- Your desired job count: CPUs – 7, but never less than 1 --------------
+JOBS := $(shell n=$(CPUS); [ $${n} -gt 7 ] && echo $$((n-7)) || echo 1)
 
 define ClearTests
 	@for t in $(test_targets); do \
@@ -25,6 +32,8 @@ define build_target
 	@if [ -d $(2) ]; then rm -fr $(2); fi
 	@conan install . --build=missing -of $(2) -s build_type=$(1)
 	@cmake -S . -B $(2) -DCMAKE_TOOLCHAIN_FILE=$(2)/build/$(1)/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$(1) -D$(3)
+	@echo ">>> Will build using $(JOBS) parallel jobs"
+	echo ">>> Done"
 endef
 
 define compile_target
@@ -34,14 +43,15 @@ define compile_target
 	else \
 		target=""; \
 	fi
-	@cmake --build $(2) --config $(1) --parallel $(target)
+	@cmake --build $(2) --config $(1) --parallel $(JOBS) $(target)
+	@echo ">>> Done"
 endef
 
 init: ## Initialize the project installing dependencies
 	@echo ">>> Installing dependencies with Conan"
 	@conan install . --output-folder=build --build=missing -s build_type=Release
 	@conan install . --output-folder=build_debug --build=missing -s build_type=Debug
-	@echo ">>> Done";
+	@echo ">>> Done"
 
 clean: ## Clean the project
 	@echo ">>> Cleaning the project..."

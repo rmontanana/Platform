@@ -7,8 +7,12 @@
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
+#include <cmath>
+#include <ctime>
+#include <iomanip>
+#include <string.h>
 
-extern char **environ;
+extern char** environ;
 
 namespace platform {
     static std::string trim(const std::string& str)

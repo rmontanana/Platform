@@ -1,10 +1,7 @@
 include_directories(
-    ## Libs
     ${Python3_INCLUDE_DIRS}
     ${MPI_CXX_INCLUDE_DIRS}
     ${CMAKE_BINARY_DIR}/configured_files/include
-    ${PyClassifiers_INCLUDE_DIRS}
-    ## Platform
     ${Platform_SOURCE_DIR}/src
 )
 
@@ -21,7 +18,7 @@ add_executable(
     experimental_clfs/DecisionTree.cpp
     experimental_clfs/AdaBoost.cpp
 )
-target_link_libraries(b_best Boost::boost "${PyClassifiers}" bayesnet::bayesnet argparse::argparse fimdlp::fimdlp ${Python3_LIBRARIES} torch::torch Boost::python Boost::numpy libxlsxwriter::libxlsxwriter)
+target_link_libraries(b_best Boost::boost pyclassifiers::pyclassifiers bayesnet::bayesnet argparse::argparse fimdlp::fimdlp ${Python3_LIBRARIES} torch::torch Boost::python Boost::numpy libxlsxwriter::libxlsxwriter)
 
 # b_grid
 set(grid_sources GridSearch.cpp GridData.cpp GridExperiment.cpp GridBase.cpp )
@@ -36,7 +33,7 @@ add_executable(b_grid commands/b_grid.cpp ${grid_sources}
     experimental_clfs/DecisionTree.cpp
     experimental_clfs/AdaBoost.cpp
 )
-target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} "${PyClassifiers}" bayesnet::bayesnet argparse::argparse fimdlp::fimdlp ${Python3_LIBRARIES} torch::torch Boost::python Boost::numpy)
+target_link_libraries(b_grid ${MPI_CXX_LIBRARIES} pyclassifiers::pyclassifiers bayesnet::bayesnet argparse::argparse fimdlp::fimdlp ${Python3_LIBRARIES} torch::torch Boost::python Boost::numpy)
 
 # b_list
 add_executable(b_list commands/b_list.cpp
@@ -49,7 +46,7 @@ add_executable(b_list commands/b_list.cpp
     experimental_clfs/DecisionTree.cpp
     experimental_clfs/AdaBoost.cpp
 )
-target_link_libraries(b_list "${PyClassifiers}" bayesnet::bayesnet argparse::argparse fimdlp::fimdlp ${Python3_LIBRARIES} torch::torch Boost::python Boost::numpy libxlsxwriter::libxlsxwriter)
+target_link_libraries(b_list pyclassifiers::pyclassifiers bayesnet::bayesnet argparse::argparse fimdlp::fimdlp ${Python3_LIBRARIES} torch::torch Boost::python Boost::numpy libxlsxwriter::libxlsxwriter)
 
 # b_main
 set(main_sources Experiment.cpp Models.cpp HyperParameters.cpp Scores.cpp ArgumentsExperiment.cpp)
@@ -64,7 +61,7 @@ add_executable(b_main commands/b_main.cpp ${main_sources}
     experimental_clfs/DecisionTree.cpp
     experimental_clfs/AdaBoost.cpp
 )
-target_link_libraries(b_main PRIVATE nlohmann_json::nlohmann_json "${PyClassifiers}" bayesnet::bayesnet argparse::argparse fimdlp::fimdlp ${Python3_LIBRARIES} torch::torch Boost::python Boost::numpy)
+target_link_libraries(b_main PRIVATE nlohmann_json::nlohmann_json pyclassifiers::pyclassifiers bayesnet::bayesnet argparse::argparse fimdlp::fimdlp ${Python3_LIBRARIES} torch::torch Boost::python Boost::numpy)
 
 # b_manage
 set(manage_sources ManageScreen.cpp OptionsMenu.cpp ResultsManager.cpp)

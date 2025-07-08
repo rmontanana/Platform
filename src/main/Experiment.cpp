@@ -246,8 +246,8 @@ namespace platform {
                 //
                 clf->fit(X_train, y_train, features, className, states, smooth_type);
                 auto clf_notes = clf->getNotes();
-                std::transform(clf_notes.begin(), clf_notes.end(), std::back_inserter(notes), [nfold](const std::string& note)
-                    { return "Fold " + std::to_string(nfold) + ": " + note; });
+                std::transform(clf_notes.begin(), clf_notes.end(), std::back_inserter(notes), [seed, nfold](const std::string& note)
+                    { return "Seed: " + std::to_string(seed) + " Fold: " + std::to_string(nfold) + ": " + note; });
                 nodes[item] = clf->getNumberOfNodes();
                 edges[item] = clf->getNumberOfEdges();
                 num_states[item] = clf->getNumberOfStates();

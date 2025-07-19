@@ -12,15 +12,15 @@ class PlatformConan(ConanFile):
     # Sources are located in the same place as this recipe, copy them to the recipe
     exports_sources = "CMakeLists.txt", "src/*", "tests/*", "config/*", "cmake/*"
     
-    def requirements(self):
+    def requirements(conanself):
         # Core dependencies from vcpkg.json
         self.requires("argparse/3.2")
-        self.requires("libtorch/2.7.0")
+        self.requires("libtorch/2.7.1")
         self.requires("nlohmann_json/3.11.3")
-        self.requires("folding/1.1.1")
-        self.requires("fimdlp/2.1.0")
-        self.requires("arff-files/1.2.0")
-        self.requires("bayesnet/1.2.0")
+        self.requires("folding/1.1.2")
+        self.requires("fimdlp/2.1.1")
+        self.requires("arff-files/1.2.1")
+        self.requires("bayesnet/1.2.1")
         self.requires("pyclassifiers/1.0.3")
         self.requires("libxlsxwriter/1.2.2")
         

@@ -12,7 +12,7 @@ class PlatformConan(ConanFile):
     # Sources are located in the same place as this recipe, copy them to the recipe
     exports_sources = "CMakeLists.txt", "src/*", "tests/*", "config/*", "cmake/*"
     
-    def requirements(conanself):
+    def requirements(self):
         # Core dependencies from vcpkg.json
         self.requires("argparse/3.2")
         self.requires("libtorch/2.7.1")

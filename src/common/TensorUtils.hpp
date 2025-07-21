@@ -62,7 +62,7 @@ namespace platform {
             torch::Tensor tensor = torch::empty({ static_cast<long>(rows), static_cast<long>(cols) }, torch::kInt64);
             for (size_t i = 0; i < rows; ++i) {
                 for (size_t j = 0; j < cols; ++j) {
-                    tensor.index_put_({ static_cast<long>(i), static_cast<long>(j) }, data[i][j]);
+                    tensor.index_put_({static_cast<int64_t>(i), static_cast<int64_t>(j)}, torch::scalar_tensor(data[i][j]));
                 }
             }
             return tensor;

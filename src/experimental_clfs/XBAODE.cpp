@@ -10,7 +10,7 @@
 #include <tuple>
 #include "XBAODE.h"
 #include "XSpode.hpp"
-#include "TensorUtils.hpp"
+#include "common/TensorUtils.hpp"
 #include <loguru.hpp>
 
 namespace platform {

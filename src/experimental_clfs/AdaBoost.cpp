@@ -11,7 +11,7 @@
 #include <numeric>
 #include <sstream>
 #include <iomanip>
-#include "TensorUtils.hpp"
+#include "common/TensorUtils.hpp"
 
 // Conditional debug macro for performance-critical sections
 #define DEBUG_LOG(condition, ...) \

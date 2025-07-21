@@ -10,7 +10,7 @@
 #include <sstream>
 #include <iomanip>
 #include <limits>
-#include "TensorUtils.hpp"
+#include "common/TensorUtils.hpp"
 
 namespace bayesnet {
 

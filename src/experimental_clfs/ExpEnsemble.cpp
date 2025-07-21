@@ -5,7 +5,7 @@
 // ***************************************************************
 
 #include "ExpEnsemble.h"
-#include "TensorUtils.hpp"
+#include "common/TensorUtils.hpp"
 
 namespace platform {
     ExpEnsemble::ExpEnsemble() : semaphore_{ CountingSemaphore::getInstance() }, Boost(false)

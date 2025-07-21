@@ -5,6 +5,15 @@
 namespace platform {
     class TensorUtils {
     public:
+        template <typename T>
+        static std::vector<T> tensorToVector(const torch::Tensor& tensor)
+        {
+            torch::Tensor contig_tensor = tensor.contiguous();
+            auto num_elements = contig_tensor.numel();
+            const T* tensor_data = contig_tensor.data_ptr<T>();
+            std::vector<T> result(tensor_data, tensor_data + num_elements);
+            return result;
+        }
         static std::vector<std::vector<int>> to_matrix(const torch::Tensor& X)
         {
             // Ensure tensor is contiguous in memory

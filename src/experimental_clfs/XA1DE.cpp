@@ -5,7 +5,7 @@
 // ***************************************************************
 
 #include "XA1DE.h"
-#include "TensorUtils.hpp"
+#include "common/TensorUtils.hpp"
 
 namespace platform {
     void XA1DE::trainModel(const torch::Tensor& weights, const bayesnet::Smoothing_t smoothing)

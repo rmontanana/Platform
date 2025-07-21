@@ -1,6 +1,6 @@
 #include <sstream>
 #include "Scores.h"
-#include "common/TensorUtils.h" // tensorToVector
+#include "common/TensorUtils.hpp" // tensorToVector
 #include "common/Colors.h"
 namespace platform {
     Scores::Scores(torch::Tensor& y_test, torch::Tensor& y_proba, int num_classes, std::vector<std::string> labels) : num_classes(num_classes), labels(labels), y_test(y_test), y_proba(y_proba)
@@ -50,7 +50,7 @@ namespace platform {
         auto nClasses = num_classes;
         if (num_classes == 2)
             nClasses = 1;
-        auto y_testv = tensorToVector<int>(y_test);
+        auto y_testv = TensorUtils::tensorToVector<int>(y_test);
         std::vector<double> aucScores(nClasses, 0.0);
         std::vector<std::pair<double, int>> scoresAndLabels;
         for (size_t classIdx = 0; classIdx < nClasses; ++classIdx) {

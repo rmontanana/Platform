@@ -38,7 +38,7 @@ namespace bayesnet {
         torch::Tensor predict(torch::Tensor& X) override;
         std::vector<int> predict(std::vector<std::vector<int>>& X) override;
         torch::Tensor predict_proba(torch::Tensor& X) override;
-        std::vector<std::vector<double>> predict_proba(std::vector<std::vector<int>>& X);
+        std::vector<std::vector<double>> predict_proba(std::vector<std::vector<int>>& X) override;
         void setDebug(bool debug) { this->debug = debug; }
 
     protected:

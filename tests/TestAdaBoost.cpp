@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include "experimental_clfs/AdaBoost.h"
 #include "experimental_clfs/DecisionTree.h"
-#include "experimental_clfs/TensorUtils.hpp"
+#include "common/TensorUtils.hpp"
 #include "TestUtils.h"
 
 using namespace bayesnet;

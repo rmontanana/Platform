@@ -5,7 +5,7 @@
 // ***************************************************************
 
 #include "ExpClf.h"
-#include "TensorUtils.hpp"
+#include "common/TensorUtils.hpp"
 
 namespace platform {
     ExpClf::ExpClf() : semaphore_{ CountingSemaphore::getInstance() }, Boost(false)

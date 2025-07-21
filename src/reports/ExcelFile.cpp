@@ -54,10 +54,8 @@ namespace platform {
     }
     void ExcelFile::setProperties(std::string title)
     {
-        char line[title.size() + 1];
-        strcpy(line, title.c_str());
         lxw_doc_properties properties = {
-            .title = line,
+            .title = title.c_str(),
             .subject = (char*)"Machine learning results",
             .author = (char*)"Ricardo Montañana Gómez",
             .manager = (char*)"Dr. J. A. Gámez, Dr. J. M. Puerta",

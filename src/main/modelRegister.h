@@ -25,18 +25,18 @@ namespace platform {
         [](void) -> bayesnet::BaseClassifier* { return new bayesnet::BoostAODE();});
     static Registrar registrarBA2("BoostA2DE",
         [](void) -> bayesnet::BaseClassifier* { return new bayesnet::BoostA2DE();});
-    static Registrar registrarSt("STree",
-        [](void) -> bayesnet::BaseClassifier* { return new pywrap::STree();});
-    static Registrar registrarOdte("Odte",
-        [](void) -> bayesnet::BaseClassifier* { return new pywrap::ODTE();});
-    static Registrar registrarSvc("SVC",
-        [](void) -> bayesnet::BaseClassifier* { return new pywrap::SVC();});
-    static Registrar registrarRaF("RandomForest",
-        [](void) -> bayesnet::BaseClassifier* { return new pywrap::RandomForest();});
-    static Registrar registrarXGB("XGBoost",
-        [](void) -> bayesnet::BaseClassifier* { return new pywrap::XGBoost();});
-    static Registrar registrarAdaPy("AdaBoostPy",
-        [](void) -> bayesnet::BaseClassifier* { return new pywrap::AdaBoostPy();});
+    // static Registrar registrarSt("STree",
+    //     [](void) -> bayesnet::BaseClassifier* { return new pywrap::STree();});
+    // static Registrar registrarOdte("Odte",
+    //     [](void) -> bayesnet::BaseClassifier* { return new pywrap::ODTE();});
+    // static Registrar registrarSvc("SVC",
+    //     [](void) -> bayesnet::BaseClassifier* { return new pywrap::SVC();});
+    // static Registrar registrarRaF("RandomForest",
+    //     [](void) -> bayesnet::BaseClassifier* { return new pywrap::RandomForest();});
+    // static Registrar registrarXGB("XGBoost",
+    //     [](void) -> bayesnet::BaseClassifier* { return new pywrap::XGBoost();});
+    // static Registrar registrarAdaPy("AdaBoostPy",
+    //     [](void) -> bayesnet::BaseClassifier* { return new pywrap::AdaBoostPy();});
     static Registrar registrarAda("AdaBoost",
         [](void) -> bayesnet::BaseClassifier* { return new bayesnet::AdaBoost();});
     static Registrar registrarDT("DecisionTree",

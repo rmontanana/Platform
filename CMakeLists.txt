@@ -67,7 +67,7 @@ find_package(arff-files CONFIG REQUIRED)
 find_package(fimdlp CONFIG REQUIRED)
 find_package(folding CONFIG REQUIRED)
 find_package(bayesnet CONFIG REQUIRED)
-find_package(pyclassifiers CONFIG REQUIRED)
+# find_package(pyclassifiers CONFIG REQUIRED)
 find_package(libxlsxwriter CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS python)
 

@@ -19,12 +19,12 @@
 #include <bayesnet/classifiers/KDBLd.h>
 #include <bayesnet/classifiers/SPODELd.h>
 #include <bayesnet/classifiers/SPODELd.h>
-#include <pyclassifiers/STree.h>
-#include <pyclassifiers/ODTE.h>
-#include <pyclassifiers/SVC.h>
-#include <pyclassifiers/XGBoost.h>
-#include <pyclassifiers/AdaBoostPy.h>
-#include <pyclassifiers/RandomForest.h>
+// #include <pyclassifiers/STree.h>
+// #include <pyclassifiers/ODTE.h>
+// #include <pyclassifiers/SVC.h>
+// #include <pyclassifiers/XGBoost.h>
+// #include <pyclassifiers/AdaBoostPy.h>
+// #include <pyclassifiers/RandomForest.h>
 #include "../experimental_clfs/XA1DE.h"
 #include "../experimental_clfs/AdaBoost.h"
 #include "../experimental_clfs/DecisionTree.h"

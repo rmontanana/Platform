@@ -21,7 +21,7 @@ class PlatformConan(ConanFile):
         self.requires("fimdlp/2.1.1")
         self.requires("arff-files/1.2.1")
         self.requires("bayesnet/1.2.1")
-        self.requires("pyclassifiers/1.0.3")
+        # self.requires("pyclassifiers/1.0.3")
         self.requires("libxlsxwriter/1.2.2")
         
     def build_requirements(self):

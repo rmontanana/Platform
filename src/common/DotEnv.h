@@ -21,7 +21,7 @@ namespace platform {
             {
                 {"depth", {"any"}},
                 {"discretize", {"0", "1"}},
-                {"discretize_algo", {"mdlp", "bin3u", "bin3q", "bin4u", "bin4q", "bin5q", "bin5u", "bin6q", "bin6u", "bin7q", "bin7u", "bin8q", "bin8u", "bin9q", "bin9u", "bin10q", "bin10u"}},
+                {"discretize_algo", {"mdlp", "mdlp3", "mdlp4", "mdlp5", "bin3u", "bin3q", "bin4u", "bin4q", "bin5q", "bin5u", "bin6q", "bin6u", "bin7q", "bin7u", "bin8q", "bin8u", "bin9q", "bin9u", "bin10q", "bin10u"}},
                 {"experiment", {"discretiz", "odte", "covid", "Test"}},
                 {"fit_features", {"0", "1"}},
                 {"framework", {"bulma", "bootstrap"}},

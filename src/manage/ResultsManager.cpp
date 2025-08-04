@@ -13,8 +13,7 @@ namespace platform {
         for (const auto& file : directory_iterator(path)) {
             auto filename = file.path().filename().string();
             if (filename.find(".json") != std::string::npos && filename.find("results_") == 0) {
-                auto result = Result();
-                result.load(path, filename);
+                auto result = Result(path, filename);
                 bool addResult = true;
                 if (platform != "any" && result.getPlatform() != platform
                     || model != "any" && result.getModel() != model

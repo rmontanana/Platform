@@ -5,6 +5,7 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include "common/Timer.hpp"
+#include "common/Paths.h"
 #include "main/HyperParameters.h"
 #include "main/PartialResult.h"
 
@@ -14,7 +15,7 @@ namespace platform {
     class Result {
     public:
         Result();
-        Result& load(const std::string& path, const std::string& filename);
+        Result(const std::string& path, const std::string& filename);
         void save(const std::string& path);
         std::vector<std::string> check();
         // Getters
@@ -49,6 +50,9 @@ namespace platform {
         void setNFolds(int nfolds) { data["folds"] = nfolds; };
         void setPlatform(const std::string& platform_name) { data["platform"] = platform_name; };
     private:
+        std::string generateFileName();
+        std::string path;
+        std::string fileName;
         json data;
         bool complete;
         double score = 0.0;

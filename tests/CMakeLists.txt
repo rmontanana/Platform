@@ -13,6 +13,6 @@ if(ENABLE_TESTING)
     )
     add_executable(${TEST_PLATFORM} ${TEST_SOURCES_PLATFORM})
     target_link_libraries(${TEST_PLATFORM} PUBLIC 
-      torch::torch fimdlp:fimdlp Catch2::Catch2WithMain bayesnet::bayesnet pyclassifiers::pyclassifiers)
+      torch::torch fimdlp::fimdlp Catch2::Catch2WithMain bayesnet::bayesnet)
     add_test(NAME ${TEST_PLATFORM} COMMAND ${TEST_PLATFORM})
 endif(ENABLE_TESTING)

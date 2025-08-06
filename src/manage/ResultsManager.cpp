@@ -88,6 +88,16 @@ namespace platform {
             return a.getDuration() > b.getDuration();
             });
     }
+    void ResultsManager::sortTitle(SortType type)
+    {
+        if (empty())
+            return;
+        sort(files.begin(), files.end(), [type](const Result& a, const Result& b) {
+            if (type == SortType::ASC)
+                return a.getTitle() < b.getTitle();
+            return a.getTitle() > b.getTitle();
+            });
+    }
     void ResultsManager::sortScore(SortType type)
     {
         if (empty())
@@ -118,6 +128,9 @@ namespace platform {
                 break;
             case SortField::DURATION:
                 sortDuration(type);
+                break;
+            case SortField::TITLE:
+                sortTitle(type);
                 break;
         }
     }

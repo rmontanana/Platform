@@ -28,7 +28,7 @@ namespace platform {
         maxTitle = results.maxTitleSize();
         header_lengths = { 3, 10, maxModel, 11, 10, 12, 2, 3, 7, maxTitle };
         header_labels = { " #", "Date", "Model", "Score Name", "Score", "Platform", "SD", "C/P", "Time", "Title" };
-        sort_fields = { "Date", "Model", "Score", "Time" };
+        sort_fields = { "Date", "Model", "Score", "Time", "Title" };
         updateSize(rows, cols);
         // Initializes the paginator for each output type (experiments, datasets, result)
         for (int i = 0; i < static_cast<int>(OutputType::Count); i++) {
@@ -346,9 +346,10 @@ namespace platform {
     {
         std::vector<std::tuple<std::string, char, bool>>  sortOptions = {
             {"date", 'd', false},
+            {"model", 'm', false},
             {"score", 's', false},
             {"time", 't', false},
-            {"model", 'm', false},
+            {"title", 'i', false},
             {"ascending+", '+', false},
             {"descending-", '-', false}
         };
@@ -378,6 +379,9 @@ namespace platform {
                 break;
             case 'm':
                 sort_field = SortField::MODEL;
+                break;
+            case 'i':
+                sort_field = SortField::TITLE;
                 break;
             case '+':
                 sort_type = SortType::ASC;

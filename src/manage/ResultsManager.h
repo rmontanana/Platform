@@ -15,6 +15,7 @@ namespace platform {
         MODEL = 1,
         SCORE = 2,
         DURATION = 3,
+        TITLE = 4,
     };
     class ResultsManager {
     public:
@@ -24,6 +25,7 @@ namespace platform {
         void sortDate(SortType type);
         void sortScore(SortType type);
         void sortModel(SortType type);
+        void sortTitle(SortType type);
         void sortDuration(SortType type);
         int maxModelSize() const { return maxModel; };
         int maxTitleSize() const { return maxTitle; };

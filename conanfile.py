@@ -18,7 +18,7 @@ class PlatformConan(ConanFile):
         self.requires("libtorch/2.7.1")
         self.requires("nlohmann_json/3.11.3")
         self.requires("folding/1.1.2")
-        self.requires("fimdlp/2.1.1")
+        self.requires("fimdlp/2.1.2")
         self.requires("arff-files/1.2.1")
         self.requires("bayesnet/1.2.1")
         # self.requires("pyclassifiers/1.0.3")

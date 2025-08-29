@@ -216,11 +216,14 @@ namespace platform {
         n_samples = Xv[0].size();
         n_features = Xv.size();
         if (numericFeaturesIdx.size() == 0) {
+            // None of the features are numeric
             numericFeatures = std::vector<bool>(n_features, false);
         } else {
             if (numericFeaturesIdx.at(0) == -1) {
+                // All the features are numeric
                 numericFeatures = std::vector<bool>(n_features, true);
             } else {
+                // Only some of the features are numeric
                 numericFeatures = std::vector<bool>(n_features, false);
                 for (auto i : numericFeaturesIdx) {
                     numericFeatures[i] = true;

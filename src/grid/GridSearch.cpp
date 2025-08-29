@@ -252,8 +252,7 @@ namespace platform {
         result->process = config_mpi.rank;
         result->task = n_task;
         //
-        // Update progress bar
+        // Progress is now displayed by the producer when it receives this result
         //
-        std::cout << get_color_rank(config_mpi.rank) << std::flush;
     }
 } /* namespace platform */

@@ -39,10 +39,10 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 
-find_package(Boost 1.66.0 REQUIRED COMPONENTS python3 numpy3) 
+#find_package(Boost 1.66.0 REQUIRED COMPONENTS python3 numpy3) 
 
 # # Python
-find_package(Python3 REQUIRED COMPONENTS Development)
+# find_package(Python3 REQUIRED COMPONENTS Development)
 
 # # Boost Python
 # find_package(boost_python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR} CONFIG REQUIRED COMPONENTS python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})

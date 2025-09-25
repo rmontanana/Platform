@@ -15,7 +15,7 @@
 TEST_CASE("Test Platform version", "[Platform]")
 {
     std::string version = { platform_project_version.begin(), platform_project_version.end() };
-    REQUIRE(version == "1.1.1");
+    REQUIRE(version == "1.1.2");
 }
 TEST_CASE("Test Folding library version", "[Folding]")
 {

@@ -225,6 +225,7 @@ namespace platform {
 
     void BestResults::printTableResults(std::vector<std::string> models, json table, bool tex, bool index)
     {
+        auto temp = ConfigLocale();
         std::stringstream oss;
         oss << Colors::GREEN() << "Best results for " << score << " as of " << table.at("dateTable").get<std::string>() << std::endl;
         std::cout << oss.str();

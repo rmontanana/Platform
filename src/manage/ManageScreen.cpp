@@ -120,15 +120,16 @@ namespace platform {
     }
     void ManageScreen::footer(const std::string& status, const std::string& status_color)
     {
-        std::stringstream oss;
-        oss << " A: " << (index_A == -1 ? "<notset>" : std::to_string(index_A)) <<
+        std::stringstream ab_indices, folder;
+        folder << " Folder: " << path;
+        auto color = (index_A != -1 && index_B != -1) ? Colors::IGREEN() : Colors::IYELLOW();
+        ab_indices << " A: " << (index_A == -1 ? "<notset>" : std::to_string(index_A)) <<
             " B: " << (index_B == -1 ? "<notset>" : std::to_string(index_B)) << " ";
-        int status_length = std::max(oss.str().size(), cols - oss.str().size());
+        int status_length = std::max(ab_indices.str().size() + folder.str().size(), cols - ab_indices.str().size() - folder.str().size());
         auto status_message = status.substr(0, status_length - 1);
         std::string status_line = status_message + std::string(std::max(size_t(0), status_length - status_message.size() - 1), ' ');
-        auto color = (index_A != -1 && index_B != -1) ? Colors::IGREEN() : Colors::IYELLOW();
-        std::cout << color << Colors::REVERSE() << oss.str() << Colors::RESET() << Colors::WHITE()
-            << Colors::REVERSE() << status_color << " " << status_line << Colors::IWHITE()
+        std::cout << Colors::REVERSE() << Colors::WHITE() << folder.str() << color << Colors::REVERSE() << ab_indices.str()
+            << Colors::RESET() << Colors::WHITE() << Colors::REVERSE() << status_color << " " << status_line
             << Colors::RESET() << std::endl;
     }
     void ManageScreen::list(const std::string& status_message, const std::string& status_color)

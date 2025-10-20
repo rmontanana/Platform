@@ -29,6 +29,7 @@ namespace platform {
         bool confirmAction(const std::string& intent, const std::string& fileName) const;
         std::string report(const int index, const bool excelReport);
         void changeModel(const int index);
+        void moveResult(const int index);
         std::string report_compared();
         std::pair<std::string, std::string> sortList();
         std::string getVersions();

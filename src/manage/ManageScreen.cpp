@@ -343,6 +343,25 @@ namespace platform {
         }
         list("Model changed to " + newModel, Colors::GREEN());
     }
+    void ManageScreen::moveResult(const int index)
+    {
+        std::cout << "Move to subfolder: ";
+        std::string subfolder;
+        getline(std::cin, subfolder);
+        if (subfolder.empty()) {
+            list("Result not moved", Colors::YELLOW());
+            return;
+        }
+        // Remove the old result file
+        std::string oldFile = path + results.at(index).getFilename();
+        std::filesystem::remove(oldFile);
+        std::string newPath = path + (subfolder.back() == '/' ? subfolder : subfolder + "/");
+        // Actually change the model
+        results.at(index).save(newPath);
+        results.deleteResult(index);
+        paginator[static_cast<int>(OutputType::EXPERIMENTS)].setTotal(results.size());
+        list("Result moved to " + newPath, Colors::GREEN());
+    }
     std::pair<std::string, std::string> ManageScreen::sortList()
     {
         std::vector<std::tuple<std::string, char, bool>>  sortOptions = {
@@ -409,6 +428,7 @@ namespace platform {
             {"datasets", 'd', false},
             {"change model", 'm', true},
             {"hide", 'h', true},
+            {"Move", 'M', true},
             {"sort", 's', false},
             {"report", 'r', true},
             {"excel", 'e', true},
@@ -535,6 +555,9 @@ namespace platform {
                     break;
                 case 'm':
                     changeModel(index);
+                    break;
+                case 'M':
+                    moveResult(index);
                     break;
                 case 'h':
                     {

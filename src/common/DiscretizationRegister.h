@@ -4,6 +4,10 @@
 #include <limits>
 static platform::RegistrarDiscretization registrarM("mdlp",
     [](void) -> mdlp::Discretizer* { return new mdlp::CPPFImdlp();});
+static platform::RegistrarDiscretization registrarPS("pkisqrt",
+    [](void) -> mdlp::Discretizer* { return new mdlp::PKIDisc(mdlp::compute_strategy_t::SQRT);});
+static platform::RegistrarDiscretization registrarPL("pkilog",
+    [](void) -> mdlp::Discretizer* { return new mdlp::PKIDisc(mdlp::compute_strategy_t::LOG);});
 static platform::RegistrarDiscretization registrarM3("mdlp3",
     [](void) -> mdlp::Discretizer* { return new mdlp::CPPFImdlp(3, numeric_limits<int>::max(), 3);});
 static platform::RegistrarDiscretization registrarM4("mdlp4",

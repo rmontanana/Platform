@@ -23,7 +23,7 @@ namespace platform {
             throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
-    int Dataset::getNFeatures() const
+    long Dataset::getNFeatures() const
     {
         if (loaded) {
             return n_features;
@@ -31,7 +31,7 @@ namespace platform {
             throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
-    int Dataset::getNSamples() const
+    long Dataset::getNSamples() const
     {
         if (loaded) {
             return n_samples;

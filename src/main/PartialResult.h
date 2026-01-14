@@ -37,8 +37,8 @@ namespace platform {
         PartialResult& setConfusionMatrices(const json& confusion_matrices) { data["confusion_matrices"] = confusion_matrices; return *this; }
         PartialResult& setConfusionMatricesTrain(const json& confusion_matrices) { data["confusion_matrices_train"] = confusion_matrices; return *this; }
         PartialResult& setHyperparameters(const json& hyperparameters) { data["hyperparameters"] = hyperparameters; return *this; }
-        PartialResult& setSamples(int samples) { data["samples"] = samples; return *this; }
-        PartialResult& setFeatures(int features) { data["features"] = features; return *this; }
+        PartialResult& setSamples(long samples) { data["samples"] = samples; return *this; }
+        PartialResult& setFeatures(long features) { data["features"] = features; return *this; }
         PartialResult& setClasses(int classes) { data["classes"] = classes; return *this; }
         PartialResult& setScoreTrain(double score) { data["score_train"] = score; return *this; }
         PartialResult& setScoreTrainStd(double score_std) { data["score_train_std"] = score_std; return *this; }

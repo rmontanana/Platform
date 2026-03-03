@@ -17,6 +17,7 @@ namespace platform {
         std::map<std::string, std::unique_ptr<Dataset>> datasets;
         bool discretize;
         void load(); // Loads the list of datasets
+        void loadCsvJson(); // Loads datasets from CSV+JSON metadata directory
     };
 };
 #endif

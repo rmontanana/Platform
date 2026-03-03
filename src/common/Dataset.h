@@ -53,6 +53,7 @@ namespace platform {
         void load_csv();
         void load_arff();
         void load_rdata();
+        void load_csv_json();
         void computeStates();
         std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y);
     };

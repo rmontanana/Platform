@@ -1,7 +1,7 @@
 #ifndef SOURCEDATA_H
 #define SOURCEDATA_H
 namespace platform {
-    enum fileType_t { CSV, ARFF, RDATA };
+    enum fileType_t { CSV, ARFF, RDATA, CSVJSON };
     class SourceData {
     public:
         SourceData(std::string source)
@@ -15,6 +15,9 @@ namespace platform {
             } else if (source == "Tanveer") {
                 path = "data/";
                 fileType = RDATA;
+            } else if (source == "CsvJSON") {
+                path = "";
+                fileType = CSVJSON;
             } else if (source == "Test") {
                 path = "@TEST_DATA_PATH@/";
                 fileType = ARFF;

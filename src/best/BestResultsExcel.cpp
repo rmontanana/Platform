@@ -196,13 +196,19 @@ namespace platform {
     {
         row = 4;
         int i = 0;
-        json origin = table.begin().value();
-        for (auto const& item : origin.items()) {
+        for (auto const& dataset : datasets) {
             writeInt(row, 0, i++, "ints");
-            writeString(row, 1, item.key().c_str(), "text");
+            writeString(row, 1, dataset.c_str(), "text");
             int col = 1;
             for (const auto& model : models) {
-                double value = ranks ? ranksModels[item.key()][model] : table[model].at(item.key()).at(0).get<double>();
+                double value;
+                try {
+                    value = ranks ? ranksModels[dataset][model] : table[model].at(dataset).at(0).get<double>();
+                }
+                catch (nlohmann::json_abi_v3_11_3::detail::out_of_range&) {
+                    writeString(row, ++col, "N/A", "text");
+                    continue;
+                }
                 writeDouble(row, ++col, value, "result");
             }
             ++row;

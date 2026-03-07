@@ -131,12 +131,16 @@ namespace platform {
     void Dataset::computeStates()
     {
         for (int i = 0; i < features.size(); ++i) {
-            auto [max_value, idx] = torch::max(X_train.index({ i, "..." }), 0);
-            states[features[i]] = std::vector<int>(max_value.item<int>() + 1);
+            auto [max_train, _1] = torch::max(X_train.index({ i, "..." }), 0);
+            auto [max_test, _2] = torch::max(X_test.index({ i, "..." }), 0);
+            auto max_value = std::max(max_train.item<int>(), max_test.item<int>());
+            states[features[i]] = std::vector<int>(max_value + 1);
             iota(begin(states.at(features[i])), end(states.at(features[i])), 0);
         }
-        auto [max_value, idx] = torch::max(y_train, 0);
-        states[className] = std::vector<int>(max_value.item<int>() + 1);
+        auto [max_train, _1] = torch::max(y_train, 0);
+        auto [max_test, _2] = torch::max(y_test, 0);
+        auto max_value = std::max(max_train.item<int>(), max_test.item<int>());
+        states[className] = std::vector<int>(max_value + 1);
         iota(begin(states.at(className)), end(states.at(className)), 0);
     }
     void Dataset::load_arff()

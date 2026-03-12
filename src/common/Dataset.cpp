@@ -254,10 +254,13 @@ namespace platform {
         std::vector<std::map<std::string, int>> factorMaps(features.size());
         // Factorization map for target
         std::map<std::string, int> labelMap;
-        // Read data rows, skipping rows with missing data
+        // Read data rows, skipping rows with missing or corrupt data
+        auto expectedColumns = features.size() + 1;
         while (getline(file, line)) {
             if (line.empty()) continue;
             std::vector<std::string> tokens = split(line, ',');
+            // Check for correct number of columns
+            if (tokens.size() != expectedColumns) continue;
             // Check for missing values in any column
             bool has_missing = false;
             for (auto i = 0; i < tokens.size(); ++i) {
@@ -267,18 +270,31 @@ namespace platform {
                 }
             }
             if (has_missing) continue;
+            // Parse feature values into a buffer before committing
+            bool has_invalid = false;
+            std::vector<float> row_values(features.size());
             for (auto i = 0; i < features.size(); ++i) {
                 auto value = trim(tokens[i]);
                 if (numericSet.count(features[i])) {
                     // Numeric feature
-                    Xv[i].push_back(stof(value));
+                    try {
+                        row_values[i] = stof(value);
+                    } catch (const std::invalid_argument&) {
+                        has_invalid = true;
+                        break;
+                    }
                 } else {
                     // Categorical feature → factorize
                     if (factorMaps[i].find(value) == factorMaps[i].end()) {
                         factorMaps[i][value] = static_cast<int>(factorMaps[i].size());
                     }
-                    Xv[i].push_back(static_cast<float>(factorMaps[i][value]));
+                    row_values[i] = static_cast<float>(factorMaps[i][value]);
                 }
+            }
+            if (has_invalid) continue;
+            // All values valid — commit to dataset
+            for (auto i = 0; i < features.size(); ++i) {
+                Xv[i].push_back(row_values[i]);
             }
             // Target (last column) → factorize
             auto label = trim(tokens.back());

@@ -77,8 +77,8 @@ namespace platform {
             std::cout << " ( " << Colors::GREEN() << "c" << Colors::RESET() << " )  Scoring test dataset" << std::endl << std::endl;
             std::cout << Colors::YELLOW() << "Note: fold number in this color means fitting had issues such as not using all features in BoostAODE classifier" << std::endl << std::endl;
             int nc = 4 + 3 * nfolds + (nfolds >= 10 ? nfolds - 10 + 1 : 0);
-            std::cout << Colors::GREEN() << left << "  #  " << setw(max_name) << "Dataset" << " #Samp #Feat Seed Status" << string(nc - 6, ' ') << setw(11) << " Time" << " Score" << std::endl;
-            std::cout << " --- " << string(max_name, '-') << " ----- ----- ---- " << string(nc, '-') << " ----------" << " ---------";
+            std::cout << Colors::GREEN() << left << "  #  " << setw(max_name) << "Dataset" << " #Samp #Feat  k  Seed Status" << string(nc - 6, ' ') << setw(11) << " Time" << " Score" << std::endl;
+            std::cout << " --- " << string(max_name, '-') << " ----- ----- --- ---- " << string(nc, '-') << " ----------" << " ---------";
             std::cout << Colors::RESET() << std::endl;
         }
         int num = 0;
@@ -174,7 +174,7 @@ namespace platform {
         auto labels = dataset.getLabels();
         int num_classes = dataset.getNClasses();
         if (!quiet) {
-            std::cout << " " << setw(5) << n_samples << " " << setw(5) << n_features << flush;
+            std::cout << " " << setw(5) << n_samples << " " << setw(5) << n_features << " " << setw(3) << num_classes << flush;
         }
         //
         // Prepare Result
@@ -206,10 +206,11 @@ namespace platform {
         auto score = parse_score();
         for (auto seed : randomSeeds) {
             seed_timer.start();
+            double seed_score_sum = 0.0;
             if (!quiet) {
                 string prefix = " ";
                 if (!first_seed) {
-                    prefix = "\n" + string(18 + max_name, ' ');
+                    prefix = "\n" + string(22 + max_name, ' ');
                 }
                 std::cout << prefix << setw(4) << right << seed << " " << flush;
                 first_seed = false;
@@ -278,6 +279,7 @@ namespace platform {
                 test_time[item] = test_timer.getDuration();
                 score_train[item] = score_train_value;
                 score_test[item] = score_test_value;
+                seed_score_sum += score_test_value;
                 if (discretized)
                     confusion_matrices.push_back(scores.get_confusion_matrix_json(true));
                 if (!quiet)
@@ -301,17 +303,22 @@ namespace platform {
             if (!quiet) {
                 seed_timer.stop();
                 std::cout << "end. " << std::setw(10) << std::right << seed_timer.getDurationString();
+                if (randomSeeds.size() > 1) {
+                    const auto seed_score_mean = seed_score_sum / static_cast<double>(nfolds);
+                    std::cout << " " << Colors::YELLOW() << std::setw(9) << std::right << std::fixed << std::setprecision(7) << seed_score_mean << Colors::RESET();
+                }
             }
             delete fold;
         }
         // Show Results
+        auto score_mean = torch::mean(score_test).item<double>();
         if (!quiet)
-            std::cout << " " << setw(9) << right << std::fixed << std::setprecision(7) << torch::mean(score_test).item<double>();
+            std::cout << " " << Colors::GREEN() << setw(9) << right << std::fixed << std::setprecision(7) << score_mean << Colors::RESET();
         //
         // Store result totals in Result
         //
         partial_result.setGraph(graphs);
-        partial_result.setScoreTest(torch::mean(score_test).item<double>()).setScoreTrain(torch::mean(score_train).item<double>());
+        partial_result.setScoreTest(score_mean).setScoreTrain(torch::mean(score_train).item<double>());
         partial_result.setScoreTestStd(torch::std(score_test).item<double>()).setScoreTrainStd(torch::std(score_train).item<double>());
         partial_result.setTrainTime(torch::mean(train_time).item<double>()).setTestTime(torch::mean(test_time).item<double>());
         partial_result.setTestTimeStd(torch::std(test_time).item<double>()).setTrainTimeStd(torch::std(train_time).item<double>());

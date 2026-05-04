@@ -39,15 +39,10 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 
-#find_package(Boost 1.66.0 REQUIRED COMPONENTS python3 numpy3) 
+find_package(Boost 1.66.0 REQUIRED COMPONENTS python3 numpy3) 
 
 # # Python
-# find_package(Python3 REQUIRED COMPONENTS Development)
-
-# # Boost Python
-# find_package(boost_python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR} CONFIG REQUIRED COMPONENTS python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
-# # target_link_libraries(MyTarget PRIVATE Boost::python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
-
+find_package(Python3 REQUIRED COMPONENTS Development)
 
 if(Boost_FOUND)
     message("Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")
@@ -67,7 +62,7 @@ find_package(arff-files CONFIG REQUIRED)
 find_package(fimdlp CONFIG REQUIRED)
 find_package(folding CONFIG REQUIRED)
 find_package(bayesnet CONFIG REQUIRED)
-# find_package(pyclassifiers CONFIG REQUIRED)
+find_package(pyclassifiers CONFIG REQUIRED)
 find_package(libxlsxwriter CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS python)
 

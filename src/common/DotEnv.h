@@ -2,18 +2,19 @@
 #define DOTENV_H
 #include <string>
 #include <map>
+#include <set>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
 #include <iostream>
 #include "Utils.h"
 
-//#include "Dataset.h"
 namespace platform {
     class DotEnv {
     private:
         std::map<std::string, std::string> env;
         std::map<std::string, std::vector<std::string>> valid;
+        std::set<std::string> optional_keys = { "csv_json_path" };
     public:
         DotEnv(bool create = false)
         {
@@ -21,7 +22,7 @@ namespace platform {
             {
                 {"depth", {"any"}},
                 {"discretize", {"0", "1"}},
-                {"discretize_algo", {"mdlp", "bin3u", "bin3q", "bin4u", "bin4q", "bin5q", "bin5u", "bin6q", "bin6u", "bin7q", "bin7u", "bin8q", "bin8u", "bin9q", "bin9u", "bin10q", "bin10u"}},
+                {"discretize_algo", {"mdlp", "mdlp3", "mdlp4", "mdlp5", "pkisqrt", "pkilog","bin3u", "bin3q", "bin4u", "bin4q", "bin5q", "bin5u", "bin6q", "bin6u", "bin7q", "bin7u", "bin8q", "bin8u", "bin9q", "bin9u", "bin10q", "bin10u"}},
                 {"experiment", {"discretiz", "odte", "covid", "Test"}},
                 {"fit_features", {"0", "1"}},
                 {"framework", {"bulma", "bootstrap"}},
@@ -36,7 +37,8 @@ namespace platform {
                 {"score", {"accuracy", "roc-auc-ovr"}},
                 {"seeds", {"any"}},
                 {"smooth_strat", {"ORIGINAL", "LAPLACE", "CESTNIK"}},
-                {"source_data", {"Arff", "Tanveer", "Surcov", "Test"}},
+                {"source_data", {"Arff", "Tanveer", "Surcov", "CsvJSON", "Test"}},
+                {"csv_json_path", {"any"}},
             };
             if (create) {
                 // For testing purposes
@@ -121,6 +123,9 @@ namespace platform {
         {
             for (auto& [key, values] : valid) {
                 if (env.find(key) == env.end()) {
+                    if (optional_keys.count(key)) {
+                        continue;
+                    }
                     std::cerr << "Key not found in .env: " << key << ", valid values: " << valid_values(key) << std::endl;
                     exit(1);
                 }
@@ -129,6 +134,9 @@ namespace platform {
         std::string get(const std::string& key)
         {
             if (env.find(key) == env.end()) {
+                if (optional_keys.count(key)) {
+                    return "";
+                }
                 std::cerr << "Key not found in .env: " << key << std::endl;
                 exit(1);
             }

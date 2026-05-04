@@ -1,5 +1,4 @@
 #include <iostream>
-#include <locale>
 #include <map>
 #include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>

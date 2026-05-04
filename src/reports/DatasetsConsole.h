@@ -1,6 +1,5 @@
 #ifndef DATASETSCONSOLE_H
 #define DATASETSCONSOLE_H
-#include <locale>
 #include <sstream>
 #include <nlohmann/json.hpp>
 #include "ReportsPaged.h"

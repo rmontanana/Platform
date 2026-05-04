@@ -28,7 +28,7 @@ namespace platform {
         maxTitle = results.maxTitleSize();
         header_lengths = { 3, 10, maxModel, 11, 10, 12, 2, 3, 7, maxTitle };
         header_labels = { " #", "Date", "Model", "Score Name", "Score", "Platform", "SD", "C/P", "Time", "Title" };
-        sort_fields = { "Date", "Model", "Score", "Time" };
+        sort_fields = { "Date", "Model", "Score", "Time", "Title" };
         updateSize(rows, cols);
         // Initializes the paginator for each output type (experiments, datasets, result)
         for (int i = 0; i < static_cast<int>(OutputType::Count); i++) {
@@ -120,15 +120,16 @@ namespace platform {
     }
     void ManageScreen::footer(const std::string& status, const std::string& status_color)
     {
-        std::stringstream oss;
-        oss << " A: " << (index_A == -1 ? "<notset>" : std::to_string(index_A)) <<
+        std::stringstream ab_indices, folder;
+        folder << " Folder: " << path;
+        auto color = (index_A != -1 && index_B != -1) ? Colors::IGREEN() : Colors::IYELLOW();
+        ab_indices << " A: " << (index_A == -1 ? "<notset>" : std::to_string(index_A)) <<
             " B: " << (index_B == -1 ? "<notset>" : std::to_string(index_B)) << " ";
-        int status_length = std::max(oss.str().size(), cols - oss.str().size());
+        int status_length = std::max(ab_indices.str().size() + folder.str().size(), cols - ab_indices.str().size() - folder.str().size());
         auto status_message = status.substr(0, status_length - 1);
         std::string status_line = status_message + std::string(std::max(size_t(0), status_length - status_message.size() - 1), ' ');
-        auto color = (index_A != -1 && index_B != -1) ? Colors::IGREEN() : Colors::IYELLOW();
-        std::cout << color << Colors::REVERSE() << oss.str() << Colors::RESET() << Colors::WHITE()
-            << Colors::REVERSE() << status_color << " " << status_line << Colors::IWHITE()
+        std::cout << Colors::REVERSE() << Colors::WHITE() << folder.str() << color << Colors::REVERSE() << ab_indices.str()
+            << Colors::RESET() << Colors::WHITE() << Colors::REVERSE() << status_color << " " << status_line
             << Colors::RESET() << std::endl;
     }
     void ManageScreen::list(const std::string& status_message, const std::string& status_color)
@@ -342,13 +343,33 @@ namespace platform {
         }
         list("Model changed to " + newModel, Colors::GREEN());
     }
+    void ManageScreen::moveResult(const int index)
+    {
+        std::cout << "Move to subfolder: ";
+        std::string subfolder;
+        getline(std::cin, subfolder);
+        if (subfolder.empty()) {
+            list("Result not moved", Colors::YELLOW());
+            return;
+        }
+        // Remove the old result file
+        std::string oldFile = path + results.at(index).getFilename();
+        std::filesystem::remove(oldFile);
+        std::string newPath = path + (subfolder.back() == '/' ? subfolder : subfolder + "/");
+        // Actually change the model
+        results.at(index).save(newPath);
+        results.deleteResult(index);
+        paginator[static_cast<int>(OutputType::EXPERIMENTS)].setTotal(results.size());
+        list("Result moved to " + newPath, Colors::GREEN());
+    }
     std::pair<std::string, std::string> ManageScreen::sortList()
     {
         std::vector<std::tuple<std::string, char, bool>>  sortOptions = {
             {"date", 'd', false},
+            {"model", 'm', false},
             {"score", 's', false},
             {"time", 't', false},
-            {"model", 'm', false},
+            {"title", 'i', false},
             {"ascending+", '+', false},
             {"descending-", '-', false}
         };
@@ -379,6 +400,9 @@ namespace platform {
             case 'm':
                 sort_field = SortField::MODEL;
                 break;
+            case 'i':
+                sort_field = SortField::TITLE;
+                break;
             case '+':
                 sort_type = SortType::ASC;
                 break;
@@ -404,6 +428,7 @@ namespace platform {
             {"datasets", 'd', false},
             {"change model", 'm', true},
             {"hide", 'h', true},
+            {"Move", 'M', true},
             {"sort", 's', false},
             {"report", 'r', true},
             {"excel", 'e', true},
@@ -530,6 +555,9 @@ namespace platform {
                     break;
                 case 'm':
                     changeModel(index);
+                    break;
+                case 'M':
+                    moveResult(index);
                     break;
                 case 'h':
                     {

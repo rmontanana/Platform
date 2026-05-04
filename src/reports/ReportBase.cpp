@@ -1,5 +1,4 @@
 #include <sstream>
-#include <locale>
 #include "common/Datasets.h"
 #include "common/DotEnv.h"
 #include "ReportBase.h"

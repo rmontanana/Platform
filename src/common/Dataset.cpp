@@ -1,5 +1,7 @@
 #include <ArffFiles.hpp>
 #include <fstream>
+#include <set>
+#include <nlohmann/json.hpp>
 #include "Dataset.h"
 namespace platform {
     const std::string message_dataset_not_loaded = "Dataset not loaded.";
@@ -23,7 +25,7 @@ namespace platform {
             throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
-    int Dataset::getNFeatures() const
+    long Dataset::getNFeatures() const
     {
         if (loaded) {
             return n_features;
@@ -31,7 +33,7 @@ namespace platform {
             throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
-    int Dataset::getNSamples() const
+    long Dataset::getNSamples() const
     {
         if (loaded) {
             return n_samples;
@@ -129,12 +131,16 @@ namespace platform {
     void Dataset::computeStates()
     {
         for (int i = 0; i < features.size(); ++i) {
-            auto [max_value, idx] = torch::max(X_train.index({ i, "..." }), 0);
-            states[features[i]] = std::vector<int>(max_value.item<int>() + 1);
+            auto [max_train, _1] = torch::max(X_train.index({ i, "..." }), 0);
+            auto [max_test, _2] = torch::max(X_test.index({ i, "..." }), 0);
+            auto max_value = std::max(max_train.item<int>(), max_test.item<int>());
+            states[features[i]] = std::vector<int>(max_value + 1);
             iota(begin(states.at(features[i])), end(states.at(features[i])), 0);
         }
-        auto [max_value, idx] = torch::max(y_train, 0);
-        states[className] = std::vector<int>(max_value.item<int>() + 1);
+        auto [max_train, _1] = torch::max(y_train, 0);
+        auto [max_test, _2] = torch::max(y_test, 0);
+        auto max_value = std::max(max_train.item<int>(), max_test.item<int>());
+        states[className] = std::vector<int>(max_value + 1);
         iota(begin(states.at(className)), end(states.at(className)), 0);
     }
     void Dataset::load_arff()
@@ -201,6 +207,114 @@ namespace platform {
         }
         file.close();
     }
+    void Dataset::load_csv_json()
+    {
+        using json = nlohmann::ordered_json;
+        // 1. Read metadata JSON
+        std::ifstream metaFile(path + name + "_metadata.json");
+        if (!metaFile.is_open()) {
+            throw std::invalid_argument("Unable to open metadata file: " + path + name + "_metadata.json");
+        }
+        auto metadata = json::parse(metaFile);
+        metaFile.close();
+        className = metadata.at("target_name");
+        // Build set of numeric feature names for quick lookup
+        std::set<std::string> numericSet;
+        std::set<std::string> categoricalSet;
+        if (metadata.contains("feature_types")) {
+            auto& ft = metadata["feature_types"];
+            if (ft.contains("numeric")) {
+                for (auto& f : ft["numeric"]) {
+                    numericSet.insert(f.get<std::string>());
+                }
+            }
+            if (ft.contains("categorical")) {
+                for (auto& f : ft["categorical"]) {
+                    categoricalSet.insert(f.get<std::string>());
+                }
+            }
+        }
+        // 2. Read CSV
+        std::ifstream file(path + name + ".csv");
+        if (!file.is_open()) {
+            throw std::invalid_argument("Unable to open dataset file: " + path + name + ".csv");
+        }
+        labels.clear();
+        std::string line;
+        // Read header
+        getline(file, line);
+        std::vector<std::string> header = split(line, ',');
+        // All columns except the last are features (target is last column)
+        features = std::vector<std::string>(header.begin(), header.end() - 1);
+        for (auto i = 0; i < features.size(); ++i) {
+            features[i] = trim(features[i]);
+            Xv.push_back(std::vector<float>());
+        }
+        // Factorization maps for categorical features (per feature index)
+        std::vector<std::map<std::string, int>> factorMaps(features.size());
+        // Factorization map for target
+        std::map<std::string, int> labelMap;
+        // Read data rows, skipping rows with missing or corrupt data
+        auto expectedColumns = features.size() + 1;
+        while (getline(file, line)) {
+            if (line.empty()) continue;
+            std::vector<std::string> tokens = split(line, ',');
+            // Check for correct number of columns
+            if (tokens.size() != expectedColumns) continue;
+            // Check for missing values in any column
+            bool has_missing = false;
+            for (auto i = 0; i < tokens.size(); ++i) {
+                if (trim(tokens[i]).empty()) {
+                    has_missing = true;
+                    break;
+                }
+            }
+            if (has_missing) continue;
+            // Parse feature values into a buffer before committing
+            bool has_invalid = false;
+            std::vector<float> row_values(features.size());
+            for (auto i = 0; i < features.size(); ++i) {
+                auto value = trim(tokens[i]);
+                if (numericSet.count(features[i])) {
+                    // Numeric feature
+                    try {
+                        row_values[i] = stof(value);
+                    } catch (const std::invalid_argument&) {
+                        has_invalid = true;
+                        break;
+                    }
+                } else {
+                    // Categorical feature → factorize
+                    if (factorMaps[i].find(value) == factorMaps[i].end()) {
+                        factorMaps[i][value] = static_cast<int>(factorMaps[i].size());
+                    }
+                    row_values[i] = static_cast<float>(factorMaps[i][value]);
+                }
+            }
+            if (has_invalid) continue;
+            // All values valid — commit to dataset
+            for (auto i = 0; i < features.size(); ++i) {
+                Xv[i].push_back(row_values[i]);
+            }
+            // Target (last column) → factorize
+            auto label = trim(tokens.back());
+            if (labelMap.find(label) == labelMap.end()) {
+                labelMap[label] = static_cast<int>(labelMap.size());
+                labels.push_back(label);
+            }
+            yv.push_back(labelMap[label]);
+        }
+        file.close();
+        // 3. Build numericFeatures[] from metadata
+        numericFeatures.resize(features.size(), false);
+        numericFeaturesIdx.clear();
+        for (int i = 0; i < features.size(); ++i) {
+            if (numericSet.count(features[i])) {
+                numericFeatures[i] = true;
+                numericFeaturesIdx.push_back(i);
+            }
+        }
+    }
     void Dataset::load()
     {
         if (loaded) {
@@ -212,18 +326,26 @@ namespace platform {
             load_arff();
         } else if (fileType == RDATA) {
             load_rdata();
+        } else if (fileType == CSVJSON) {
+            load_csv_json();
         }
         n_samples = Xv[0].size();
         n_features = Xv.size();
-        if (numericFeaturesIdx.size() == 0) {
-            numericFeatures = std::vector<bool>(n_features, false);
-        } else {
-            if (numericFeaturesIdx.at(0) == -1) {
-                numericFeatures = std::vector<bool>(n_features, true);
-            } else {
+        if (fileType != CSVJSON) {
+            // CSVJSON builds numericFeatures inside load_csv_json()
+            if (numericFeaturesIdx.size() == 0) {
+                // None of the features are numeric
                 numericFeatures = std::vector<bool>(n_features, false);
-                for (auto i : numericFeaturesIdx) {
-                    numericFeatures[i] = true;
+            } else {
+                if (numericFeaturesIdx.at(0) == -1) {
+                    // All the features are numeric
+                    numericFeatures = std::vector<bool>(n_features, true);
+                } else {
+                    // Only some of the features are numeric
+                    numericFeatures = std::vector<bool>(n_features, false);
+                    for (auto i : numericFeaturesIdx) {
+                        numericFeatures[i] = true;
+                    }
                 }
             }
         }

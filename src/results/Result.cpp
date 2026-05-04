@@ -1,6 +1,8 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <random>
+#include <cstdlib>
 #include "best/BestScore.h"
 #include "common/Colors.h"
 #include "common/DotEnv.h"
@@ -34,14 +36,25 @@ namespace platform {
     }
     Result::Result()
     {
+        path = Paths::results();
+        fileName = "none";
         data["date"] = get_actual_date();
         data["time"] = get_actual_time();
         data["results"] = json::array();
         data["seeds"] = json::array();
+        complete = false;
     }
-
-    Result& Result::load(const std::string& path, const std::string& fileName)
+    std::string Result::getFilename() const
     {
+        if (fileName == "none") {
+            throw std::runtime_error("Filename is not set. Use save() method to generate a filename.");
+        }
+        return fileName;
+    }
+    Result::Result(const std::string& path, const std::string& fileName)
+    {
+        this->path = path;
+        this->fileName = fileName;
         std::ifstream resultData(path + "/" + fileName);
         if (resultData.is_open()) {
             data = json::parse(resultData);
@@ -58,7 +71,6 @@ namespace platform {
             score /= best.second;
         }
         complete = data["results"].size() > 1;
-        return *this;
     }
     json Result::getJson()
     {
@@ -71,11 +83,15 @@ namespace platform {
     }
     void Result::save(const std::string& path)
     {
-        std::ofstream file(path + getFilename());
+        do {
+            fileName = generateFileName();
+        }
+        while (std::filesystem::exists(path + fileName));
+        std::ofstream file(path + fileName);
         file << data;
         file.close();
     }
-    std::string Result::getFilename() const
+    std::string Result::generateFileName()
     {
         std::ostringstream oss;
         std::string stratified;
@@ -85,13 +101,31 @@ namespace platform {
         catch (nlohmann::json_abi_v3_11_3::detail::type_error) {
             stratified = data["stratified"].get<int>() == 1 ? "1" : "0";
         }
+        auto generateRandomString = [](int length) -> std::string {
+            const char alphanum[] =
+                "0123456789"
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                "abcdefghijklmnopqrstuvwxyz";
+
+            // Use thread-local static generator to avoid interfering with global random state
+            thread_local static std::random_device rd;
+            thread_local static std::mt19937 gen(rd());
+            std::uniform_int_distribution<> dis(0, sizeof(alphanum) - 2);
+
+            std::string result;
+            for (int i = 0; i < length; ++i) {
+                result += alphanum[dis(gen)];
+            }
+            return result;
+            };
         oss << "results_"
             << data.at("score_name").get<std::string>() << "_"
             << data.at("model").get<std::string>() << "_"
             << data.at("platform").get<std::string>() << "_"
             << data["date"].get<std::string>() << "_"
             << data["time"].get<std::string>() << "_"
-            << stratified << ".json";
+            << stratified << "_"
+            << generateRandomString(5) << ".json";
         return oss.str();
     }
     std::string Result::to_string(int maxModel, int maxTitle) const

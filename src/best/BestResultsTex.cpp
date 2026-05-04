@@ -64,8 +64,15 @@ namespace platform {
             else
                 handler << dataset << " ";
             for (const auto& model : models) {
-                double value = table[model].at(dataset).at(0).get<double>();
-                double std_value = table[model].at(dataset).at(3).get<double>();
+                double value, std_value;
+                try {
+                    value = table[model].at(dataset).at(0).get<double>();
+                    std_value = table[model].at(dataset).at(3).get<double>();
+                }
+                catch (nlohmann::json_abi_v3_11_3::detail::out_of_range err) {
+                    handler << "& N/A ";
+                    continue;
+                }
                 const char* bold = value == max_value ? "\\bfseries" : "";
                 handler << "& " << bold << std::setprecision(4) << std::fixed << value << "$\\pm$" << std::setprecision(3) << std_value;
             }
@@ -76,10 +83,10 @@ namespace platform {
     {
         handler << "\\hline" << std::endl;
         handler << "Average ";
-        int nDatasets = totals.begin()->second.size();
         for (const auto& model : models) {
-            double value = std::reduce(totals.at(model).begin(), totals.at(model).end()) / nDatasets;
-            double std_value = compute_std(totals.at(model), value);
+            int modelDatasets = totals.at(model).size();
+            double value = modelDatasets > 0 ? std::reduce(totals.at(model).begin(), totals.at(model).end()) / modelDatasets : 0.0;
+            double std_value = modelDatasets > 0 ? compute_std(totals.at(model), value) : 0.0;
             const char* bold = model == best_model ? "\\bfseries" : "";
             handler << "& " << bold << std::setprecision(4) << std::fixed << value << "$\\pm$" << std::setprecision(3) << std::fixed << std_value;
         }

@@ -7,6 +7,7 @@
 #include <cctype>
 #include "common/Colors.h"
 #include "common/CLocale.h"
+#include "common/Datasets.h"
 #include "common/Paths.h"
 #include "common/Utils.h" // compute_std
 #include "results/Result.h"
@@ -41,8 +42,7 @@ namespace platform {
         }
         json bests;
         for (const auto& file : files) {
-            auto result = Result();
-            result.load(path, file);
+            auto result = Result(path, file);
             auto data = result.getJson();
             for (auto const& item : data.at("results")) {
                 bool update = true;
@@ -146,6 +146,16 @@ namespace platform {
         maxDatasetName = std::max(7, maxDatasetName);
         return datasets;
     }
+    std::vector<std::string> BestResults::getAllDatasets(json table)
+    {
+        auto allDatasets = Datasets(false, Paths::datasets());
+        auto datasets = allDatasets.getNames();
+        if (!datasets.empty()) {
+            maxDatasetName = (*max_element(datasets.begin(), datasets.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size();
+            maxDatasetName = std::max(7, maxDatasetName);
+        }
+        return datasets;
+    }
     void BestResults::buildAll()
     {
         auto models = getModels();
@@ -226,6 +236,7 @@ namespace platform {
 
     void BestResults::printTableResults(std::vector<std::string> models, json table, bool tex, bool index)
     {
+        auto temp = ConfigLocale();
         std::stringstream oss;
         oss << Colors::GREEN() << "Best results for " << score << " as of " << table.at("dateTable").get<std::string>() << std::endl;
         std::cout << oss.str();
@@ -248,8 +259,8 @@ namespace platform {
         std::cout << std::endl;
         auto i = 0;
         std::map<std::string, std::vector<double>> totals;
-        int nDatasets = table.begin().value().size();
-        auto datasets = getDatasets(table.begin().value());
+        auto datasets = getAllDatasets(table);
+        int nDatasets = datasets.size();
         if (tex) {
             bestResultsTex.results_body(datasets, table, index);
             bestResultsMd.results_body(datasets, table);
@@ -318,8 +329,9 @@ namespace platform {
         }
         for (const auto& model : models) {
             std::string efectiveColor = model == best_model ? Colors::RED() : Colors::GREEN();
-            double value = std::reduce(totals[model].begin(), totals[model].end()) / nDatasets;
-            double std = compute_std(totals[model], value);
+            int modelDatasets = totals[model].size();
+            double value = modelDatasets > 0 ? std::reduce(totals[model].begin(), totals[model].end()) / modelDatasets : 0.0;
+            double std = modelDatasets > 0 ? compute_std(totals[model], value) : 0.0;
             std::cout << efectiveColor << std::right << std::setw(maxModelName - 6) << std::setprecision(maxModelName - 8) << std::fixed << value;
             std::cout << efectiveColor << "±" << std::setw(5) << std::setprecision(3) << std::fixed << std << " ";
         }
@@ -332,7 +344,7 @@ namespace platform {
             auto models = getModels();
             // Build the table of results
             json table = buildTableResults(models);
-            std::vector<std::string> datasets = getDatasets(table.begin().value());
+            std::vector<std::string> datasets = getAllDatasets(table);
             BestResultsExcel excel_report(path, score, datasets);
             excel_report.reportSingle(model, path + Paths::bestResultsFile(score, model));
             messageOutputFile("Excel", excel_report.getFileName());
@@ -344,7 +356,7 @@ namespace platform {
         auto models = getModels();
         // Build the table of results
         json table = buildTableResults(models);
-        std::vector<std::string> datasets = getDatasets(table.begin().value());
+        std::vector<std::string> datasets = getAllDatasets(table);
         // Print the table of results
         printTableResults(models, table, tex, index);
         // Compute the Friedman test

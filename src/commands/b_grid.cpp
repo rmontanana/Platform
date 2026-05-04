@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdio>
 #include <argparse/argparse.hpp>
 #include <map>
 #include <nlohmann/json.hpp>
@@ -213,6 +214,11 @@ void search(argparse::ArgumentParser& program)
     struct platform::ConfigMPI mpi_config;
     mpi_config.manager = 0; // which process is the manager
     MPI_Init(nullptr, nullptr);
+    
+    // Disable buffering for stdout to ensure real-time progress output
+    // This must be done after MPI_Init
+    std::setvbuf(stdout, nullptr, _IONBF, 0);  // Completely disable buffering
+    std::cout.setf(std::ios::unitbuf);  // Also set unitbuf flag for cout
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_config.rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_config.n_procs);
     if (mpi_config.n_procs < 2) {
@@ -239,6 +245,11 @@ void experiment(argparse::ArgumentParser& program)
     struct platform::ConfigMPI mpi_config;
     mpi_config.manager = 0; // which process is the manager
     MPI_Init(nullptr, nullptr);
+    
+    // Disable buffering for stdout to ensure real-time progress output
+    // This must be done after MPI_Init
+    std::setvbuf(stdout, nullptr, _IONBF, 0);  // Completely disable buffering
+    std::cout.setf(std::ios::unitbuf);  // Also set unitbuf flag for cout
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_config.rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_config.n_procs);
     if (mpi_config.n_procs < 2) {

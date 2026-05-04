@@ -7,6 +7,7 @@
 #include <vector>
 #include <fimdlp/Discretizer.h>
 #include <fimdlp/BinDisc.h>
+#include <fimdlp/PKIDisc.h>
 #include <fimdlp/CPPFImdlp.h>
 namespace platform {
     class Discretization {

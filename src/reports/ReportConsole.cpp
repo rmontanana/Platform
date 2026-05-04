@@ -1,5 +1,4 @@
 #include <iostream>
-#include <locale>
 #include "best/BestScore.h"
 #include "common/CLocale.h"
 #include "common/Timer.hpp"

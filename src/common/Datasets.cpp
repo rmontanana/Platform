@@ -1,6 +1,8 @@
 #include <fstream>
-#include<algorithm>
+#include <algorithm>
+#include <filesystem>
 #include "Datasets.h"
+#include "DotEnv.h"
 #include <nlohmann/json.hpp>
 
 namespace platform {
@@ -19,6 +21,10 @@ namespace platform {
         auto sd = SourceData(sfileType);
         fileType = sd.getFileType();
         path = sd.getPath();
+        if (fileType == CSVJSON) {
+            loadCsvJson();
+            return;
+        }
         ifstream catalog(path + "all.txt");
         std::vector<int> numericFeaturesIdx;
         if (!catalog.is_open()) {
@@ -76,6 +82,40 @@ namespace platform {
             datasets[name] = make_unique<Dataset>(path, name, className, discretize, fileType, numericFeaturesIdx, discretizer_algorithm);
         }
         catalog.close();
+    }
+    void Datasets::loadCsvJson()
+    {
+        auto env = DotEnv();
+        path = env.get("csv_json_path");
+        if (path.empty()) {
+            throw std::invalid_argument("csv_json_path is required in .env when source_data=CsvJSON");
+        }
+        if (!path.empty() && path.back() != '/') {
+            path += '/';
+        }
+        for (const auto& entry : std::filesystem::directory_iterator(path)) {
+            if (entry.path().extension() != ".json") {
+                continue;
+            }
+            auto stem = entry.path().stem().string();
+            const std::string suffix = "_metadata";
+            if (stem.size() <= suffix.size() || stem.substr(stem.size() - suffix.size()) != suffix) {
+                continue;
+            }
+            auto name = stem.substr(0, stem.size() - suffix.size());
+            // Read metadata JSON to get className and feature types
+            std::ifstream metaFile(entry.path());
+            if (!metaFile.is_open()) {
+                throw std::invalid_argument("Unable to open metadata file: " + entry.path().string());
+            }
+            auto metadata = json::parse(metaFile);
+            metaFile.close();
+            std::string className = metadata.at("target_name");
+            // numericFeaturesIdx is not used for CSVJSON - load_csv_json() resolves
+            // numeric features by name from the metadata JSON directly
+            std::vector<int> numericFeaturesIdx;
+            datasets[name] = make_unique<Dataset>(path, name, className, discretize, fileType, numericFeaturesIdx, discretizer_algorithm);
+        }
     }
     std::vector<std::string> Datasets::getNames()
     {

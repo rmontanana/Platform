@@ -13,8 +13,7 @@ namespace platform {
         for (const auto& file : directory_iterator(path)) {
             auto filename = file.path().filename().string();
             if (filename.find(".json") != std::string::npos && filename.find("results_") == 0) {
-                auto result = Result();
-                result.load(path, filename);
+                auto result = Result(path, filename);
                 bool addResult = true;
                 if (platform != "any" && result.getPlatform() != platform
                     || model != "any" && result.getModel() != model
@@ -89,6 +88,16 @@ namespace platform {
             return a.getDuration() > b.getDuration();
             });
     }
+    void ResultsManager::sortTitle(SortType type)
+    {
+        if (empty())
+            return;
+        sort(files.begin(), files.end(), [type](const Result& a, const Result& b) {
+            if (type == SortType::ASC)
+                return a.getTitle() < b.getTitle();
+            return a.getTitle() > b.getTitle();
+            });
+    }
     void ResultsManager::sortScore(SortType type)
     {
         if (empty())
@@ -119,6 +128,9 @@ namespace platform {
                 break;
             case SortField::DURATION:
                 sortDuration(type);
+                break;
+            case SortField::TITLE:
+                sortTitle(type);
                 break;
         }
     }

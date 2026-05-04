@@ -1,5 +1,6 @@
 #include <random>
 #include <cstddef>
+#include <cstdio>
 #include "common/DotEnv.h"
 #include "common/Paths.h"
 #include "common/Colors.h"
@@ -268,7 +269,10 @@ namespace platform {
             if (status.MPI_TAG == TAG_RESULT) {
                 //Store result
                 store_result(names, result, results);
-
+                // Display progress in the manager process using the worker's rank
+                std::cout << get_color_rank(result.process) << std::flush;
+                std::cout.flush();
+                std::fflush(stdout);
             }
             MPI_Send(&i, 1, MPI_INT, status.MPI_SOURCE, TAG_TASK, MPI_COMM_WORLD);
         }
@@ -281,6 +285,10 @@ namespace platform {
             if (status.MPI_TAG == TAG_RESULT) {
                 //Store result
                 store_result(names, result, results);
+                // Display progress in the manager process using the worker's rank
+                std::cout << get_color_rank(result.process) << std::flush;
+                std::cout.flush();
+                std::fflush(stdout);
             }
             MPI_Send(&i, 1, MPI_INT, status.MPI_SOURCE, TAG_END, MPI_COMM_WORLD);
         }

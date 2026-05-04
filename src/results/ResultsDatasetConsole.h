@@ -1,6 +1,5 @@
 #ifndef RESULTSDATASETSCONSOLE_H
 #define RESULTSDATASETSCONSOLE_H
-#include <locale>
 #include <string>
 #include <sstream>
 #include <nlohmann/json.hpp>

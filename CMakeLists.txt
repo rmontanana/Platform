@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(Platform
-  VERSION 1.1.0
+  VERSION 1.1.2
   DESCRIPTION "Platform to run Experiments with classifiers."
   HOMEPAGE_URL "https://github.com/rmontanana/platform"
   LANGUAGES CXX
@@ -43,11 +43,6 @@ find_package(Boost 1.66.0 REQUIRED COMPONENTS python3 numpy3)
 
 # # Python
 find_package(Python3 REQUIRED COMPONENTS Development)
-
-# # Boost Python
-# find_package(boost_python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR} CONFIG REQUIRED COMPONENTS python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
-# # target_link_libraries(MyTarget PRIVATE Boost::python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
-
 
 if(Boost_FOUND)
     message("Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")

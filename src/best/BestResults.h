@@ -19,6 +19,7 @@ namespace platform {
     private:
         std::vector<std::string> getModels();
         std::vector<std::string> getDatasets(json table);
+        std::vector<std::string> getAllDatasets(json table);
         std::vector<std::string> loadResultFiles();
         void messageOutputFile(const std::string& title, const std::string& fileName);
         json buildTableResults(std::vector<std::string> models);

@@ -4,7 +4,7 @@ from conan.tools.cmake import CMakeToolchain, CMakeDeps, cmake_layout
 
 class PlatformConan(ConanFile):
     name = "platform"
-    version = "1.1.0"
+    version = "1.1.2"
     
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
@@ -18,9 +18,9 @@ class PlatformConan(ConanFile):
         self.requires("libtorch/2.7.1")
         self.requires("nlohmann_json/3.11.3")
         self.requires("folding/1.1.2")
-        self.requires("fimdlp/2.1.1")
+        self.requires("fimdlp/2.1.3")
         self.requires("arff-files/1.2.1")
-        self.requires("bayesnet/1.2.1")
+        self.requires("bayesnet/1.2.3")
         self.requires("pyclassifiers/1.0.3")
         self.requires("libxlsxwriter/1.2.2")
         

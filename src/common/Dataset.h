@@ -27,8 +27,8 @@ namespace platform {
         std::pair<vector<std::vector<float>>&, std::vector<int>&> getVectors();
         std::pair<torch::Tensor&, torch::Tensor&> getTensors();
         std::tuple<torch::Tensor&, torch::Tensor&, torch::Tensor&, torch::Tensor&> getTrainTestTensors(std::vector<int>& train, std::vector<int>& test);
-        int getNFeatures() const;
-        int getNSamples() const;
+        long getNFeatures() const;
+        long getNSamples() const;
         std::vector<bool>& getNumericFeatures() { return numericFeatures; }
         void load();
         const bool inline isLoaded() const { return loaded; };
@@ -37,7 +37,7 @@ namespace platform {
         std::string name;
         fileType_t fileType;
         std::string className;
-        int n_samples{ 0 }, n_features{ 0 };
+        long n_samples{ 0 }, n_features{ 0 };
         std::vector<int> numericFeaturesIdx;
         std::string discretizer_algorithm;
         std::vector<bool> numericFeatures; // true if feature is numeric
@@ -53,6 +53,7 @@ namespace platform {
         void load_csv();
         void load_arff();
         void load_rdata();
+        void load_csv_json();
         void computeStates();
         std::vector<mdlp::labels_t> discretizeDataset(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y);
     };

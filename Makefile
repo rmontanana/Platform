@@ -111,9 +111,8 @@ release: ## Build a Release version of the project with Conan
 opt = ""
 test: ## Run tests (opt="-s") to verbose output the tests, (opt="-c='Test Maximum Spanning Tree'") to run only that section
 	@echo ">>> Running Platform tests...";
-	@$(MAKE) clean
 	@$(MAKE) debug
-	@$(call "Compile_target", "Debug", "$(f_debug)", $(test_targets))
+	@$(call compile_target, "Debug", "$(f_debug)", $(test_targets))
 	@for t in $(test_targets); do \
 		if [ -f $(f_debug)/tests/$$t ]; then \
 			cd $(f_debug)/tests ; \

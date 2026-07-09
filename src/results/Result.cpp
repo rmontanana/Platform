@@ -81,12 +81,14 @@ namespace platform {
         platform::JsonValidator validator(platform::SchemaV1_0::schema);
         return validator.validate(data);
     }
-    void Result::save(const std::string& path)
+    void Result::save(const std::string& path, const bool generate_filename)
     {
-        do {
-            fileName = generateFileName();
+        if (generate_filename) {
+            do {
+                fileName = generateFileName();
+            }
+            while (std::filesystem::exists(path + fileName));
         }
-        while (std::filesystem::exists(path + fileName));
         std::ofstream file(path + fileName);
         file << data;
         file.close();

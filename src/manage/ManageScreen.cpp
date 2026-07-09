@@ -334,7 +334,7 @@ namespace platform {
         std::filesystem::remove(oldFile);
         // Actually change the model
         results.at(index).setModel(newModel);
-        results.at(index).save(path);
+        results.at(index).save(path, false);
         int newModelSize = static_cast<int>(newModel.size());
         if (newModelSize > maxModel) {
             maxModel = newModelSize;
@@ -357,7 +357,7 @@ namespace platform {
         std::filesystem::remove(oldFile);
         std::string newPath = path + (subfolder.back() == '/' ? subfolder : subfolder + "/");
         // Actually change the model
-        results.at(index).save(newPath);
+        results.at(index).save(newPath, false);
         results.deleteResult(index);
         paginator[static_cast<int>(OutputType::EXPERIMENTS)].setTotal(results.size());
         list("Result moved to " + newPath, Colors::GREEN());
@@ -611,7 +611,7 @@ namespace platform {
                         getline(std::cin, newTitle);
                         if (!newTitle.empty()) {
                             results.at(index).setTitle(newTitle);
-                            results.at(index).save(path);
+                            results.at(index).save(path, false);
                             list("Title changed to " + newTitle, Colors::GREEN());
                             break;
                         }

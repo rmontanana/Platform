@@ -16,7 +16,7 @@ namespace platform {
     public:
         Result();
         Result(const std::string& path, const std::string& filename);
-        void save(const std::string& path);
+        void save(const std::string& path, const bool generate_filename = true);
         std::vector<std::string> check();
         // Getters
         json getJson();

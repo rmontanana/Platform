@@ -77,8 +77,8 @@ namespace platform {
             std::cout << " ( " << Colors::GREEN() << "c" << Colors::RESET() << " )  Scoring test dataset" << std::endl << std::endl;
             std::cout << Colors::YELLOW() << "Note: fold number in this color means fitting had issues such as not using all features in BoostAODE classifier" << std::endl << std::endl;
             int nc = 4 + 3 * nfolds + (nfolds >= 10 ? nfolds - 10 + 1 : 0);
-            std::cout << Colors::GREEN() << left << "  #  " << setw(max_name) << "Dataset" << " #Samp #Feat  k  Seed Status" << string(nc - 6, ' ') << setw(11) << " Time" << " Score" << std::endl;
-            std::cout << " --- " << string(max_name, '-') << " ----- ----- --- ---- " << string(nc, '-') << " ----------" << " ---------";
+            std::cout << Colors::GREEN() << left << "  #  " << setw(max_name) << "Dataset" << " #Samp. #Feat  k  Seed Status" << string(nc - 6, ' ') << setw(11) << " Time" << " Score" << std::endl;
+            std::cout << " --- " << string(max_name, '-') << " ------ ----- --- ---- " << string(nc, '-') << " ----------" << " ---------";
             std::cout << Colors::RESET() << std::endl;
         }
         int num = 0;
@@ -174,7 +174,7 @@ namespace platform {
         auto labels = dataset.getLabels();
         int num_classes = dataset.getNClasses();
         if (!quiet) {
-            std::cout << " " << setw(5) << n_samples << " " << setw(5) << n_features << " " << setw(3) << num_classes << flush;
+            std::cout << " " << setw(6) << n_samples << " " << setw(5) << n_features << " " << setw(3) << num_classes << flush;
         }
         //
         // Prepare Result
@@ -210,7 +210,7 @@ namespace platform {
             if (!quiet) {
                 string prefix = " ";
                 if (!first_seed) {
-                    prefix = "\n" + string(22 + max_name, ' ');
+                    prefix = "\n" + string(23 + max_name, ' ');
                 }
                 std::cout << prefix << setw(4) << right << seed << " " << flush;
                 first_seed = false;

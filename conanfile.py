@@ -20,7 +20,10 @@ class PlatformConan(ConanFile):
         self.requires("folding/1.1.2")
         self.requires("fimdlp/2.1.3")
         self.requires("arff-files/1.2.1")
-        self.requires("bayesnet/1.2.3")
+        # force=True overrides the bayesnet/1.2.3 that pyclassifiers pulls in
+        # transitively; 1.3.0 only adds classes (XA1DE/XA2DE), so the symbols
+        # pyclassifiers links against are unchanged.
+        self.requires("bayesnet/1.3.0", force=True)
         self.requires("pyclassifiers/1.0.3")
         self.requires("libxlsxwriter/1.2.2")
         

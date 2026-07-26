@@ -50,6 +50,8 @@ namespace platform {
     static Registrar registrarXBA2DE("XBA2DE",
         [](void) -> bayesnet::BaseClassifier* { return new bayesnet::XBA2DE();});
     static Registrar registrarXA1DE("XA1DE",
-        [](void) -> bayesnet::BaseClassifier* { return new XA1DE();});
+        [](void) -> bayesnet::BaseClassifier* { return new bayesnet::XA1DE();});
+    static Registrar registrarXA2DE("XA2DE",
+        [](void) -> bayesnet::BaseClassifier* { return new bayesnet::XA2DE();});
 }
 #endif

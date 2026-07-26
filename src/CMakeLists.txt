@@ -13,8 +13,6 @@ add_executable(
     main/Models.cpp main/Scores.cpp
     reports/ReportExcel.cpp reports/ReportBase.cpp reports/ExcelFile.cpp
     results/Result.cpp
-    experimental_clfs/XA1DE.cpp
-    experimental_clfs/ExpClf.cpp
     experimental_clfs/DecisionTree.cpp
     experimental_clfs/AdaBoost.cpp
 )
@@ -28,8 +26,6 @@ add_executable(b_grid commands/b_grid.cpp ${grid_sources}
     main/HyperParameters.cpp main/Models.cpp main/Experiment.cpp main/Scores.cpp main/ArgumentsExperiment.cpp
     reports/ReportConsole.cpp reports/ReportBase.cpp 
     results/Result.cpp
-    experimental_clfs/XA1DE.cpp
-    experimental_clfs/ExpClf.cpp
     experimental_clfs/DecisionTree.cpp
     experimental_clfs/AdaBoost.cpp
 )
@@ -41,8 +37,6 @@ add_executable(b_list commands/b_list.cpp
     main/Models.cpp main/Scores.cpp
     reports/ReportExcel.cpp reports/ExcelFile.cpp reports/ReportBase.cpp reports/DatasetsExcel.cpp reports/DatasetsConsole.cpp reports/ReportsPaged.cpp
     results/Result.cpp results/ResultsDatasetExcel.cpp results/ResultsDataset.cpp results/ResultsDatasetConsole.cpp
-    experimental_clfs/XA1DE.cpp
-    experimental_clfs/ExpClf.cpp
     experimental_clfs/DecisionTree.cpp
     experimental_clfs/AdaBoost.cpp
 )
@@ -55,9 +49,6 @@ add_executable(b_main commands/b_main.cpp ${main_sources}
     common/Datasets.cpp common/Dataset.cpp common/Discretization.cpp
     reports/ReportConsole.cpp reports/ReportBase.cpp 
     results/Result.cpp
-    experimental_clfs/XA1DE.cpp
-    experimental_clfs/ExpClf.cpp
-    experimental_clfs/ExpClf.cpp
     experimental_clfs/DecisionTree.cpp
     experimental_clfs/AdaBoost.cpp
 )

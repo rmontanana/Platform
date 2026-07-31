@@ -28,8 +28,8 @@ namespace platform {
         auto datasets_names = datasets.getNames();
         std::cout << Colors::GREEN() << "Datasets available in the platform: " << datasets_names.size() << std::endl;
         int maxName = std::max(size_t(7), (*max_element(datasets_names.begin(), datasets_names.end(), [](const std::string& a, const std::string& b) { return a.size() < b.size(); })).size());
-        std::vector<std::string> header_labels = { " #", "Dataset", "Sampl.", "Feat.", "#Num.", "Cls", "Balance" };
-        std::vector<int> header_lengths = { 3, maxName, 6, 6, 6, 3, DatasetsConsole::BALANCE_LENGTH };
+        std::vector<std::string> header_labels = { " #", "Dataset", "Samples", "Feat.", "#Num.", "Cls", "Balance" };
+        std::vector<int> header_lengths = { 3, maxName, 7, 6, 6, 3, DatasetsConsole::BALANCE_LENGTH };
         sheader << Colors::GREEN();
         for (int i = 0; i < header_labels.size(); i++) {
             sheader << setw(header_lengths[i]) << left << header_labels[i] << " ";

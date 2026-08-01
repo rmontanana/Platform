@@ -81,9 +81,9 @@ namespace platform {
             maxHyper = std::max(maxHyper, (int)r["hyperparameters"].dump().size());
             maxDataset = std::max(maxDataset, (int)r["dataset"].get<std::string>().size());
         }
-        std::vector<std::string> header_labels = { " #", "Dataset", "Sampl.", "Feat.", "Cls", nodes_label, leaves_label, depth_label, "Score", "Time", "Hyperparameters" };
+        std::vector<std::string> header_labels = { " #", "Dataset", "Samples", "Feat.", "Cls", nodes_label, leaves_label, depth_label, "Score", "Time", "Hyperparameters" };
         sheader << Colors::GREEN();
-        std::vector<int> header_lengths = { 3, maxDataset, 6, 6, 3, 13, 13, 13, 15, 20, maxHyper };
+        std::vector<int> header_lengths = { 3, maxDataset, 7, 6, 3, 13, 13, 13, 15, 20, maxHyper };
         for (int i = 0; i < header_labels.size(); i++) {
             sheader << std::setw(header_lengths[i]) << std::left << header_labels[i] << " ";
         }
@@ -106,7 +106,7 @@ namespace platform {
             line << color;
             line << std::setw(3) << std::right << index++ << " ";
             line << std::setw(maxDataset) << std::left << r["dataset"].get<std::string>() << " ";
-            line << std::setw(6) << std::right << r["samples"].get<int>() << " ";
+            line << std::setw(7) << std::right << r["samples"].get<int>() << " ";
             line << std::setw(6) << std::right << r["features"].get<int>() << " ";
             line << std::setw(3) << std::right << r["classes"].get<int>() << " ";
             line << std::setw(13) << std::setprecision(2) << std::fixed << r["nodes"].get<float>() << " ";

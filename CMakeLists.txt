@@ -64,7 +64,14 @@ find_package(folding CONFIG REQUIRED)
 find_package(bayesnet CONFIG REQUIRED)
 find_package(pyclassifiers CONFIG REQUIRED)
 find_package(libxlsxwriter CONFIG REQUIRED)
-find_package(Boost REQUIRED COMPONENTS python)
+
+# libPyClassifiers.a references Boost.Python/Boost.NumPy/libpython, but the Conan
+# package does not declare them. Without this edge CMake is free to emit those
+# shared libs before the archive that needs them, and --as-needed then drops
+# them, yielding undefined references at link time. Declaring the real
+# dependency lets CMake order them after the archive on every target.
+set_property(TARGET pyclassifiers::pyclassifiers APPEND PROPERTY
+  INTERFACE_LINK_LIBRARIES Boost::python Boost::numpy Python3::Python)
 
 # Subdirectories
 # --------------

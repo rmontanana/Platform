@@ -16,16 +16,16 @@
 
 const std::string PATH = { platform_data_path.begin(), platform_data_path.end() };
 
-pair<std::vector<mdlp::labels_t>, map<std::string, int>> discretize(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y, std::vector<std::string> features)
+std::pair<std::vector<mdlp::labels_t>, std::map<std::string, int>> discretize(std::vector<mdlp::samples_t>& X, mdlp::labels_t& y, std::vector<std::string> features)
 {
     std::vector<mdlp::labels_t>Xd;
-    map<std::string, int> maxes;
+    std::map<std::string, int> maxes;
 
     auto fimdlp = mdlp::CPPFImdlp();
     for (int i = 0; i < X.size(); i++) {
         fimdlp.fit(X[i], y);
         mdlp::labels_t& xd = fimdlp.transform(X[i]);
-        maxes[features[i]] = *max_element(xd.begin(), xd.end()) + 1;
+        maxes[features[i]] = *std::max_element(xd.begin(), xd.end()) + 1;
         Xd.push_back(xd);
     }
     return { Xd, maxes };
@@ -40,7 +40,7 @@ bool file_exists(const std::string& name)
         return false;
     }
 }
-pair<std::vector<std::vector<int>>, std::vector<int>> extract_indices(std::vector<int> indices, std::vector<std::vector<int>> X, std::vector<int> y)
+std::pair<std::vector<std::vector<int>>, std::vector<int>> extract_indices(std::vector<int> indices, std::vector<std::vector<int>> X, std::vector<int> y)
 {
     std::vector<std::vector<int>> Xr; // nxm
     std::vector<int> yr;
@@ -58,7 +58,7 @@ pair<std::vector<std::vector<int>>, std::vector<int>> extract_indices(std::vecto
 
 int main(int argc, char** argv)
 {
-    map<std::string, bool> datasets = {
+    std::map<std::string, bool> datasets = {
             { "diabetes",           true },
             { "ecoli",              true },
             { "glass",              true },
@@ -69,16 +69,16 @@ int main(int argc, char** argv)
             { "mfeat-factors",      true },
     };
     auto valid_datasets = std::vector<std::string>();
-    transform(datasets.begin(), datasets.end(), back_inserter(valid_datasets),
-        [](const pair<std::string, bool>& pair) { return pair.first; });
+    std::transform(datasets.begin(), datasets.end(), std::back_inserter(valid_datasets),
+        [](const std::pair<const std::string, bool>& pair) { return pair.first; });
     argparse::ArgumentParser program("PlatformSample");
     program.add_argument("-d", "--dataset")
         .help("Dataset file name")
         .action([valid_datasets](const std::string& value) {
-        if (find(valid_datasets.begin(), valid_datasets.end(), value) != valid_datasets.end()) {
+        if (std::find(valid_datasets.begin(), valid_datasets.end(), value) != valid_datasets.end()) {
             return value;
         }
-        throw runtime_error("file must be one of {diabetes, ecoli, glass, iris, kdd_JapaneseVowels, letter, liver-disorders, mfeat-factors}");
+        throw std::runtime_error("file must be one of {diabetes, ecoli, glass, iris, kdd_JapaneseVowels, letter, liver-disorders, mfeat-factors}");
             }
         );
     program.add_argument("-p", "--path")
@@ -89,10 +89,10 @@ int main(int argc, char** argv)
         .help("Model to use " + platform::Models::instance()->toString())
         .action([](const std::string& value) {
         static const std::vector<std::string> choices = platform::Models::instance()->getNames();
-        if (find(choices.begin(), choices.end(), value) != choices.end()) {
+        if (std::find(choices.begin(), choices.end(), value) != choices.end()) {
             return value;
         }
-        throw runtime_error("Model must be one of " + platform::Models::instance()->toString());
+        throw std::runtime_error("Model must be one of " + platform::Models::instance()->toString());
             }
         );
     program.add_argument("--discretize").help("Discretize input dataset").default_value(false).implicit_value(true);
@@ -101,17 +101,17 @@ int main(int argc, char** argv)
     program.add_argument("--tensors").help("Use tensors to store samples").default_value(false).implicit_value(true);
     program.add_argument("-f", "--folds").help("Number of folds").default_value(5).scan<'i', int>().action([](const std::string& value) {
         try {
-            auto k = stoi(value);
+            auto k = std::stoi(value);
             if (k < 2) {
-                throw runtime_error("Number of folds must be greater than 1");
+                throw std::runtime_error("Number of folds must be greater than 1");
             }
             return k;
         }
-        catch (const runtime_error& err) {
-            throw runtime_error(err.what());
+        catch (const std::runtime_error& err) {
+            throw std::runtime_error(err.what());
         }
         catch (...) {
-            throw runtime_error("Number of folds must be an integer");
+            throw std::runtime_error("Number of folds must be an integer");
         }});
         program.add_argument("-s", "--seed").help("Random seed").default_value(-1).scan<'i', int>();
         bool class_last, stratified, tensors, dump_cpt;
@@ -130,12 +130,12 @@ int main(int argc, char** argv)
             dump_cpt = program.get<bool>("dumpcpt");
             class_last = datasets[file_name];
             if (!file_exists(complete_file_name)) {
-                throw runtime_error("Data File " + path + file_name + ".arff" + " does not exist");
+                throw std::runtime_error("Data File " + path + file_name + ".arff" + " does not exist");
             }
         }
-        catch (const exception& err) {
-            cerr << err.what() << std::endl;
-            cerr << program;
+        catch (const std::exception& err) {
+            std::cerr << err.what() << std::endl;
+            std::cerr << program;
             exit(1);
         }
 
@@ -151,12 +151,12 @@ int main(int argc, char** argv)
         auto className = handler.getClassName();
         std::vector<std::string> features;
         auto attributes = handler.getAttributes();
-        transform(attributes.begin(), attributes.end(), back_inserter(features),
-            [](const pair<std::string, std::string>& item) { return item.first; });
+        std::transform(attributes.begin(), attributes.end(), std::back_inserter(features),
+            [](const std::pair<std::string, std::string>& item) { return item.first; });
         // Discretize Dataset
         auto [Xd, maxes] = discretize(X, y, features);
-        maxes[className] = *max_element(y.begin(), y.end()) + 1;
-        map<std::string, std::vector<int>> states;
+        maxes[className] = *std::max_element(y.begin(), y.end()) + 1;
+        std::map<std::string, std::vector<int>> states;
         for (auto feature : features) {
             states[feature] = std::vector<int>(maxes[feature]);
         }

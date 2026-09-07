@@ -36,9 +36,9 @@ void list_datasets(argparse::ArgumentParser& program)
 
 void list_results(argparse::ArgumentParser& program)
 {
-    auto dataset = program.get<string>("dataset");
-    auto score = program.get<string>("score");
-    auto model = program.get<string>("model");
+    auto dataset = program.get<std::string>("dataset");
+    auto score = program.get<std::string>("score");
+    auto model = program.get<std::string>("model");
     auto excel = program.get<bool>("excel");
     auto report = platform::ResultsDatasetsConsole();
     if (!report.report(dataset, score, model))
@@ -96,7 +96,7 @@ int main(int argc, char** argv)
     try {
         program.parse_args(argc, argv);
         bool found = false;
-        map<std::string, void(*)(argparse::ArgumentParser&)> commands = { {"datasets", &list_datasets}, {"results", &list_results} };
+        std::map<std::string, void(*)(argparse::ArgumentParser&)> commands = { { "datasets", &list_datasets },{ "results", &list_results } };
         for (const auto& command : commands) {
             if (program.is_subcommand_used(command.first)) {
                 std::invoke(command.second, program.at<argparse::ArgumentParser>(command.first));
@@ -108,9 +108,9 @@ int main(int argc, char** argv)
             throw std::runtime_error("You must specify one of the following commands: {datasets, results}\n");
         }
     }
-    catch (const exception& err) {
-        cerr << err.what() << std::endl;
-        cerr << program;
+    catch (const std::exception& err) {
+        std::cerr << err.what() << std::endl;
+        std::cerr << program;
         exit(1);
     }
     std::cout << Colors::RESET() << std::endl;

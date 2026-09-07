@@ -25,7 +25,7 @@ namespace platform {
             loadCsvJson();
             return;
         }
-        ifstream catalog(path + "all.txt");
+        std::ifstream catalog(path + "all.txt");
         std::vector<int> numericFeaturesIdx;
         if (!catalog.is_open()) {
             throw std::invalid_argument("Unable to open catalog file. [" + path + "all.txt" + "]");

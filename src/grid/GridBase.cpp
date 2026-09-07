@@ -116,12 +116,12 @@ namespace platform {
                 worker_tasks[worker].push_back(line);
             }
         }
-        std::cout << Colors::MAGENTA() << " W  " << setw(max_dataset) << std::left << "Dataset";
+        std::cout << Colors::MAGENTA() << " W  " << std::setw(max_dataset) << std::left << "Dataset";
         std::cout << " Seed Fold Time" << std::endl;
         std::cout << "=== " << std::string(max_dataset, '=') << " ==== ==== " << std::string(15, '=') << std::endl;
         for (int worker = 0; worker < config_mpi.n_procs; ++worker) {
             auto color = (worker % 2) ? Colors::CYAN() : Colors::BLUE();
-            std::cout << color << std::right << setw(3) << worker << " ";
+            std::cout << color << std::right << std::setw(3) << worker << " ";
             if (worker == config_mpi.manager) {
                 std::cout << "Manager" << std::endl;
                 continue;
@@ -139,16 +139,16 @@ namespace platform {
                     std::cout << std::string(4, ' ');
                 else
                     first = false;
-                std::cout << std::left << setw(max_dataset) << task["dataset"].get<std::string>();
-                std::cout << " " << setw(4) << std::right << task["seed"].get<int>();
-                std::cout << " " << setw(4) << task["fold"].get<int>();
-                std::cout << " " << setw(15) << std::setprecision(7) << std::fixed << task["time"].get<double>() << std::endl;
+                std::cout << std::left << std::setw(max_dataset) << task["dataset"].get<std::string>();
+                std::cout << " " << std::setw(4) << std::right << task["seed"].get<int>();
+                std::cout << " " << std::setw(4) << task["fold"].get<int>();
+                std::cout << " " << std::setw(15) << std::setprecision(7) << std::fixed << task["time"].get<double>() << std::endl;
                 total += task["time"].get<double>();
             }
             if (num_tasks > 1) {
                 std::cout << Colors::MAGENTA() << "    ";
-                std::cout << setw(max_dataset) << "Total (" << setw(2) << std::right << num_tasks << ")" << std::string(7, '.');
-                std::cout << " " << setw(15) << std::setprecision(7) << std::fixed << total << std::endl;
+                std::cout << std::setw(max_dataset) << "Total (" << std::setw(2) << std::right << num_tasks << ")" << std::string(7, '.');
+                std::cout << " " << std::setw(15) << std::setprecision(7) << std::fixed << total << std::endl;
             }
         }
     }

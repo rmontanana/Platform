@@ -18,17 +18,17 @@ namespace platform {
         static Discretization* instance();
         std::shared_ptr<mdlp::Discretizer> create(const std::string& name);
         void registerFactoryFunction(const std::string& name,
-            function<mdlp::Discretizer* (void)> classFactoryFunction);
-        std::vector<string> getNames();
+            std::function<mdlp::Discretizer* (void)> classFactoryFunction);
+        std::vector<std::string> getNames();
         std::string toString();
     private:
-        map<std::string, function<mdlp::Discretizer* (void)>> functionRegistry;
+        std::map<std::string, std::function<mdlp::Discretizer* (void)>> functionRegistry;
         static Discretization* factory; //singleton
         Discretization() {};
     };
     class RegistrarDiscretization {
     public:
-        RegistrarDiscretization(const std::string& className, function<mdlp::Discretizer* (void)> classFactoryFunction);
+        RegistrarDiscretization(const std::string& className, std::function<mdlp::Discretizer* (void)> classFactoryFunction);
     };
 }
 #endif

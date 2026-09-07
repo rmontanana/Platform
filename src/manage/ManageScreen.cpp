@@ -5,14 +5,14 @@
 #include "folding.hpp"
 #include "common/CLocale.h"
 #include "common/Paths.h"
-#include "OptionsMenu.h"
-#include "ManageScreen.h"
-#include "reports/DatasetsConsole.h"
-#include "reports/ReportConsole.h"
-#include "reports/ReportExcel.h"
-#include "reports/ReportExcelCompared.h"
 #include <bayesnet/classifiers/TAN.h>
 #include <fimdlp/CPPFImdlp.h>
+#include "OptionsMenu.h"
+#include "reports/DatasetsConsole.h"
+#include "reports/ReportConsole.h"
+#include "ManageScreen.h"
+#include "reports/ReportExcel.h"
+#include "reports/ReportExcelCompared.h"
 
 namespace platform {
     const std::string STATUS_OK = "Ok.";

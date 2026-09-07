@@ -29,7 +29,7 @@ namespace platform {
                 throw std::invalid_argument("Dataset " + config.continue_from + " not found");
             }
             // Remove datasets already processed
-            std::vector<string>::iterator it = datasets_names.begin();
+            std::vector<std::string>::iterator it = datasets_names.begin();
             while (it != datasets_names.end()) {
                 if (*it != config.continue_from) {
                     it = datasets_names.erase(it);
@@ -84,10 +84,10 @@ namespace platform {
             { "stratified", config.stratified },
             { "n_folds", config.n_folds },
             { "seeds", config.seeds },
-            { "date", get_date() + " " + get_time()},
-            { "nested", config.nested},
+            { "date", get_date() + " " + get_time() },
+            { "nested", config.nested },
             { "platform", config.platform },
-            { "duration", timer.getDurationString(true)},
+            { "duration", timer.getDurationString(true) },
             { "results", results }
 
         };

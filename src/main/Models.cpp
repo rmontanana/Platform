@@ -10,12 +10,12 @@ namespace platform {
         return factory;
     }
     void Models::registerFactoryFunction(const std::string& name,
-        function<bayesnet::BaseClassifier* (void)> classFactoryFunction)
+        std::function<bayesnet::BaseClassifier* (void)> classFactoryFunction)
     {
         // register the class factory function
         functionRegistry[name] = classFactoryFunction;
     }
-    shared_ptr<bayesnet::BaseClassifier> Models::create(const std::string& name)
+    std::shared_ptr<bayesnet::BaseClassifier> Models::create(const std::string& name)
     {
         bayesnet::BaseClassifier* instance = nullptr;
 
@@ -25,15 +25,15 @@ namespace platform {
             instance = it->second();
         // wrap instance in a shared ptr and return
         if (instance != nullptr)
-            return unique_ptr<bayesnet::BaseClassifier>(instance);
+            return std::unique_ptr<bayesnet::BaseClassifier>(instance);
         else
             throw std::runtime_error("Model not found: " + name);
     }
     std::vector<std::string> Models::getNames()
     {
         std::vector<std::string> names;
-        transform(functionRegistry.begin(), functionRegistry.end(), back_inserter(names),
-            [](const pair<std::string, function<bayesnet::BaseClassifier* (void)>>& pair) { return pair.first; });
+        std::transform(functionRegistry.begin(), functionRegistry.end(), std::back_inserter(names),
+            [](const std::pair<const std::string, std::function<bayesnet::BaseClassifier* (void)>>& pair) { return pair.first; });
         return names;
     }
     std::string Models::toString()
@@ -46,7 +46,7 @@ namespace platform {
         }
         return "{" + result + "}";
     }
-    Registrar::Registrar(const std::string& name, function<bayesnet::BaseClassifier* (void)> classFactoryFunction)
+    Registrar::Registrar(const std::string& name, std::function<bayesnet::BaseClassifier* (void)> classFactoryFunction)
     {
         // register the class factory function 
         Models::instance()->registerFactoryFunction(name, classFactoryFunction);

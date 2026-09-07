@@ -11,7 +11,7 @@ namespace platform {
         return factory;
     }
     void Discretization::registerFactoryFunction(const std::string& name,
-        function<mdlp::Discretizer* (void)> classFactoryFunction)
+        std::function<mdlp::Discretizer* (void)> classFactoryFunction)
     {
         // register the class factory function
         functionRegistry[name] = classFactoryFunction;
@@ -34,7 +34,7 @@ namespace platform {
     {
         std::vector<std::string> names;
         transform(functionRegistry.begin(), functionRegistry.end(), back_inserter(names),
-            [](const pair<std::string, function<mdlp::Discretizer* (void)>>& pair) { return pair.first; });
+            [](const std::pair<std::string, std::function<mdlp::Discretizer* (void)>>& pair) { return pair.first; });
         return names;
     }
     std::string Discretization::toString()
@@ -47,7 +47,7 @@ namespace platform {
         }
         return "{" + result + "}";
     }
-    RegistrarDiscretization::RegistrarDiscretization(const std::string& name, function<mdlp::Discretizer* (void)> classFactoryFunction)
+    RegistrarDiscretization::RegistrarDiscretization(const std::string& name, std::function<mdlp::Discretizer* (void)> classFactoryFunction)
     {
         // register the class factory function 
         Discretization::instance()->registerFactoryFunction(name, classFactoryFunction);

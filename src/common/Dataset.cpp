@@ -1,4 +1,4 @@
-#include <ArffFiles.hpp>
+#include <ArffFiles/ArffFiles.hpp>
 #include <fstream>
 #include <set>
 #include <nlohmann/json.hpp>
@@ -82,7 +82,7 @@ namespace platform {
             throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
-    pair<std::vector<std::vector<float>>&, std::vector<int>&> Dataset::getVectors()
+    std::pair<std::vector<std::vector<float>>&, std::vector<int>&> Dataset::getVectors()
     {
         if (loaded) {
             return { Xv, yv };
@@ -90,7 +90,7 @@ namespace platform {
             throw std::invalid_argument(message_dataset_not_loaded);
         }
     }
-    pair<torch::Tensor&, torch::Tensor&> Dataset::getTensors()
+    std::pair<torch::Tensor&, torch::Tensor&> Dataset::getTensors()
     {
         if (loaded) {
             return { X, y };
@@ -100,7 +100,7 @@ namespace platform {
     }
     void Dataset::load_csv()
     {
-        ifstream file(path + "/" + name + ".csv");
+        std::ifstream file(path + "/" + name + ".csv");
         if (!file.is_open()) {
             throw std::invalid_argument("Unable to open dataset file.");
         }
@@ -145,7 +145,7 @@ namespace platform {
     }
     void Dataset::load_arff()
     {
-        auto arff = ArffFiles();
+        auto arff = ArffFiles::ArffFiles();
         arff.load(path + "/" + name + ".arff", className);
         // Get Dataset X, y
         Xv = arff.getX();
@@ -176,18 +176,18 @@ namespace platform {
     }
     void Dataset::load_rdata()
     {
-        ifstream file(path + "/" + name + "_R.dat");
+        std::ifstream file(path + "/" + name + "_R.dat");
         if (!file.is_open()) {
             throw std::invalid_argument("Unable to open dataset file.");
         }
         std::string line;
         labels.clear();
         getline(file, line);
-        line = ArffFiles::trim(line);
+        line = trim(line);
         std::vector<std::string> tokens = tokenize(line);
-        transform(tokens.begin(), tokens.end() - 1, back_inserter(features), [](const auto& attribute) { return ArffFiles::trim(attribute); });
+        transform(tokens.begin(), tokens.end() - 1, back_inserter(features), [](const auto& attribute) { return trim(attribute); });
         if (className == "-1") {
-            className = ArffFiles::trim(tokens.back());
+            className = trim(tokens.back());
         }
         for (auto i = 0; i < features.size(); ++i) {
             Xv.push_back(std::vector<float>());
@@ -279,7 +279,8 @@ namespace platform {
                     // Numeric feature
                     try {
                         row_values[i] = stof(value);
-                    } catch (const std::invalid_argument&) {
+                    }
+                    catch (const std::invalid_argument&) {
                         has_invalid = true;
                         break;
                     }

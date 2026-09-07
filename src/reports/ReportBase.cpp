@@ -7,7 +7,7 @@ namespace platform {
     ReportBase::ReportBase(json data_, bool compare) : data(data_), compare(compare), margin(0.1)
     {
         std::stringstream oss;
-        oss << "Better than ZeroR + " << std::setprecision(1) << fixed << margin * 100 << "%";
+        oss << "Better than ZeroR + " << std::setprecision(1) << std::fixed << margin * 100 << "%";
         meaning = {
             {Symbols::equal_best, "Equal to best"},
             {Symbols::better_best, "Better than best"},
@@ -37,7 +37,7 @@ namespace platform {
         std::string sep = "";
         oss << title << "[";
         for (const auto& item : data) {
-            oss << sep << fixed << setw(width) << std::setprecision(precision) << item.get<double>();
+            oss << sep << std::fixed << std::setw(width) << std::setprecision(precision) << item.get<double>();
             sep = ", ";
         }
         oss << "]";
@@ -94,7 +94,7 @@ namespace platform {
             std::string score = data["score_name"];
             replace(score.begin(), score.end(), '_', '-');
             std::string fileName = "best_results_" + score + "_" + model + ".json";
-            ifstream resultData(Paths::results() + "/" + fileName);
+            std::ifstream resultData(Paths::results() + "/" + fileName);
             if (resultData.is_open()) {
                 bestResults = json::parse(resultData);
             } else {
@@ -104,7 +104,7 @@ namespace platform {
         try {
             value = bestResults.at(dataset).at(0);
         }
-        catch (exception) {
+        catch (std::exception) {
             value = 1.0;
 
         }

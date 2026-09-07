@@ -22,9 +22,9 @@ namespace platform {
         int getNClasses() const;
         std::vector<std::string> getLabels() const; // return the labels factorization result
         std::vector<int> getClassesCounts() const;
-        std::vector<string> getFeatures() const;
+        std::vector<std::string> getFeatures() const;
         std::map<std::string, std::vector<int>> getStates() const;
-        std::pair<vector<std::vector<float>>&, std::vector<int>&> getVectors();
+        std::pair<std::vector<std::vector<float>>&, std::vector<int>&> getVectors();
         std::pair<torch::Tensor&, torch::Tensor&> getTensors();
         std::tuple<torch::Tensor&, torch::Tensor&, torch::Tensor&, torch::Tensor&> getTrainTestTensors(std::vector<int>& train, std::vector<int>& test);
         long getNFeatures() const;

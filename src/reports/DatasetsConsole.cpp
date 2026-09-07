@@ -13,7 +13,7 @@ namespace platform {
             auto part = temp.substr(0, DatasetsConsole::BALANCE_LENGTH);
             line += part + "\n";
             body.push_back(line);
-            line = string(name_len + 28, ' ');
+            line = std::string(name_len + 28, ' ');
             temp = temp.substr(DatasetsConsole::BALANCE_LENGTH);
         }
         line += temp + "\n";
@@ -32,7 +32,7 @@ namespace platform {
         std::vector<int> header_lengths = { 3, maxName, 7, 6, 6, 3, DatasetsConsole::BALANCE_LENGTH };
         sheader << Colors::GREEN();
         for (int i = 0; i < header_labels.size(); i++) {
-            sheader << setw(header_lengths[i]) << left << header_labels[i] << " ";
+            sheader << std::setw(header_lengths[i]) << std::left << header_labels[i] << " ";
         }
         sheader << std::endl;
         header.push_back(sheader.str());
@@ -47,26 +47,26 @@ namespace platform {
             std::stringstream line;
             line.imbue(loc);
             auto color = num % 2 ? Colors::CYAN() : Colors::BLUE();
-            line << color << setw(3) << right << num++ << " ";
-            line << setw(maxName) << left << dataset_name << " ";
+            line << color << std::setw(3) << std::right << num++ << " ";
+            line << std::setw(maxName) << std::left << dataset_name << " ";
             auto& dataset = datasets.getDataset(dataset_name);
             dataset.load();
             auto nSamples = dataset.getNSamples();
-            line << setw(header_lengths[2]) << right << nSamples << " ";
+            line << std::setw(header_lengths[2]) << std::right << nSamples << " ";
             auto nFeatures = dataset.getFeatures().size();
-            line << setw(header_lengths[3]) << right << nFeatures << " ";
+            line << std::setw(header_lengths[3]) << std::right << nFeatures << " ";
             auto numericFeatures = dataset.getNumericFeatures();
             auto num = std::count(numericFeatures.begin(), numericFeatures.end(), true);
-            line << setw(header_lengths[4]) << right << num << " ";
+            line << std::setw(header_lengths[4]) << std::right << num << " ";
             auto nClasses = dataset.getNClasses();
-            line << setw(header_lengths[5]) << right << nClasses << " ";
+            line << std::setw(header_lengths[5]) << std::right << nClasses << " ";
             std::string sep = "";
             oss.str("");
             if (nSamples == 0) {
                 oss << "No samples";
             } else {
                 for (auto number : dataset.getClassesCounts()) {
-                    oss << sep << std::setprecision(2) << fixed << (float)number / nSamples * 100.0 << "% (" << number << ")";
+                    oss << sep << std::setprecision(2) << std::fixed << (float)number / nSamples * 100.0 << "% (" << number << ")";
                     sep = " / ";
                 }
             }

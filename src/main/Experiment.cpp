@@ -77,14 +77,14 @@ namespace platform {
             std::cout << " ( " << Colors::GREEN() << "c" << Colors::RESET() << " )  Scoring test dataset" << std::endl << std::endl;
             std::cout << Colors::YELLOW() << "Note: fold number in this color means fitting had issues such as not using all features in BoostAODE classifier" << std::endl << std::endl;
             int nc = 4 + 3 * nfolds + (nfolds >= 10 ? nfolds - 10 + 1 : 0);
-            std::cout << Colors::GREEN() << left << "  #  " << setw(max_name) << "Dataset" << " #Samp. #Feat  k  Seed Status" << string(nc - 6, ' ') << setw(11) << " Time" << " Score" << std::endl;
-            std::cout << " --- " << string(max_name, '-') << " ------ ----- --- ---- " << string(nc, '-') << " ----------" << " ---------";
+            std::cout << Colors::GREEN() << std::left << "  #  " << std::setw(max_name) << "Dataset" << " #Samp. #Feat  k  Seed Status" << std::string(nc - 6, ' ') << std::setw(11) << " Time" << " Score" << std::endl;
+            std::cout << " --- " << std::string(max_name, '-') << " ------ ----- --- ---- " << std::string(nc, '-') << " ----------" << " ---------";
             std::cout << Colors::RESET() << std::endl;
         }
         int num = 0;
         for (auto fileName : filesToTest) {
             if (!quiet)
-                std::cout << " " << setw(3) << right << num++ << " " << setw(max_name) << left << fileName << right << flush;
+                std::cout << " " << std::setw(3) << std::right << num++ << " " << std::setw(max_name) << std::left << fileName << std::right << std::flush;
             cross_validation(fileName);
             if (!quiet)
                 std::cout << std::endl;
@@ -117,7 +117,7 @@ namespace platform {
     {
         int nc = fold >= 10 ? 5 : 4;
         std::string prefix = phase == "-" ? "" : std::string(nc, '\b');
-        std::cout << prefix << color << fold << Colors::RESET() << "(" << color << phase << Colors::RESET() << ")" << flush;
+        std::cout << prefix << color << fold << Colors::RESET() << "(" << color << phase << Colors::RESET() << ")" << std::flush;
 
     }
     void generate_files(const std::string& fileName, bool discretize, bool stratified, int seed, int nfold, torch::Tensor X_train, torch::Tensor y_train, torch::Tensor X_test, torch::Tensor y_test, std::vector<int>& train, std::vector<int>& test)
@@ -174,7 +174,7 @@ namespace platform {
         auto labels = dataset.getLabels();
         int num_classes = dataset.getNClasses();
         if (!quiet) {
-            std::cout << " " << setw(6) << n_samples << " " << setw(5) << n_features << " " << setw(3) << num_classes << flush;
+            std::cout << " " << std::setw(6) << n_samples << " " << std::setw(5) << n_features << " " << std::setw(3) << num_classes << std::flush;
         }
         //
         // Prepare Result
@@ -208,11 +208,11 @@ namespace platform {
             seed_timer.start();
             double seed_score_sum = 0.0;
             if (!quiet) {
-                string prefix = " ";
+                std::string prefix = " ";
                 if (!first_seed) {
-                    prefix = "\n" + string(23 + max_name, ' ');
+                    prefix = "\n" + std::string(23 + max_name, ' ');
                 }
-                std::cout << prefix << setw(4) << right << seed << " " << flush;
+                std::cout << prefix << std::setw(4) << std::right << seed << " " << std::flush;
                 first_seed = false;
             }
             folding::Fold* fold;
@@ -283,7 +283,7 @@ namespace platform {
                 if (discretized)
                     confusion_matrices.push_back(scores.get_confusion_matrix_json(true));
                 if (!quiet)
-                    std::cout << "\b\b\b, " << flush;
+                    std::cout << "\b\b\b, " << std::flush;
                 //
                 // Store results and times in std::vector
                 //
@@ -313,7 +313,7 @@ namespace platform {
         // Show Results
         auto score_mean = torch::mean(score_test).item<double>();
         if (!quiet)
-            std::cout << " " << Colors::GREEN() << setw(9) << right << std::fixed << std::setprecision(7) << score_mean << Colors::RESET();
+            std::cout << " " << Colors::GREEN() << std::setw(9) << std::right << std::fixed << std::setprecision(7) << score_mean << Colors::RESET();
         //
         // Store result totals in Result
         //

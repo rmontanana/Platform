@@ -5,7 +5,7 @@
 #include <torch/torch.h>
 #include <argparse/argparse.hpp>
 #include <nlohmann/json.hpp>
-#include <ArffFiles.hpp>
+#include <ArffFiles/ArffFiles.hpp>
 #include <fimdlp/CPPFImdlp.h>
 #include <folding.hpp>
 #include <bayesnet/utils/BayesMetrics.h>
@@ -59,14 +59,14 @@ pair<std::vector<std::vector<int>>, std::vector<int>> extract_indices(std::vecto
 int main(int argc, char** argv)
 {
     map<std::string, bool> datasets = {
-            {"diabetes",           true},
-            {"ecoli",              true},
-            {"glass",              true},
-            {"iris",               true},
-            {"kdd_JapaneseVowels", false},
-            {"letter",             true},
-            {"liver-disorders",    true},
-            {"mfeat-factors",      true},
+            { "diabetes",           true },
+            { "ecoli",              true },
+            { "glass",              true },
+            { "iris",               true },
+            { "kdd_JapaneseVowels", false },
+            { "letter",             true },
+            { "liver-disorders",    true },
+            { "mfeat-factors",      true },
     };
     auto valid_datasets = std::vector<std::string>();
     transform(datasets.begin(), datasets.end(), back_inserter(valid_datasets),
@@ -142,7 +142,7 @@ int main(int argc, char** argv)
         /*
         * Begin Processing
         */
-        auto handler = ArffFiles();
+        auto handler = ArffFiles::ArffFiles();
         handler.load(complete_file_name, class_last);
         // Get Dataset X, y
         std::vector<mdlp::samples_t>& X = handler.getX();

@@ -73,7 +73,7 @@ namespace platform {
                 }
                 return k;
             }
-            catch (const runtime_error& err) {
+            catch (const std::runtime_error& err) {
                 throw std::runtime_error(err.what());
             }
             catch (...) {
@@ -91,9 +91,9 @@ namespace platform {
         try {
             arguments.parse_args(argc, argv);
         }
-        catch (const exception& err) {
-            cerr << err.what() << std::endl;
-            cerr << arguments;
+        catch (const std::exception& err) {
+            std::cerr << err.what() << std::endl;
+            std::cerr << arguments;
             exit(1);
         }
         parse();
@@ -130,12 +130,12 @@ namespace platform {
                 hyperparameters = "{}";
             } else {
                 if (hyperparameters_file != "" && hyperparameters != "{}") {
-                    throw runtime_error("hyperparameters and hyper_file are mutually exclusive");
+                    throw std::runtime_error("hyperparameters and hyper_file are mutually exclusive");
                 }
             }
             title = arguments.get<std::string>("title");
             if (title == "" && file_name == "all") {
-                throw runtime_error("title is mandatory if all datasets are to be tested");
+                throw std::runtime_error("title is mandatory if all datasets are to be tested");
             }
             saveResults = arguments.get<bool>("save");
             if (type == experiment_t::NORMAL) {
@@ -146,22 +146,22 @@ namespace platform {
                 generate_fold_files = false;
             }
         }
-        catch (const exception& err) {
-            cerr << err.what() << std::endl;
-            cerr << arguments;
+        catch (const std::exception& err) {
+            std::cerr << err.what() << std::endl;
+            std::cerr << arguments;
             exit(1);
         }
         auto datasets = platform::Datasets(false, platform::Paths::datasets());
         if (datasets_file != "") {
-            ifstream catalog(datasets_file);
+            std::ifstream catalog(datasets_file);
             if (catalog.is_open()) {
                 std::string line;
-                while (getline(catalog, line)) {
+                while (std::getline(catalog, line)) {
                     if (line.empty() || line[0] == '#') {
                         continue;
                     }
                     if (!datasets.isDataset(line)) {
-                        cerr << "Dataset " << line << " not found" << std::endl;
+                        std::cerr << "Dataset " << line << " not found" << std::endl;
                         exit(1);
                     }
                     filesToTest.push_back(line);
@@ -169,8 +169,8 @@ namespace platform {
                 catalog.close();
                 saveResults = true;
                 if (title == "") {
-                    title = "Test " + to_string(filesToTest.size()) + " datasets (" + datasets_file + ") "\
-                        + model_name + " " + to_string(n_folds) + " folds";
+                    title = "Test " + std::to_string(filesToTest.size()) + " datasets (" + datasets_file + ") "\
+                        + model_name + " " + std::to_string(n_folds) + " folds";
                 }
             } else {
                 throw std::invalid_argument("Unable to open catalog file. [" + datasets_file + "]");
@@ -179,7 +179,7 @@ namespace platform {
             if (file_names.size() > 0) {
                 for (auto file : file_names) {
                     if (!datasets.isDataset(file)) {
-                        cerr << "Dataset " << file << " not found" << std::endl;
+                        std::cerr << "Dataset " << file << " not found" << std::endl;
                         exit(1);
                     }
                 }
@@ -191,16 +191,16 @@ namespace platform {
                     });
                 saveResults = true;
                 if (title == "") {
-                    title = "Test " + to_string(file_names.size()) + " datasets " + model_name + " " + to_string(n_folds) + " folds";
+                    title = "Test " + std::to_string(file_names.size()) + " datasets " + model_name + " " + std::to_string(n_folds) + " folds";
                 }
             } else {
                 if (file_name != "all") {
                     if (!datasets.isDataset(file_name)) {
-                        cerr << "Dataset " << file_name << " not found" << std::endl;
+                        std::cerr << "Dataset " << file_name << " not found" << std::endl;
                         exit(1);
                     }
                     if (title == "") {
-                        title = "Test " + file_name + " " + model_name + " " + to_string(n_folds) + " folds";
+                        title = "Test " + file_name + " " + model_name + " " + std::to_string(n_folds) + " folds";
                     }
                     filesToTest.push_back(file_name);
                 } else {

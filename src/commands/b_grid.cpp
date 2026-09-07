@@ -54,7 +54,7 @@ void add_search_args(argparse::ArgumentParser& program)
             }
             return k;
         }
-        catch (const runtime_error& err) {
+        catch (const std::runtime_error& err) {
             throw std::runtime_error(err.what());
         }
         catch (...) {
@@ -69,7 +69,7 @@ void add_search_args(argparse::ArgumentParser& program)
                 }
                 return k;
             }
-            catch (const runtime_error& err) {
+            catch (const std::runtime_error& err) {
                 throw std::runtime_error(err.what());
             }
             catch (...) {
@@ -105,20 +105,20 @@ void list_dump(std::string& model)
             }
         }
     }
-    std::cout << Colors::GREEN() << left << " #  " << left << setw(max_dataset) << "Dataset" << " #Com. "
-        << setw(max_hyper) << "Hyperparameters" << std::endl;
-    std::cout << "=== " << string(max_dataset, '=') << " ===== " << string(max_hyper, '=') << std::endl;
+    std::cout << Colors::GREEN() << std::left << " #  " << std::left << std::setw(max_dataset) << "Dataset" << " #Com. "
+        << std::setw(max_hyper) << "Hyperparameters" << std::endl;
+    std::cout << "=== " << std::string(max_dataset, '=') << " ===== " << std::string(max_hyper, '=') << std::endl;
     int i = 0;
     for (auto const& item : combinations) {
         auto color = (i++ % 2) ? Colors::CYAN() : Colors::BLUE();
         std::cout << color;
         auto num_combinations = data.getNumCombinations(item.first);
-        std::cout << setw(3) << fixed << right << ++index << left << " " << setw(max_dataset) << item.first
-            << " " << setw(5) << right << num_combinations << " ";
+        std::cout << std::setw(3) << std::fixed << std::right << ++index << std::left << " " << std::setw(max_dataset) << item.first
+            << " " << std::setw(5) << std::right << num_combinations << " ";
         std::string prefix = "";
         for (auto const& [key, value] : item.second.items()) {
-            std::cout << prefix << setw(max_hyper) << std::left << value.dump() << std::endl;
-            prefix = string(11 + max_dataset, ' ');
+            std::cout << prefix << std::setw(max_hyper) << std::left << value.dump() << std::endl;
+            prefix = std::string(11 + max_dataset, ' ');
         }
     }
     std::cout << Colors::RESET() << std::endl;
@@ -134,7 +134,7 @@ void list_results(json& results, std::string& model)
         + " Discretized: " + (results["discretize"].get<bool>() ? "True" : "False")
         + " Stratified: " + (results["stratified"].get<bool>() ? "True" : "False")
         + " #Folds: " + std::to_string(results["n_folds"].get<int>())
-        + " Nested: " + (results["nested"].get<int>() == 0 ? "False" : to_string(results["nested"].get<int>()))
+        + " Nested: " + (results["nested"].get<int>() == 0 ? "False" : std::to_string(results["nested"].get<int>()))
     );
     std::cout << std::string(MAXL, '*') << std::endl;
     int spaces = 7;
@@ -150,19 +150,19 @@ void list_results(json& results, std::string& model)
             hyperparameters_spaces = value["hyperparameters"].dump().size();
         }
     }
-    std::cout << Colors::GREEN() << " #  " << left << setw(spaces) << "Dataset" << " " << setw(19) << "Date" << " "
-        << "Duration " << setw(8) << "Score" << " " << "Hyperparameters" << std::endl;
-    std::cout << "=== " << string(spaces, '=') << " " << string(19, '=') << " " << string(8, '=') << " "
-        << string(8, '=') << " " << string(hyperparameters_spaces, '=') << std::endl;
+    std::cout << Colors::GREEN() << " #  " << std::left << std::setw(spaces) << "Dataset" << " " << std::setw(19) << "Date" << " "
+        << "Duration " << std::setw(8) << "Score" << " " << "Hyperparameters" << std::endl;
+    std::cout << "=== " << std::string(spaces, '=') << " " << std::string(19, '=') << " " << std::string(8, '=') << " "
+        << std::string(8, '=') << " " << std::string(hyperparameters_spaces, '=') << std::endl;
     int index = 0;
     for (const auto& item : temp.items()) {
         auto color = (index % 2) ? Colors::CYAN() : Colors::BLUE();
         auto value = item.value();
         std::cout << color;
         std::cout << std::setw(3) << std::right << index++ << " ";
-        std::cout << left << setw(spaces) << item.key() << " " << value["date"].get<string>()
-            << " " << setw(8) << right << value["duration"].get<string>() << " " << setw(8) << setprecision(6)
-            << fixed << right << value["score"].get<double>() << " " << value["hyperparameters"].dump() << std::endl;
+        std::cout << std::left << std::setw(spaces) << item.key() << " " << value["date"].get<std::string>()
+            << " " << std::setw(8) << std::right << value["duration"].get<std::string>() << " " << std::setw(8) << std::setprecision(6)
+            << std::fixed << std::right << value["score"].get<double>() << " " << value["hyperparameters"].dump() << std::endl;
     }
     std::cout << Colors::RESET() << std::endl;
 }
@@ -214,7 +214,7 @@ void search(argparse::ArgumentParser& program)
     struct platform::ConfigMPI mpi_config;
     mpi_config.manager = 0; // which process is the manager
     MPI_Init(nullptr, nullptr);
-    
+
     // Disable buffering for stdout to ensure real-time progress output
     // This must be done after MPI_Init
     std::setvbuf(stdout, nullptr, _IONBF, 0);  // Completely disable buffering
@@ -245,7 +245,7 @@ void experiment(argparse::ArgumentParser& program)
     struct platform::ConfigMPI mpi_config;
     mpi_config.manager = 0; // which process is the manager
     MPI_Init(nullptr, nullptr);
-    
+
     // Disable buffering for stdout to ensure real-time progress output
     // This must be done after MPI_Init
     std::setvbuf(stdout, nullptr, _IONBF, 0);  // Completely disable buffering
@@ -307,7 +307,7 @@ int main(int argc, char** argv)
     try {
         program.parse_args(argc, argv);
         bool found = false;
-        map<std::string, void(*)(argparse::ArgumentParser&)> commands = { {"dump", &dump}, {"report", &report}, {"search", &search}, { "experiment",&experiment } };
+        std::map<std::string, void(*)(argparse::ArgumentParser&)> commands = { { "dump", &dump },{ "report", &report },{ "search", &search },{ "experiment",&experiment } };
         for (const auto& command : commands) {
             if (program.is_subcommand_used(command.first)) {
                 std::invoke(command.second, program.at<argparse::ArgumentParser>(command.first));
@@ -319,9 +319,9 @@ int main(int argc, char** argv)
             throw std::runtime_error("You must specify one of the following commands: dump, experiment, report, search \n");
         }
     }
-    catch (const exception& err) {
-        cerr << err.what() << std::endl;
-        cerr << program;
+    catch (const std::exception& err) {
+        std::cerr << err.what() << std::endl;
+        std::cerr << program;
         exit(1);
     }
     std::cout << "Done!" << std::endl;

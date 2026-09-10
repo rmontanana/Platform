@@ -206,7 +206,11 @@ namespace platform {
         char* msg;
         json tasks;
         auto env = platform::DotEnv();
-        auto datasets = Datasets(config.discretize, Paths::datasets(), env.get("discretize_algo"));
+        // El algoritmo de discretización sale de --discretize-algo cuando se ha
+        // indicado; si no, del .env. Antes se leía siempre del .env, así que un
+        // --discretize-algo distinto acababa en el informe pero no se aplicaba.
+        auto discretize_algo = config.discretize_algo.empty() ? env.get("discretize_algo") : config.discretize_algo;
+        auto datasets = Datasets(config.discretize, Paths::datasets(), discretize_algo);
         if (config_mpi.rank == config_mpi.manager) {
             timer.start();
             tasks = build_tasks(datasets);

@@ -41,6 +41,7 @@ namespace platform {
         bool isStratified() const { return stratified; }
         bool isQuiet() const { return quiet; }
         std::string getSmoothStrategy() const { return smooth_strategy; }
+        std::string getDiscretizationAlgorithm() const { return discretization_algo; }
         int getNFolds() const { return nfolds; }
         std::vector<int> getRandomSeeds() const { return randomSeeds; }
         void cross_validation(const std::string& fileName);

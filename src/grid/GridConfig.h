@@ -20,6 +20,10 @@ namespace platform {
         std::string continue_from;
         std::string platform;
         std::string smooth_strategy;
+        // Algoritmo de discretización pedido en la línea de órdenes
+        // (--discretize-algo). Si queda vacío se usa el valor de discretize_algo
+        // del .env, que es el comportamiento de siempre.
+        std::string discretize_algo;
         bool quiet;
         bool only; // used with continue_from to only compute that dataset
         bool discretize;

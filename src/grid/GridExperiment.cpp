@@ -1,5 +1,8 @@
 #include <iostream>
 #include <cstddef>
+#include <cstdlib>
+#include <unistd.h>
+#include <limits.h>
 #include <torch/torch.h>
 #include <folding.hpp>
 #include "main/Models.h"
@@ -7,6 +10,15 @@
 #include "common/Utils.h"
 #include "GridExperiment.h"
 
+#ifndef HOST_NAME_MAX
+#include <sys/param.h>
+#ifdef MAXHOSTNAMELEN
+#define HOST_NAME_MAX MAXHOSTNAMELEN
+#else
+// 3. Fallback final si ninguna de las dos existe (255 es el límite POSIX estándar)
+#define HOST_NAME_MAX 255 
+#endif
+#endif
 namespace platform {
     // GridExperiment::GridExperiment(argparse::ArgumentParser& program, struct ConfigGrid& config) : arguments(program), GridBase(config)
     GridExperiment::GridExperiment(ArgumentsExperiment& program, struct ConfigGrid& config) : arguments(program), GridBase(config)
@@ -19,6 +31,7 @@ namespace platform {
         this->config.discretize = experiment.isDiscretized();
         this->config.stratified = experiment.isStratified();
         this->config.smooth_strategy = experiment.getSmoothStrategy();
+        this->config.discretize_algo = experiment.getDiscretizationAlgorithm();
         this->config.n_folds = experiment.getNFolds();
         this->config.seeds = experiment.getRandomSeeds();
         this->config.quiet = experiment.isQuiet();
@@ -126,6 +139,23 @@ namespace platform {
         auto seed = task["seed"].get<int>();
         auto n_fold = task["fold"].get<int>();
         bool stratified = config.stratified;
+        //
+        // Traza para localizar la tarea que provoca un fallo en un worker.
+        // Se activa con BGRID_TRACE=1; sin esa variable no imprime nada, así
+        // que la salida normal del experimento no cambia. La última línea que
+        // deja un rank antes de morir dice en qué tarea y en qué fase estaba.
+        //
+        static const bool trace = std::getenv("BGRID_TRACE") != nullptr;
+        auto trace_step = [&](const char* step) {
+            if (!trace) return;
+            char host[HOST_NAME_MAX + 1] = {};
+            gethostname(host, sizeof(host) - 1);
+            std::cerr << "[trace rank " << config_mpi.rank << "@" << host
+                << " task=" << n_task << " " << dataset_name
+                << " seed=" << seed << " fold=" << n_fold
+                << "] " << step << std::endl;
+            };
+        trace_step("start");
         bayesnet::Smoothing_t smooth;
         if (config.smooth_strategy == "ORIGINAL")
             smooth = bayesnet::Smoothing_t::ORIGINAL;
@@ -138,6 +168,7 @@ namespace platform {
         //
         auto& dataset = datasets.getDataset(dataset_name);
         dataset.load();
+        trace_step("dataset loaded");
         auto [X, y] = dataset.getTensors();
         auto features = dataset.getFeatures();
         auto className = dataset.getClassName();
@@ -153,6 +184,7 @@ namespace platform {
         auto [train, test] = fold->getFold(n_fold);
         auto [X_train, X_test, y_train, y_test] = dataset.getTrainTestTensors(train, test);
         auto states = dataset.getStates(); // Get the states of the features Once they are discretized
+        trace_step("tensors ready");
 
         //
         // Build Classifier with selected hyperparameters
@@ -165,13 +197,16 @@ namespace platform {
         //
         // Train model
         //
+        trace_step("fitting");
         clf->fit(X_train, y_train, features, className, states, smooth);
         auto train_time = train_timer.getDuration();
+        trace_step("fit done");
         //
         // Test model
         //
         test_timer.start();
         double score = clf->score(X_test, y_test);
+        trace_step("scored");
         delete fold;
         auto test_time = test_timer.getDuration();
         //

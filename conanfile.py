@@ -24,7 +24,7 @@ class PlatformConan(ConanFile):
         # transitively; 1.3.0 only adds classes (XA1DE/XA2DE), so the symbols
         # pyclassifiers links against are unchanged.
         self.requires("bayesnet/1.4.0", force=True)
-        self.requires("pyclassifiers/1.0.3")
+        self.requires("pyclassifiers/1.0.4")
         self.requires("libxlsxwriter/1.2.2")
         
     def build_requirements(self):

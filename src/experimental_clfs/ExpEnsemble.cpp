@@ -137,14 +137,14 @@ namespace platform {
         }
         return n_models * (2 * models_.at(0)->getNFeatures() - 1);
     }
-    int ExpEnsemble::getNumberOfStates() const
+    long ExpEnsemble::getNumberOfStates() const
     {
         if (models_.empty()) {
             return 0;
         }
         auto states = models_.at(0)->getStates();
         int nFeatures = models_.at(0)->getNFeatures();
-        return std::accumulate(states.begin(), states.end(), 0) * nFeatures * n_models;
+        return std::accumulate(states.begin(), states.end(), 0L) * nFeatures * n_models;
     }
     int ExpEnsemble::getClassNumStates() const
     {

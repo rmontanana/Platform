@@ -387,9 +387,9 @@ namespace platform {
         }
         int statesClass() const { return statesClass_; }
         int getNFeatures() const { return nFeatures_; }
-        int getNumberOfStates() const
+        long getNumberOfStates() const
         {
-            return std::accumulate(states_.begin(), states_.end(), 0) * nFeatures_;
+            return std::accumulate(states_.begin(), states_.end(), 0L) * nFeatures_;
         }
         int getNumberOfEdges() const
         {

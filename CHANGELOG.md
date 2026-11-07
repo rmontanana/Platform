@@ -35,6 +35,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The migration maintains compatibility with existing make targets and workflow
 - All dependencies now managed through Conan package manager
 
+## [1.1.3] - 2026-11-07
+
+### Changed
+
+- Dependencies: `bayesnet/1.4.2` and `pyclassifiers/1.0.6` (built against it). BayesNet 1.4.2 fixes [BayesNet#47](https://gitea.rmontanana.es/rmontanana/BayesNet/issues/47): the X family (`XA1DE`, `XA2DE`, `XBAODE`, `XBA2DE`) sized its probability tables with the training maxima instead of the `states` map Platform passes to `fit`, so a value present only in the test partition was read out of range — the segfault of `b_grid` with `XA1DE` on `splice`, and silent garbage elsewhere. Results only change where some feature had a value above its training maximum; the model versions move (`XA1DE`/`XA2DE` 1.0.1, `XBAODE` 0.9.8, `XBA2DE` 0.9.10) so results computed with the fix can be told apart.
+- Since 1.1.2 (commit 2c78599): `bayesnet/1.4.1` and `pyclassifiers/1.0.5`, where `getNumberOfStates()` returns `long` (the number of probability cells for the X family); the experimental `ExpEnsemble` and `XSpode` follow the signature.
+- `TestPlatform` expects Platform 1.1.3 and BayesNet 1.4.2.
+
 ## [1.1.0] - 2025-07-02
 
 ### Added

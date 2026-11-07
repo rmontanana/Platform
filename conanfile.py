@@ -4,7 +4,7 @@ from conan.tools.cmake import CMakeToolchain, CMakeDeps, cmake_layout
 
 class PlatformConan(ConanFile):
     name = "platform"
-    version = "1.1.2"
+    version = "1.1.3"
     
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
@@ -20,12 +20,11 @@ class PlatformConan(ConanFile):
         self.requires("folding/2.0.0")
         self.requires("fimdlp/3.0.1")
         self.requires("arff-files/2.0.0")
-        # pyclassifiers/1.0.5 is built against bayesnet/1.4.1 (getNumberOfStates
-        # returns long since 1.4.1) and does not use the X family, so 1.4.2 (fix
-        # of BayesNet#47) needs no new pyclassifiers; force=True keeps a single
-        # bayesnet version in the graph.
+        # pyclassifiers/1.0.6 is built against bayesnet/1.4.2 (fix of
+        # BayesNet#47); force=True keeps a single bayesnet version in the graph
+        # should a transitive requirement lag behind.
         self.requires("bayesnet/1.4.2", force=True)
-        self.requires("pyclassifiers/1.0.5")
+        self.requires("pyclassifiers/1.0.6")
         self.requires("libxlsxwriter/1.2.2")
         
     def build_requirements(self):

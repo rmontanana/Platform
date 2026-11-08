@@ -35,6 +35,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The migration maintains compatibility with existing make targets and workflow
 - All dependencies now managed through Conan package manager
 
+## [1.1.4] - 2026-11-08
+
+### Fixed
+
+- **`b_grid experiment` stores the same result as `b_main`** ([#8](https://gitea.rmontanana.es/rmontanana/Platform/issues/8), [#9](https://gitea.rmontanana.es/rmontanana/Platform/issues/9)). Both programs now run a fold with the same function (`run_fold`, `src/main/FoldRun.cpp`) and build the result of a dataset with the same function (`build_partial_result`, `src/main/FoldResult.cpp`). Their JSON files are identical field by field except dates and times; `tests/parity/run_parity.sh` checks it. Before this release, `b_grid experiment`:
+  - stored `confusion_matrices` as `[]` and no `confusion_matrices_train`;
+  - stored the folds in the order the tasks arrived, so they could not be paired with `b_main` or with another run. They are now sorted seed × fold, in the order the seeds were given;
+  - stored `notes` as `[]`; the notes now carry the `b_main` prefix `Seed: s Fold: f:`;
+  - stored `score_train` as 0 and ignored `--no-train-score`;
+  - **ignored `--score`**: it always computed accuracy, even when the file said `roc-auc-ovr`;
+  - predicted with `predict()` instead of the argmax of `predict_proba()`;
+  - did not accept `--graph` or `--generate-fold-files`.
+- **A failing task stops `b_grid`.** An exception in a worker left the manager waiting forever, or let `mpirun` kill the job without saying which task failed. The worker now prints the task, dataset, seed, fold and message and calls `MPI_Abort`. BayesNet 1.4.3 throws where 1.4.2 returned NaN, so this is needed before running it with `b_grid`.
+- **`--generate-fold-files` throws when it cannot write** the fold file (for instance, when `datasets_experiment/` is missing), instead of silently writing nothing.
+
+### Changed
+
+- **What the times measure, in both programs.** `times_train` is `fit` alone, without the train/test split. `times_test` is `predict_proba` of the test partition alone, without building `Scores` and the confusion matrix. Times are therefore lower than in earlier releases and are not comparable with them.
+- **The confusion matrix of `Scores` is one `torch::bincount`** instead of a loop of `item<int>()` per instance. The counts are the same.
+- **MPI transport of `b_grid`.**
+  - `Task_Result` gains `seed`, `score_train`, `has_train`, `n_classes`, `notes_len` and `graph_len`.
+  - The confusion matrices, the notes and the graph travel in messages that follow `TAG_RESULT` from the same worker: `TAG_CONFUSION`, `TAG_CONFUSION_TRAIN`, `TAG_NOTES` and `TAG_GRAPH`.
+  - `b_grid search` leaves the new fields at 0 and sends nothing else.
+- **Dependencies.** `bayesnet/1.4.3`, which fixes [BayesNet#48](https://gitea.rmontanana.es/rmontanana/BayesNet/issues/48): the boosted ensembles no longer keep the model AdaBoost rejects. A rejected first model gave NaN probabilities and always class 0. `pyclassifiers/1.0.6` is unchanged (`force=True`).
+- `TestPlatform` expects Platform 1.1.4 and BayesNet 1.4.3.
+
+### Tests
+
+- New `TestFoldResult.cpp`:
+  - seed × fold order with unsorted seeds, and rejection of missing, duplicated and unknown folds;
+  - the vectorized confusion matrix against a plain count, with a class absent from the test partition, and the JSON format of `Scores::get_confusion_matrix_json(true)`;
+  - the fields of the result: notes with their prefix, matrices only when discretized, and no `confusion_matrices_train` with `--no-train-score`.
+- New `tests/parity/run_parity.sh` compares `b_main` and `mpirun -np 3 b_grid experiment` on iris, ecoli and diabetes. Six cases:
+  - `XBAODE` and `XBA2DE` (with notes);
+  - `--no-train-score`;
+  - `roc-auc-ovr`;
+  - `TANLd` on continuous data;
+  - `--graph`.
+  
+  It also checks that a failing task stops `b_grid` and names the task.
+
 ## [1.1.3] - 2026-11-07
 
 ### Changed

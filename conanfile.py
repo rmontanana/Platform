@@ -4,7 +4,7 @@ from conan.tools.cmake import CMakeToolchain, CMakeDeps, cmake_layout
 
 class PlatformConan(ConanFile):
     name = "platform"
-    version = "1.1.3"
+    version = "1.1.4"
     
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"

@@ -123,7 +123,7 @@ namespace platform {
             results[dataset] = json_best;
         }
     }
-    json GridSearch::store_result(std::vector<std::string>& names, Task_Result& result, json& results)
+    json GridSearch::store_result(std::vector<std::string>& names, Task_Result& result, Task_Payload& payload, json& results)
     {
         json json_result = {
             { "score", result.score },
@@ -141,7 +141,7 @@ namespace platform {
         results[name].push_back(json_result);
         return results;
     }
-    void GridSearch::consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result)
+    void GridSearch::consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result, Task_Payload& payload)
     {
         //
         // initialize

@@ -23,8 +23,11 @@ namespace platform {
         virtual std::vector<std::string> filterDatasets(Datasets& datasets) const = 0;
         virtual json initializeResults() = 0;
         virtual void compile_results(json& results, json& all_results, std::string& model) = 0;
-        virtual json store_result(std::vector<std::string>& names, Task_Result& result, json& results) = 0;
-        virtual void consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result) = 0;
+        virtual json store_result(std::vector<std::string>& names, Task_Result& result, Task_Payload& payload, json& results) = 0;
+        virtual void consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result, Task_Payload& payload) = 0;
+        void send_payload(const Task_Result& result, const Task_Payload& payload, int manager);
+        [[noreturn]] void abort_task(struct ConfigMPI& config_mpi, json& tasks, int n_task, const std::string& message);
+        void receive_payload(const Task_Result& result, Task_Payload& payload, int source);
         void shuffle_and_progress_bar(json& tasks);
         json producer(std::vector<std::string>& names, json& tasks, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result);
         void consumer(Datasets& datasets, json& tasks, struct ConfigGrid& config, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result);

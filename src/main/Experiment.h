@@ -44,6 +44,9 @@ namespace platform {
         std::string getDiscretizationAlgorithm() const { return discretization_algo; }
         int getNFolds() const { return nfolds; }
         std::vector<int> getRandomSeeds() const { return randomSeeds; }
+        bool isNoTrainScore() const { return no_train_score; }
+        bool doGraph() const { return graph; }
+        bool doGenerateFoldFiles() const { return generate_fold_files; }
         void cross_validation(const std::string& fileName);
         void go();
         void saveResult(const std::string& path);

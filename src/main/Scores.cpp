@@ -11,12 +11,10 @@ namespace platform {
         total = y_test.size(0);
         auto y_pred = y_proba.argmax(1);
         accuracy_value = (y_pred == y_test).sum().item<float>() / total;
-        init_confusion_matrix();
-        for (int i = 0; i < total; i++) {
-            int actual = y_test[i].item<int>();
-            int predicted = y_pred[i].item<int>();
-            confusion_matrix[actual][predicted] += 1;
-        }
+        // One bincount instead of a loop of item<int>() per instance (Platform#8): cell
+        // (actual, predicted) is bin actual * num_classes + predicted.
+        auto cells = y_test.to(torch::kLong) * num_classes + y_pred.to(torch::kLong);
+        confusion_matrix = torch::bincount(cells, {}, num_classes * num_classes).view({ num_classes, num_classes }).to(torch::kInt32).contiguous();
     }
     Scores::Scores(const json& confusion_matrix_)
     {

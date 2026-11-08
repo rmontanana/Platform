@@ -9,6 +9,8 @@
 #include "common/Paths.h"
 #include "common/Utils.h"
 #include "GridExperiment.h"
+#include "main/FoldRun.h"
+#include <sstream>
 
 #ifndef HOST_NAME_MAX
 #include <sys/param.h>
@@ -35,6 +37,27 @@ namespace platform {
         this->config.n_folds = experiment.getNFolds();
         this->config.seeds = experiment.getRandomSeeds();
         this->config.quiet = experiment.isQuiet();
+        this->config.no_train_score = experiment.isNoTrainScore();
+        this->config.graph = experiment.doGraph();
+        this->config.generate_fold_files = experiment.doGenerateFoldFiles();
+    }
+    FoldOptions GridExperiment::fold_options(Dataset& dataset)
+    {
+        FoldOptions options;
+        options.model = config.model;
+        if (config.score == "accuracy")
+            options.score = score_t::ACCURACY;
+        else if (config.score == "roc-auc-ovr")
+            options.score = score_t::ROC_AUC_OVR;
+        else
+            throw std::runtime_error("Unknown score: " + config.score);
+        options.no_train_score = config.no_train_score;
+        options.discretized = config.discretize;
+        options.graph = config.graph;
+        options.smoothing = smooth_type;
+        options.num_classes = dataset.getNClasses();
+        options.labels = dataset.getLabels();
+        return options;
     }
     json GridExperiment::getResults()
     {
@@ -61,54 +84,51 @@ namespace platform {
             // each result has the results of all the outer folds as each one were a different task
             auto dataset_name = result_item.key();
             auto data = result_item.value();
-            auto result = json::object();
-            int data_size = data.size();
-            auto score = torch::zeros({ data_size }, torch::kFloat64);
-            auto score_train = torch::zeros({ data_size }, torch::kFloat64);
-            auto time_test = torch::zeros({ data_size }, torch::kFloat64);
-            auto time_train = torch::zeros({ data_size }, torch::kFloat64);
-            auto nodes = torch::zeros({ data_size }, torch::kFloat64);
-            auto leaves = torch::zeros({ data_size }, torch::kFloat64);
-            auto depth = torch::zeros({ data_size }, torch::kFloat64);
             auto& dataset = datasets.getDataset(dataset_name);
             dataset.load();
-            //
-            // Prepare Result
-            //
-            auto partial_result = PartialResult();
-            partial_result.setSamples(dataset.getNSamples()).setFeatures(dataset.getNFeatures()).setClasses(dataset.getNClasses());
-            partial_result.setHyperparameters(experiment.getHyperParameters().get(dataset_name));
-            for (int fold = 0; fold < data_size; ++fold) {
-                partial_result.addScoreTest(data[fold]["score"]);
-                partial_result.addScoreTrain(0.0);
-                partial_result.addTimeTest(data[fold]["time"]);
-                partial_result.addTimeTrain(data[fold]["time_train"]);
-                score[fold] = data[fold]["score"].get<double>();
-                time_test[fold] = data[fold]["time"].get<double>();
-                time_train[fold] = data[fold]["time_train"].get<double>();
-                nodes[fold] = data[fold]["nodes"].get<double>();
-                leaves[fold] = data[fold]["leaves"].get<double>();
-                depth[fold] = data[fold]["depth"].get<double>();
+            std::vector<FoldOutcome> folds;
+            for (const auto& item : data) {
+                FoldOutcome f;
+                f.seed = item["seed"].get<int>();
+                f.fold = item["fold"].get<int>();
+                f.score_test = item["score"].get<double>();
+                f.score_train = item["score_train"].get<double>();
+                f.has_train = item["has_train"].get<bool>();
+                f.time_test = item["time"].get<double>();
+                f.time_train = item["time_train"].get<double>();
+                f.nodes = item["nodes"].get<double>();
+                f.edges = item["leaves"].get<double>();
+                f.states = item["depth"].get<double>();
+                f.cm_test = item["cm_test"].get<std::vector<int>>();
+                f.cm_train = item["cm_train"].get<std::vector<int>>();
+                f.notes = item["notes"].get<std::vector<std::string>>();
+                f.graph = item["graph"].get<std::string>();
+                folds.push_back(std::move(f));
             }
-            partial_result.setGraph(std::vector<std::string>());
-            partial_result.setScoreTest(torch::mean(score).item<double>()).setScoreTrain(0.0);
-            partial_result.setScoreTestStd(torch::std(score).item<double>()).setScoreTrainStd(0.0);
-            partial_result.setTrainTime(torch::mean(time_train).item<double>()).setTestTime(torch::mean(time_test).item<double>());
-            partial_result.setTrainTimeStd(torch::std(time_train).item<double>()).setTestTimeStd(torch::std(time_test).item<double>());
-            partial_result.setNodes(torch::mean(nodes).item<double>()).setLeaves(torch::mean(leaves).item<double>()).setDepth(torch::mean(depth).item<double>());
-            partial_result.setDataset(dataset_name).setNotes(std::vector<std::string>());
-            partial_result.setConfusionMatrices(json::array());
+            // The tasks arrive in any order; b_main stores them seed x fold (Platform#8)
+            sort_by_seed_fold(folds, config.seeds, config.n_folds);
+            auto options = fold_options(dataset);
+            auto partial_result = build_partial_result(folds, options, dataset_name, dataset.getNSamples(), dataset.getNFeatures(),
+                dataset.getNClasses(), experiment.getHyperParameters().get(dataset_name));
             experiment.addResult(partial_result);
         }
         auto clf = Models::instance()->create(experiment.getModel());
         experiment.setModelVersion(clf->getVersion());
         computed_results = results;
     }
-    json GridExperiment::store_result(std::vector<std::string>& names, Task_Result& result, json& results)
+    json GridExperiment::store_result(std::vector<std::string>& names, Task_Result& result, Task_Payload& payload, json& results)
     {
+        std::vector<std::string> notes;
+        std::stringstream ss(payload.notes);
+        for (std::string note; std::getline(ss, note, '\n');) {
+            notes.push_back(note);
+        }
         json json_result = {
             { "score", result.score },
+            { "score_train", result.score_train },
+            { "has_train", result.has_train != 0 },
             { "combination", result.idx_combination },
+            { "seed", result.seed },
             { "fold", result.n_fold },
             { "time", result.time },
             { "time_train", result.time_train },
@@ -117,7 +137,11 @@ namespace platform {
             { "leaves", result.leaves },
             { "depth", result.depth },
             { "process", result.process },
-            { "task", result.task }
+            { "task", result.task },
+            { "cm_test", payload.cm_test },
+            { "cm_train", payload.cm_train },
+            { "notes", notes },
+            { "graph", payload.graph }
         };
         auto name = names[result.idx_dataset];
         if (!results.contains(name)) {
@@ -126,16 +150,13 @@ namespace platform {
         results[name].push_back(json_result);
         return results;
     }
-    void GridExperiment::consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result)
+    void GridExperiment::consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result, Task_Payload& payload)
     {
         //
         // initialize
         //
-        Timer train_timer, test_timer;
         json task = tasks[n_task];
-        auto model = config.model;
         auto dataset_name = task["dataset"].get<std::string>();
-        auto idx_dataset = task["idx_dataset"].get<int>();
         auto seed = task["seed"].get<int>();
         auto n_fold = task["fold"].get<int>();
         bool stratified = config.stratified;
@@ -156,13 +177,6 @@ namespace platform {
                 << "] " << step << std::endl;
             };
         trace_step("start");
-        bayesnet::Smoothing_t smooth;
-        if (config.smooth_strategy == "ORIGINAL")
-            smooth = bayesnet::Smoothing_t::ORIGINAL;
-        else if (config.smooth_strategy == "LAPLACE")
-            smooth = bayesnet::Smoothing_t::LAPLACE;
-        else if (config.smooth_strategy == "CESTNIK")
-            smooth = bayesnet::Smoothing_t::CESTNIK;
         //
         // Generate the hyperparameters combinations
         //
@@ -180,49 +194,52 @@ namespace platform {
             fold = new folding::StratifiedKFold(config.n_folds, y, seed);
         else
             fold = new folding::KFold(config.n_folds, y.size(0), seed);
-        train_timer.start();
         auto [train, test] = fold->getFold(n_fold);
+        delete fold;
         auto [X_train, X_test, y_train, y_test] = dataset.getTrainTestTensors(train, test);
         auto states = dataset.getStates(); // Get the states of the features Once they are discretized
+        if (config.generate_fold_files)
+            generate_files(dataset_name, config.discretize, stratified, seed, n_fold, X_train, y_train, X_test, y_test, train, test);
         trace_step("tensors ready");
-
         //
-        // Build Classifier with selected hyperparameters
+        // Train and test the model exactly as b_main does
         //
-        auto clf = Models::instance()->create(config.model);
-        auto valid = clf->getValidHyperparameters();
-        auto hyperparameters = experiment.getHyperParameters();
-        hyperparameters.check(valid, dataset_name);
-        clf->setHyperparameters(hyperparameters.get(dataset_name));
-        //
-        // Train model
-        //
-        trace_step("fitting");
-        clf->fit(X_train, y_train, features, className, states, smooth);
-        auto train_time = train_timer.getDuration();
-        trace_step("fit done");
-        //
-        // Test model
-        //
-        test_timer.start();
-        double score = clf->score(X_test, y_test);
+        auto options = fold_options(dataset);
+        auto& hyperparameters = experiment.getHyperParameters();
+        auto progress = [&](char phase, bayesnet::status_t) {
+            trace_step(phase == 'a' ? "fitting" : phase == 'b' ? "scoring train" : "scoring test");
+            };
+        auto outcome = run_fold(options, hyperparameters, dataset_name, X_train, y_train, X_test, y_test, features, className, states, progress);
         trace_step("scored");
-        delete fold;
-        auto test_time = test_timer.getDuration();
         //
         // Return the result
         //
         result->idx_dataset = task["idx_dataset"].get<int>();
         result->idx_combination = 0;
-        result->score = score;
+        result->seed = seed;
+        result->score = outcome.score_test;
+        result->score_train = outcome.score_train;
+        result->has_train = outcome.has_train ? 1 : 0;
         result->n_fold = n_fold;
-        result->time = test_time;
-        result->time_train = train_time;
-        result->nodes = clf->getNumberOfNodes();
-        result->leaves = clf->getNumberOfEdges();
-        result->depth = clf->getNumberOfStates();
+        result->time = outcome.time_test;
+        result->time_train = outcome.time_train;
+        result->nodes = outcome.nodes;
+        result->leaves = outcome.edges;
+        result->depth = outcome.states;
         result->process = config_mpi.rank;
         result->task = n_task;
+        result->n_classes = outcome.cm_test.empty() ? 0 : options.num_classes;
+        payload.cm_test = std::move(outcome.cm_test);
+        payload.cm_train = std::move(outcome.cm_train);
+        payload.notes.clear();
+        for (size_t i = 0; i < outcome.notes.size(); ++i) {
+            if (i > 0)
+                payload.notes += '\n';
+            payload.notes += outcome.notes[i];
+        }
+        payload.graph = std::move(outcome.graph);
+        result->notes_len = static_cast<int>(payload.notes.size());
+        result->graph_len = static_cast<int>(payload.graph.size());
         //
         // Progress is now displayed by the producer when it receives this result
         //

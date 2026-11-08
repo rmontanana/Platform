@@ -81,10 +81,9 @@ namespace platform {
             }});
             auto seed_values = env.getSeeds();
             arguments.add_argument("--seeds").nargs(1, 10).help("Random seeds. Set to -1 to have pseudo random").scan<'i', int>().default_value(seed_values);
-            if (type == experiment_t::NORMAL) {
-                arguments.add_argument("--generate-fold-files").help("generate fold information in datasets_experiment folder").default_value(false).implicit_value(true);
-                arguments.add_argument("--graph").help("generate graphviz dot files with the model").default_value(false).implicit_value(true);
-            }
+            // b_grid experiment accepts them too, as b_main (Platform#9)
+            arguments.add_argument("--generate-fold-files").help("generate fold information in datasets_experiment folder").default_value(false).implicit_value(true);
+            arguments.add_argument("--graph").help("generate graphviz dot files with the model").default_value(false).implicit_value(true);
     }
     void ArgumentsExperiment::parse_args(int argc, char** argv)
     {
@@ -138,13 +137,8 @@ namespace platform {
                 throw std::runtime_error("title is mandatory if all datasets are to be tested");
             }
             saveResults = arguments.get<bool>("save");
-            if (type == experiment_t::NORMAL) {
-                graph = arguments.get<bool>("graph");
-                generate_fold_files = arguments.get<bool>("generate-fold-files");
-            } else {
-                graph = false;
-                generate_fold_files = false;
-            }
+            graph = arguments.get<bool>("graph");
+            generate_fold_files = arguments.get<bool>("generate-fold-files");
         }
         catch (const std::exception& err) {
             std::cerr << err.what() << std::endl;

@@ -5,9 +5,9 @@ if(ENABLE_TESTING)
         ${CMAKE_BINARY_DIR}/configured_files/include
     )
     set(TEST_SOURCES_PLATFORM 
-        TestUtils.cpp TestPlatform.cpp TestResult.cpp TestScores.cpp TestDecisionTree.cpp TestAdaBoost.cpp
+        TestUtils.cpp TestPlatform.cpp TestResult.cpp TestScores.cpp TestDecisionTree.cpp TestAdaBoost.cpp TestFoldResult.cpp
         ${Platform_SOURCE_DIR}/src/common/Datasets.cpp ${Platform_SOURCE_DIR}/src/common/Dataset.cpp ${Platform_SOURCE_DIR}/src/common/Discretization.cpp
-        ${Platform_SOURCE_DIR}/src/main/Scores.cpp 
+        ${Platform_SOURCE_DIR}/src/main/Scores.cpp ${Platform_SOURCE_DIR}/src/main/FoldResult.cpp 
         ${Platform_SOURCE_DIR}/src/experimental_clfs/DecisionTree.cpp
         ${Platform_SOURCE_DIR}/src/experimental_clfs/AdaBoost.cpp
     )

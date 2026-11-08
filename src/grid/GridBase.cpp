@@ -1,3 +1,5 @@
+#include <sstream>
+#include <algorithm>
 #include <random>
 #include <cstddef>
 #include <cstdio>
@@ -184,9 +186,12 @@ namespace platform {
         Task_Result result;
         int tasks_size;
         MPI_Datatype MPI_Result;
-        MPI_Datatype type[11] = { MPI_UNSIGNED, MPI_UNSIGNED, MPI_INT, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_INT, MPI_INT };
-        int blocklen[11] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-        MPI_Aint disp[11];
+        const int n_fields = 17;
+        MPI_Datatype type[n_fields] = { MPI_UNSIGNED, MPI_UNSIGNED, MPI_INT, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_INT, MPI_INT,
+            MPI_INT, MPI_DOUBLE, MPI_INT, MPI_INT, MPI_INT, MPI_INT };
+        int blocklen[n_fields];
+        std::fill(blocklen, blocklen + n_fields, 1);
+        MPI_Aint disp[n_fields];
         disp[0] = offsetof(Task_Result, idx_dataset);
         disp[1] = offsetof(Task_Result, idx_combination);
         disp[2] = offsetof(Task_Result, n_fold);
@@ -198,7 +203,17 @@ namespace platform {
         disp[8] = offsetof(Task_Result, depth);
         disp[9] = offsetof(Task_Result, process);
         disp[10] = offsetof(Task_Result, task);
-        MPI_Type_create_struct(11, blocklen, disp, type, &MPI_Result);
+        disp[11] = offsetof(Task_Result, seed);
+        disp[12] = offsetof(Task_Result, score_train);
+        disp[13] = offsetof(Task_Result, has_train);
+        disp[14] = offsetof(Task_Result, n_classes);
+        disp[15] = offsetof(Task_Result, notes_len);
+        disp[16] = offsetof(Task_Result, graph_len);
+        MPI_Datatype tmp_type;
+        MPI_Type_create_struct(n_fields, blocklen, disp, type, &tmp_type);
+        // Resize to sizeof(Task_Result) so trailing padding is covered (arrays of results, if ever)
+        MPI_Type_create_resized(tmp_type, 0, sizeof(Task_Result), &MPI_Result);
+        MPI_Type_free(&tmp_type);
         MPI_Type_commit(&MPI_Result);
         //
         // 0.2 Manager creates the tasks
@@ -271,8 +286,13 @@ namespace platform {
             MPI_Status status;
             MPI_Recv(&result, 1, MPI_Result, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             if (status.MPI_TAG == TAG_RESULT) {
+                // The worker sends the rest of the result right after it; MPI keeps the
+                // order of the messages between two processes, so they are the next ones
+                // from status.MPI_SOURCE.
+                Task_Payload payload;
+                receive_payload(result, payload, status.MPI_SOURCE);
                 //Store result
-                store_result(names, result, results);
+                store_result(names, result, payload, results);
                 // Display progress in the manager process using the worker's rank
                 std::cout << get_color_rank(result.process) << std::flush;
                 std::cout.flush();
@@ -287,8 +307,13 @@ namespace platform {
             MPI_Status status;
             MPI_Recv(&result, 1, MPI_Result, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             if (status.MPI_TAG == TAG_RESULT) {
+                // The worker sends the rest of the result right after it; MPI keeps the
+                // order of the messages between two processes, so they are the next ones
+                // from status.MPI_SOURCE.
+                Task_Payload payload;
+                receive_payload(result, payload, status.MPI_SOURCE);
                 //Store result
-                store_result(names, result, results);
+                store_result(names, result, payload, results);
                 // Display progress in the manager process using the worker's rank
                 std::cout << get_color_rank(result.process) << std::flush;
                 std::cout.flush();
@@ -298,9 +323,58 @@ namespace platform {
         }
         return results;
     }
+    void GridBase::abort_task(struct ConfigMPI& config_mpi, json& tasks, int n_task, const std::string& message)
+    {
+        const auto& task = tasks[n_task];
+        // One write, so the messages of two failing ranks do not interleave
+        std::ostringstream oss;
+        oss << "b_grid: task " << n_task << " failed on rank " << config_mpi.rank;
+        for (const auto& key : { "dataset", "seed", "fold" }) {
+            if (task.contains(key))
+                oss << " " << key << "=" << task[key].dump();
+        }
+        oss << ": " << message << "\n";
+        std::cerr << oss.str() << std::flush;
+        MPI_Abort(MPI_COMM_WORLD, 1);
+        std::abort(); // MPI_Abort is not declared noreturn
+    }
+    void GridBase::send_payload(const Task_Result& result, const Task_Payload& payload, int manager)
+    {
+        int cells = result.n_classes * result.n_classes;
+        if (result.n_classes > 0) {
+            MPI_Send(payload.cm_test.data(), cells, MPI_INT, manager, TAG_CONFUSION, MPI_COMM_WORLD);
+            if (result.has_train)
+                MPI_Send(payload.cm_train.data(), cells, MPI_INT, manager, TAG_CONFUSION_TRAIN, MPI_COMM_WORLD);
+        }
+        if (result.notes_len > 0)
+            MPI_Send(payload.notes.data(), result.notes_len, MPI_CHAR, manager, TAG_NOTES, MPI_COMM_WORLD);
+        if (result.graph_len > 0)
+            MPI_Send(payload.graph.data(), result.graph_len, MPI_CHAR, manager, TAG_GRAPH, MPI_COMM_WORLD);
+    }
+    void GridBase::receive_payload(const Task_Result& result, Task_Payload& payload, int source)
+    {
+        MPI_Status status;
+        int cells = result.n_classes * result.n_classes;
+        if (result.n_classes > 0) {
+            payload.cm_test.resize(cells);
+            MPI_Recv(payload.cm_test.data(), cells, MPI_INT, source, TAG_CONFUSION, MPI_COMM_WORLD, &status);
+            if (result.has_train) {
+                payload.cm_train.resize(cells);
+                MPI_Recv(payload.cm_train.data(), cells, MPI_INT, source, TAG_CONFUSION_TRAIN, MPI_COMM_WORLD, &status);
+            }
+        }
+        if (result.notes_len > 0) {
+            payload.notes.resize(result.notes_len);
+            MPI_Recv(payload.notes.data(), result.notes_len, MPI_CHAR, source, TAG_NOTES, MPI_COMM_WORLD, &status);
+        }
+        if (result.graph_len > 0) {
+            payload.graph.resize(result.graph_len);
+            MPI_Recv(payload.graph.data(), result.graph_len, MPI_CHAR, source, TAG_GRAPH, MPI_COMM_WORLD, &status);
+        }
+    }
     void GridBase::consumer(Datasets& datasets, json& tasks, struct ConfigGrid& config, struct ConfigMPI& config_mpi, MPI_Datatype& MPI_Result)
     {
-        Task_Result result;
+        Task_Result result{};
         //
         // 2b.1 Consumers announce to the producer that they are ready to receive a task
         //
@@ -315,11 +389,23 @@ namespace platform {
             if (status.MPI_TAG == TAG_END) {
                 break;
             }
-            consumer_go(config, config_mpi, tasks, task, datasets, &result);
+            Task_Payload payload;
+            try {
+                consumer_go(config, config_mpi, tasks, task, datasets, &result, payload);
+            }
+            catch (const std::exception& e) {
+                // A failed task must stop the whole run, as in b_main, and say where it
+                // failed. Leaving the loop would let the manager wait forever.
+                abort_task(config_mpi, tasks, task, e.what());
+            }
+            catch (...) {
+                abort_task(config_mpi, tasks, task, "unknown exception");
+            }
             //
             // 2b.3 Consumers send the result to the producer
             //
             MPI_Send(&result, 1, MPI_Result, config_mpi.manager, TAG_RESULT, MPI_COMM_WORLD);
+            send_payload(result, payload, config_mpi.manager);
         }
     }
 

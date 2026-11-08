@@ -9,6 +9,7 @@
 #include "main/HyperParameters.h"
 #include "main/ArgumentsExperiment.h"
 #include "GridBase.h"
+#include "main/FoldRun.h"
 
 
 namespace platform {
@@ -27,12 +28,13 @@ namespace platform {
         json computed_results;
         bool saveResults = false;
         std::vector<std::string> filesToTest;
+        FoldOptions fold_options(Dataset& dataset);
         void save(json& results);
         json initializeResults();
         std::vector<std::string> filterDatasets(Datasets& datasets) const;
         void compile_results(json& results, json& all_results, std::string& model);
-        json store_result(std::vector<std::string>& names, Task_Result& result, json& results);
-        void consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result);
+        json store_result(std::vector<std::string>& names, Task_Result& result, Task_Payload& payload, json& results);
+        void consumer_go(struct ConfigGrid& config, struct ConfigMPI& config_mpi, json& tasks, int n_task, Datasets& datasets, Task_Result* result, Task_Payload& payload);
     };
 } /* namespace platform */
 #endif

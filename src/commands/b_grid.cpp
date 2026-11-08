@@ -265,6 +265,9 @@ void experiment(argparse::ArgumentParser& program)
             experiment.saveResult(path_results);
         }
         experiment.report();
+        if (arguments.doGraph()) {
+            experiment.saveGraph();
+        }
         std::cout << "Process took " << duration << std::endl;
     }
     MPI_Finalize();

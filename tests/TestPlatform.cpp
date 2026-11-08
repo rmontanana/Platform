@@ -25,7 +25,7 @@ TEST_CASE("Test Folding library version", "[Folding]")
 TEST_CASE("Test BayesNet version", "[BayesNet]")
 {
     std::string version = bayesnet::TAN().getVersion();
-    REQUIRE(version == "1.4.2");
+    REQUIRE(version == "1.4.3");
 }
 TEST_CASE("Test mdlp version", "[mdlp]")
 {

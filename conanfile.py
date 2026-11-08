@@ -20,10 +20,10 @@ class PlatformConan(ConanFile):
         self.requires("folding/2.0.0")
         self.requires("fimdlp/3.0.1")
         self.requires("arff-files/2.0.0")
-        # pyclassifiers/1.0.6 is built against bayesnet/1.4.2 (fix of
-        # BayesNet#47); force=True keeps a single bayesnet version in the graph
-        # should a transitive requirement lag behind.
-        self.requires("bayesnet/1.4.2", force=True)
+        # bayesnet/1.4.3 (fix of BayesNet#48). pyclassifiers/1.0.6 was built
+        # against bayesnet/1.4.2; force=True keeps a single bayesnet version in
+        # the graph (pyclassifiers does not use the boosted ensembles).
+        self.requires("bayesnet/1.4.3", force=True)
         self.requires("pyclassifiers/1.0.6")
         self.requires("libxlsxwriter/1.2.2")
         

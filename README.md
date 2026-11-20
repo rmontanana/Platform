@@ -1,155 +1,129 @@
-# <img src="logo.png" alt="logo" width="50"/> Platform
+# <img src="logo.png" alt="Platform logo" width="50"/> Platform
 
-![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=flat&logo=c%2B%2B&logoColor=white)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](<https://opensource.org/licenses/MIT>)
+![C++](https://img.shields.io/badge/C%2B%2B-20-00599C?logo=c%2B%2B&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/rmontanana/Platform)
 ![Gitea Last Commit](https://img.shields.io/gitea/last-commit/rmontanana/platform?gitea_url=https://gitea.rmontanana.es&logo=gitea)
 
-Platform to run Bayesian Networks and Machine Learning Classifiers experiments.
+Platform is a C++ framework for running and comparing machine-learning experiments, with a focus on Bayesian network classifiers. It brings datasets, cross-validation, hyperparameter search and result analysis together in a set of command-line tools.
 
-## 0. Setup
+- Run classification experiments with configurable folds, seeds and preprocessing.
+- Search hyperparameters in parallel with MPI.
+- Browse, compare and validate results, and export reports to Excel or TeX.
+- Use Bayesian network classifiers alongside supported Python-based models.
 
-Before compiling Platform.
+## At a glance
 
-### Miniconda
+The following terminal images were rendered from actual command output using an experiment directory with 42 datasets and 49 result files. The dataset listing is shortened for readability.
 
-To be able to run Python Classifiers such as STree, ODTE, SVC, etc. it is needed to install Miniconda. To do so, download the installer from [Miniconda](https://docs.conda.io/en/latest/miniconda.html) and run it. It is recommended to install it in the home folder.
+### Explore datasets
 
-In Linux sometimes the library libstdc++ is mistaken from the miniconda installation and produces the next message when running the b_xxxx executables:
+`b_list datasets` displays the available datasets, their sizes, features, classes and class balance.
 
-```bash
-libstdc++.so.6: version `GLIBCXX_3.4.32' not found (required by b_xxxx)
-```
+![Terminal output listing available datasets](img/readme/datasets.png)
 
-The solution is to erase the libstdc++ library from the miniconda installation and no further compilation is needed.
+### Run an experiment
 
-### MPI
+`b_main -d iris -m TAN -f 5 --discretize` trains and evaluates TAN with five-fold cross-validation. The report below is an excerpt of the output, using the experiment's configured random seeds.
 
-In Linux just install openmpi & openmpi-devel packages.
+![TAN experiment report on iris](img/readme/main.png)
 
-```bash
-source /etc/profile.d/modules.sh
-module load mpi/openmpi-x86_64
-```
+### Explore a hyperparameter grid
 
-If cmake can't find openmpi installation (like in Oracle Linux) set the following variable:
+`b_grid dump -m KDB` displays the combinations in `grid/grid_KDB_input.json` before running a search. This example uses a sample grid with `k` values for all datasets and a separate set for iris; see the [grid guide](docs/b_grid.md) for the input format and MPI search commands.
 
-```bash
-export MPI_HOME="/usr/lib64/openmpi"
-```
+![KDB hyperparameter grid](img/readme/grid.png)
 
-In Mac OS X, install mpich with brew and if cmake doesn't find it, edit mpicxx wrapper to remove the ",-commons,use_dylibs" from final_ldflags
+### Search hyperparameters with MPI
 
-```bash
-vi /opt/homebrew/bin/mpicxx
-```
+`b_grid search` distributes the cross-validation tasks across MPI workers. Here, three MPI processes search the sample grid for iris; `--continue iris --only` selects that dataset and loads any previous search results. The table shows the work completed by each worker and the winning hyperparameters.
 
-### boost library
+![MPI hyperparameter search and worker summary](img/readme/grid-search.png)
 
-[Getting Started](<https://www.boost.org/doc/libs/1_83_0/more/getting_started/index.html>)
+### Run a parallel experiment
 
-The best option is install the packages that the Linux distribution have in its repository. If this is the case:
+`b_grid experiment` runs the experiment across MPI workers. This example uses the hyperparameters produced by the search above, with three folds and two seeds. Warnings about other datasets and the remainder of the report have been omitted from the image.
 
-```bash
-sudo dnf install boost-devel
-```
+![MPI experiment with worker summary and results](img/readme/grid-experiment.png)
 
-If this is not possible and the compressed packaged is installed, the following environment variable has to be set pointing to the folder where it was unzipped to:
+### Compare results
 
-```bash
-export BOOST_ROOT=/path/to/library/
-```
+`b_list results -d iris -s accuracy` shows the recorded results for a dataset.
 
-In some cases, it is needed to build the library, to do so:
+![Terminal output comparing iris results](img/readme/results.png)
 
-```bash
-cd /path/to/library
-mkdir own
-./bootstrap.sh --prefix=/path/to/library/own
-./b2 install
-export BOOST_ROOT=/path/to/library/own/
-```
+`b_best -m any -s accuracy --friedman` compares the best recorded score for each model and dataset, followed by the Friedman test and the Holm post-hoc test. The image omits some dataset rows to show both the table header and the statistical results; the command also updates the corresponding best-results files.
 
-Don't forget to add the export BOOST_ROOT statement to .bashrc or wherever it is meant to be.
+![Best accuracy by dataset and model, with Friedman and Holm tests](img/readme/best.png)
 
-### libxlswriter
+### Browse experiments interactively
+
+`b_manage` opens a terminal interface for browsing and filtering results. From the list, use `r` with a row number to inspect a result or `q` to quit.
+
+![Interactive results manager](img/readme/manage.png)
+
+### Validate results
+
+`b_results` checks the result files against the expected schema.
+
+![Terminal output validating result files](img/readme/validation.png)
+
+## Installation
+
+Platform uses CMake and Make, with dependencies managed by Conan. You need a C++20 compiler, CMake, Make, Conan, MPI and Boost. Miniconda is also needed for Python-based classifiers.
 
 ```bash
-cd lib/libxlsxwriter
-make
-make install DESTDIR=/home/rmontanana/Code PREFIX=
+make init       # install dependencies for Debug and Release
+make release    # build in build_Release/
+# or: make debug
 ```
 
-### Release
+Executables are placed in `build_Release/src/` or `build_Debug/src/`. To install them in `~/bin`, use `make install`.
+
+See the [installation guide](docs/installation.md) for platform-specific prerequisites, optional dependencies and troubleshooting.
+
+## Quick start
+
+Run the commands from your experiment directory: Platform reads its `.env` configuration from the current working directory. Start with the repository's [.env.example](.env.example), prepare your datasets and their `all.txt` index, and create the required directories as described in the [configuration guide](docs/configuration.md).
 
 ```bash
-make release
+cd /path/to/experiment
+
+# Inspect your datasets
+b_list datasets
+
+# Run a five-fold experiment on iris
+b_main -d iris -m TAN -f 5
+
+# Inspect recorded results and validate their files
+b_list results -d iris -s accuracy
+b_results
 ```
 
-### Debug & Tests
+The examples assume the executables are on your `PATH`. Running an experiment writes results to the configured experiment directory.
+
+## Commands
+
+| Command | Purpose | Guide |
+| --- | --- | --- |
+| `b_list` | List datasets and inspect results for a dataset. | [b_list](docs/b_list.md) |
+| `b_main` | Run cross-validated classification experiments. | [b_main](docs/b_main.md) |
+| `b_grid` | Search hyperparameters and run experiments using MPI. | [b_grid](docs/b_grid.md) |
+| `b_best` | Compare best results and generate statistical reports. | [b_best](docs/b_best.md) |
+| `b_manage` | Browse and manage results in an interactive terminal interface. | [b_manage](docs/b_manage.md) |
+| `b_results` | Validate result files and optionally repair them. | [b_results](docs/b_results.md) |
+
+Use `--help` with a command for its options. The [user manual](docs/README.md) also covers [classifiers](docs/classifiers.md), [result formats](docs/results-format.md) and [troubleshooting](docs/troubleshooting.md).
+
+## Tests
 
 ```bash
-make debug
+make test                     # build Debug and run the tests
+make test opt="-s"            # verbose output
+make test opt="-c='Test Name'" # run a specific section
+make coverage                 # generate a coverage report
 ```
 
-### Configuration
+## License
 
-The configuration file is named .env and it should be located in the folder where the experiments should be run. In the root folder of the project there is a file named .env.example that can be used as a template.
-
-## 1. Commands
-
-### b_list
-
-List all the datasets and its properties. The datasets are located in the _datasets_ folder under the experiments root folder. A special file called all.txt with the names of the datasets has to be created. This all file is built wih lines of the form:
-<name>,<class_name>,<real_features>
-
-where <real_features> can be either the word _all_ or a list of numbers separated by commas, i.e. [0,3,6,7]
-
-### b_grid
-
-Run a grid search over the parameters of the classifiers. The parameters are defined in the file _grid.txt_ located in the grid folder of the experiments. The file has to be created with the following format:
-
-```json
-{
-    "all": [
-        <set of hyperparams>, ...
-    ],
-    "<dataset_name>": [
-        <specific set of hyperparams for <dataset_name>>, ...
-    ],
-}
-```
-
-The file has to be named _grid_<model_name>_input.json_
-
-As a result it builds a file named _grid_<model_name>_output.json_ with the results of the grid search.
-
-The computation is done in parallel using MPI.
-
-![b_grid](img/bgrid.gif)
-
-### b_main
-
-Run the main experiment. There are several hyperparameters that can set in command line:
-
-- -d, -\-dataset <dataset_name> : Name of the dataset to run the experiment with. If no dataset is specificied the experiment will run with all the datasets in the all.txt file.
-- -m, -\-model <classifier_name> : Name of the classifier to run the experiment with (i.e. BoostAODE, TAN, Odte, etc.).
-- -\-discretize: Discretize the dataset before running the experiment.
-- -\-stratified: Use stratified cross validation.
-- -\-folds <folds>: Number of folds for cross validation (optional, default value is in .env file).
-- -s, -\-seeds <seed>: Seeds for the random number generator (optional, default values are in .env file).
-- -\-no-train-score: Do not calculate the train score (optional), this is useful when the dataset is big and the training score is not needed.
-- -\-hyperparameters <hyperparameters>: Hyperparameters for the experiment in json format.
-- -\-hyper-file <hyperparameters_file>: File with the hyperparameters for the experiment in json format. This file uses the output format of the b_grid command.
-- -\-title <title_text>: Title of the experiment (optional if only one dataset is specificied).
-- -\-quiet: Don't display detailed progress and result of the experiment.
-
-### b_manage
-
-Manage the results of the experiments.
-
-### b_best
-
-Get and optionally compare the best results of the experiments. The results can be stored in an MS Excel file.
-
-![b_best](img/bbest.gif)
+Platform is distributed under the [MIT License](LICENSE).

@@ -39,6 +39,24 @@ your home folder.
   `mpicxx` wrapper and remove `,-commons,use_dylibs` from `final_ldflags`:
   `vi /opt/homebrew/bin/mpicxx`.
 
+### Python and Boost for the Python classifiers
+
+Since 1.1.6 Platform uses PyClassifiers 1.1, which is built for one CPython
+minor version and one exact Boost version; Platform is built with the same
+pair. `make debug`, `make release` and `make init` detect them and print a line
+such as `>>> Python /path/python3 (ABI 3.12), Boost 1.85.0`:
+
+- Python: `python3` in the `PATH`, or the interpreter in `PYCLASSIFIERS_PYTHON`.
+  It must have NumPy, scikit-learn, STree, Odte and XGBoost installed.
+- Boost: the one in `BOOST_ROOT`, in the active conda environment
+  (`CONDA_PREFIX`) or in the system, in that order; `BOOST_VERSION=x.y.z`
+  overrides the detection. It must have Boost.Python and Boost.NumPy built for
+  that Python (`libboost_python312`, `libboost_numpy312`) and its CMake config
+  files.
+
+If the Boost libraries are not in a system path, add its `lib` folder to
+`LD_LIBRARY_PATH` (`DYLD_LIBRARY_PATH` on macOS) to run the programs.
+
 ### Boost
 
 The easiest option is your distribution's package

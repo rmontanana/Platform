@@ -16,9 +16,7 @@ add_executable(
     experimental_clfs/DecisionTree.cpp
     experimental_clfs/AdaBoost.cpp
 )
-# Boost::python/Boost::numpy/Python3::Python arrive transitively through
-# pyclassifiers (see the INTERFACE_LINK_LIBRARIES edge in the top-level
-# CMakeLists) so that they are always emitted after libPyClassifiers.a.
+# Boost.Python, Boost.NumPy and Python arrive through pyclassifiers::pyclassifiers.
 target_link_libraries(b_best Boost::boost pyclassifiers::pyclassifiers bayesnet::bayesnet argparse::argparse fimdlp::fimdlp torch::torch libxlsxwriter::libxlsxwriter)
 
 # b_grid

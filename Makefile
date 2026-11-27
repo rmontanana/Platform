@@ -14,6 +14,23 @@ CPUS := $(shell getconf _NPROCESSORS_ONLN 2>/dev/null \
 # --- Your desired job count: CPUs – 7, but never less than 1 --------------
 JOBS := $(shell n=$(CPUS); [ $${n} -gt 7 ] && echo $$((n-7)) || echo 1)
 
+# --- External Python and Boost of pyclassifiers ----------------------------
+# pyclassifiers >= 1.1 is built for one CPython minor version and one exact
+# Boost version, and Platform has to be built with the same pair. They are
+# detected here and passed to Conan as options of pyclassifiers.
+#   PYCLASSIFIERS_PYTHON  interpreter to use (default: python3 in the PATH)
+#   BOOST_ROOT            Boost prefix, if it is not the conda/system one
+#   BOOST_VERSION         exact version, if the detection below does not find it
+PYTHON := $(if $(PYCLASSIFIERS_PYTHON),$(PYCLASSIFIERS_PYTHON),$(shell command -v python3))
+PY_ABI := $(shell "$(PYTHON)" -c "import sys; print('%d.%d' % sys.version_info[:2])")
+BOOST_VERSION ?= $(shell for r in "$(BOOST_ROOT)" "$(CONDA_PREFIX)" /opt/homebrew /usr/local /usr; do \
+	f="$$r/include/boost/version.hpp"; \
+	if [ -n "$$r" ] && [ -f "$$f" ]; then \
+		awk '/define BOOST_VERSION /{v=$$3; printf "%d.%d.%d\n", v/100000, (v/100)%1000, v%100; exit}' "$$f"; break; \
+	fi; done)
+export PYCLASSIFIERS_PYTHON := $(PYTHON)
+pyclfs_options = -o "pyclassifiers/*:python_abi=$(PY_ABI)" -o "pyclassifiers/*:boost_version=$(BOOST_VERSION)"
+
 define ClearTests
 	@for t in $(test_targets); do \
 		if [ -f $(f_debug)/tests/$$t ]; then \
@@ -30,7 +47,8 @@ endef
 define build_target
 	@echo ">>> Building the project for $(1)..."
 	@if [ -d $(2) ]; then rm -fr $(2); fi
-	@conan install . --build=missing -of $(2) -s build_type=$(1)
+	@echo ">>> Python $(PYTHON) (ABI $(PY_ABI)), Boost $(BOOST_VERSION)"
+	@conan install . --build=missing -of $(2) -s build_type=$(1) $(pyclfs_options)
 	@cmake -S . -B $(2) -DCMAKE_TOOLCHAIN_FILE=$(2)/build/$(1)/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$(1) -D$(3)
 	@echo ">>> Will build using $(JOBS) parallel jobs"
 	echo ">>> Done"
@@ -49,8 +67,8 @@ endef
 
 init: ## Initialize the project installing dependencies
 	@echo ">>> Installing dependencies with Conan"
-	@conan install . --output-folder=build --build=missing -s build_type=Release
-	@conan install . --output-folder=build_debug --build=missing -s build_type=Debug
+	@conan install . --output-folder=build --build=missing -s build_type=Release $(pyclfs_options)
+	@conan install . --output-folder=build_debug --build=missing -s build_type=Debug $(pyclfs_options)
 	@echo ">>> Done"
 
 clean: ## Clean the project

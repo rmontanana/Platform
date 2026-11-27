@@ -19,6 +19,23 @@ namespace platform {
             return std::vector<int>(c.data_ptr<int>(), c.data_ptr<int>() + c.numel());
         }
     }
+    namespace {
+        // Nodes, edges and states of the model. The Python classifiers that are
+        // not trees (SVC, XGBoost) have none and pyclassifiers >= 1.1 throws
+        // std::logic_error for them: the result stores 0, as it always has.
+        template <typename Measure>
+        double size_measure(const bayesnet::BaseClassifier& clf, Measure measure)
+        {
+            if (dynamic_cast<const pywrap::PyClassifier*>(&clf) == nullptr)
+                return measure();
+            try {
+                return measure();
+            }
+            catch (const std::logic_error&) {
+                return 0.0;
+            }
+        }
+    }
     FoldOutcome run_fold(const FoldOptions& options, HyperParameters& hyperparameters, const std::string& dataset,
         torch::Tensor& X_train, torch::Tensor& y_train, torch::Tensor& X_test, torch::Tensor& y_test,
         const std::vector<std::string>& features, const std::string& className,
@@ -36,12 +53,12 @@ namespace platform {
         if (progress) progress('a', clf->getStatus());
         Timer timer;
         timer.start();
-        clf->fit(X_train, y_train, features, className, states, options.smoothing);
+        clf->fit(X_train, y_train, features, className, states, Models::smoothing(*clf, options.smoothing));
         out.time_train = timer.getDuration();
         out.notes = clf->getNotes();
-        out.nodes = clf->getNumberOfNodes();
-        out.edges = clf->getNumberOfEdges();
-        out.states = clf->getNumberOfStates();
+        out.nodes = size_measure(*clf, [&] { return clf->getNumberOfNodes(); });
+        out.edges = size_measure(*clf, [&] { return clf->getNumberOfEdges(); });
+        out.states = size_measure(*clf, [&] { return clf->getNumberOfStates(); });
         //
         // Score train
         //

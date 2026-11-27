@@ -15,6 +15,10 @@ namespace platform {
         // register the class factory function
         functionRegistry[name] = classFactoryFunction;
     }
+    bayesnet::Smoothing_t Models::smoothing(const bayesnet::BaseClassifier& clf, bayesnet::Smoothing_t requested)
+    {
+        return dynamic_cast<const pywrap::PyClassifier*>(&clf) != nullptr ? bayesnet::Smoothing_t::NONE : requested;
+    }
     std::shared_ptr<bayesnet::BaseClassifier> Models::create(const std::string& name)
     {
         bayesnet::BaseClassifier* instance = nullptr;

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(Platform
-  VERSION 1.1.5
+  VERSION 1.1.6
   DESCRIPTION "Platform to run Experiments with classifiers."
   HOMEPAGE_URL "https://github.com/rmontanana/platform"
   LANGUAGES CXX
@@ -32,26 +32,7 @@ find_package(MPI REQUIRED)
 message("MPI_CXX_LIBRARIES=${MPI_CXX_LIBRARIES}")
 message("MPI_CXX_INCLUDE_DIRS=${MPI_CXX_INCLUDE_DIRS}")
 
-# Boost Library
 cmake_policy(SET CMP0135 NEW)
-cmake_policy(SET CMP0167 NEW) # For FindBoost
-set(Boost_USE_STATIC_LIBS OFF) 
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
-
-find_package(Boost 1.66.0 REQUIRED COMPONENTS python3 numpy3) 
-
-# # Python
-find_package(Python3 REQUIRED COMPONENTS Development)
-
-if(Boost_FOUND)
-    message("Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")
-    message("Boost_LIBRARIES=${Boost_LIBRARIES}")
-    message("Boost_VERSION=${Boost_VERSION}")
-    include_directories(${Boost_INCLUDE_DIRS}) 
-endif()
-
-
 
 # External libraries - dependencies of Platform
 # ---------------------------------------------
@@ -62,16 +43,18 @@ find_package(arff-files CONFIG REQUIRED)
 find_package(fimdlp CONFIG REQUIRED)
 find_package(folding CONFIG REQUIRED)
 find_package(bayesnet CONFIG REQUIRED)
-find_package(pyclassifiers CONFIG REQUIRED)
+# PyClassifiers >= 1.1 discovers Python and Boost itself and attaches them to
+# its target: the CPython minor version and SOABI and the exact Boost version
+# must be the ones the package was built with (its python_abi and boost_version
+# options, set by the Makefile). Select the interpreter with PYCLASSIFIERS_PYTHON
+# and a Boost outside the default prefixes with BOOST_ROOT.
+find_package(PyClassifiers CONFIG REQUIRED)
 find_package(libxlsxwriter CONFIG REQUIRED)
-
-# libPyClassifiers.a references Boost.Python/Boost.NumPy/libpython, but the Conan
-# package does not declare them. Without this edge CMake is free to emit those
-# shared libs before the archive that needs them, and --as-needed then drops
-# them, yielding undefined references at link time. Declaring the real
-# dependency lets CMake order them after the archive on every target.
-set_property(TARGET pyclassifiers::pyclassifiers APPEND PROPERTY
-  INTERFACE_LINK_LIBRARIES Boost::python Boost::numpy Python3::Python)
+message("Python3_EXECUTABLE=${Python3_EXECUTABLE}")
+message("Python3_VERSION=${Python3_VERSION}")
+message("Boost_VERSION=${Boost_VERSION}")
+message("Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")
+include_directories(${Boost_INCLUDE_DIRS})
 
 # Subdirectories
 # --------------

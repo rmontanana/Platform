@@ -216,7 +216,7 @@ namespace platform {
                 //
                 // Train model
                 //
-                clf->fit(X_nested_train, y_nested_train, features, className, states, smooth);
+                clf->fit(X_nested_train, y_nested_train, features, className, states, Models::smoothing(*clf, smooth));
                 //
                 // Test model
                 //
@@ -239,7 +239,7 @@ namespace platform {
         auto valid = clf->getValidHyperparameters();
         hyperparameters.check(valid, dataset_name);
         clf->setHyperparameters(best_fold_hyper);
-        clf->fit(X_train, y_train, features, className, states, smooth);
+        clf->fit(X_train, y_train, features, className, states, Models::smoothing(*clf, smooth));
         best_fold_score = clf->score(X_test, y_test);
         //
         // Return the result

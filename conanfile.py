@@ -1,10 +1,11 @@
+import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, cmake_layout
 
 
 class PlatformConan(ConanFile):
     name = "platform"
-    version = "1.1.5"
+    version = "1.1.6"
     
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
@@ -20,12 +21,11 @@ class PlatformConan(ConanFile):
         self.requires("folding/2.0.0")
         self.requires("fimdlp/3.0.1")
         self.requires("arff-files/2.0.0")
-        # bayesnet/1.5.0 (adaboost and weight_update hyperparameters, defaults
-        # unchanged). pyclassifiers/1.0.6 was built against bayesnet/1.4.2;
-        # force=True keeps a single bayesnet version in the graph (pyclassifiers
-        # does not use the boosted ensembles).
-        self.requires("bayesnet/1.5.0", force=True)
-        self.requires("pyclassifiers/1.0.6")
+        self.requires("bayesnet/1.5.0")
+        # pyclassifiers/1.1.1 is built on bayesnet/1.5.0. Its python_abi and
+        # boost_version options name the external CPython and Boost it is built
+        # and used with; the Makefile detects and passes them.
+        self.requires("pyclassifiers/1.1.1")
         self.requires("libxlsxwriter/1.2.2")
         
     def build_requirements(self):
@@ -39,6 +39,10 @@ class PlatformConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        # Same interpreter for pyclassifiers and for Platform.
+        python = os.environ.get("PYCLASSIFIERS_PYTHON")
+        if python:
+            tc.variables["Python3_EXECUTABLE"] = python
         tc.generate()
     
     def configure(self):

@@ -41,6 +41,9 @@ namespace platform {
         void registerFactoryFunction(const std::string& name,
             std::function<bayesnet::BaseClassifier* (void)> classFactoryFunction);
         std::vector<std::string> getNames();
+        // Smoothing to fit clf with: the requested one, except for the Python
+        // classifiers, which have none (pyclassifiers >= 1.1 throws otherwise).
+        static bayesnet::Smoothing_t smoothing(const bayesnet::BaseClassifier& clf, bayesnet::Smoothing_t requested);
         std::string toString();
     private:
         std::map<std::string, std::function<bayesnet::BaseClassifier* (void)>> functionRegistry;

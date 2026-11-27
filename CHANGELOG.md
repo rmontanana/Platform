@@ -35,6 +35,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The migration maintains compatibility with existing make targets and workflow
 - All dependencies now managed through Conan package manager
 
+## [1.1.6] - 2026-11-27
+
+### Changed
+
+- **Move to `pyclassifiers/1.1.1`**, which is built on `bayesnet/1.5.0`: the graph has a single BayesNet again and `conanfile.py` no longer forces it over the one `pyclassifiers` was built with.
+- **Python and Boost are found through PyClassifiers.** `CMakeLists.txt` no longer looks for Boost.Python and Python itself: `find_package(PyClassifiers CONFIG REQUIRED)` discovers them and attaches them to `pyclassifiers::pyclassifiers`. PyClassifiers 1.1 is built for one CPython minor version and one exact Boost version, and Platform must be built with the same pair. The `Makefile` detects both (`python3` in the `PATH`, or `PYCLASSIFIERS_PYTHON`; the Boost of `BOOST_ROOT`, of the active conda environment or of the system, or `BOOST_VERSION`), prints them and passes them to Conan as the `python_abi` and `boost_version` options of `pyclassifiers`. Boost must provide its CMake config files and the versioned components (`python312`, `numpy312`).
+
+### Fixed
+
+- **Python classifiers are fitted without smoothing.** `b_main`, `b_grid experiment` and `b_grid search` passed the smoothing of `.env` (`smooth_strat`) to every classifier. PyClassifiers 1.0 ignored it; 1.1 throws for any value but `NONE`. `Models::smoothing` now returns `NONE` for the classifiers that derive from `pywrap::PyClassifier` and the requested value for the rest, so results of the BayesNet models do not change.
+- **`SVC` and `XGBoost` store 0 nodes, edges and states**, as before: PyClassifiers 1.1 throws `std::logic_error` for the size measures of the classifiers that are not trees, and `run_fold` now takes that as 0 for Python classifiers only.
+
+### Known
+
+- `SVC` needs `--hyperparameters '{"probability": true}'`: since 1.1.4 the test score comes from `predict_proba`, which scikit-learn's `SVC` only has with that option. Without it the run stops with the Python error.
+
 ## [1.1.5] - 2026-11-27
 
 ### Changed

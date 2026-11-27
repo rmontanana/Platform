@@ -35,6 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The migration maintains compatibility with existing make targets and workflow
 - All dependencies now managed through Conan package manager
 
+## [1.1.5] - 2026-11-27
+
+### Changed
+
+- Move to `bayesnet/1.5.0`, which adds the `adaboost` (`M1` | `SAMME`) and `weight_update` (`BoostAODE` | `AdaBoost`) hyperparameters to the boosted ensembles. Their defaults are the previous behaviour, so results computed without them are the same as with 1.1.4. `pyclassifiers` stays at 1.0.6.
+
 ## [1.1.4] - 2026-11-08
 
 ### Fixed

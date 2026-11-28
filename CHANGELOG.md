@@ -49,6 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   environment is needed.
 - `scripts/bootstrap_python.py` and `scripts/bootstrap_boost.py`, shared
   verbatim with PyClassifiers.
+  When `CXX` is set (a conda or module toolchain), Boost is built with that
+  compiler instead of the first `gcc`/`clang` on `PATH`.
 - `buildd` and `buildr` configure the build folder if it does not exist yet.
 
 ### Changed

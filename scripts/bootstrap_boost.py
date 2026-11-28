@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import tarfile
@@ -163,8 +164,25 @@ print(json.dumps({'executable':sys.executable,'prefix':sys.prefix,'base_prefix':
     logs = local_path(base / "logs")
     logs.mkdir(exist_ok=True)
     log = local_path(logs / "boost-build.log")
+    # B2 otherwise takes whatever gcc/clang is first on PATH. With CXX set (a
+    # Conda or module toolchain, for instance) Boost must be built by that same
+    # compiler, the one that compiles the project that links against it.
+    compiler = os.environ.get("CXX", "").strip()
+    toolset = []
+    using_compiler = ""
+    if compiler:
+        resolved = shutil.which(compiler)
+        if not resolved or any(char in resolved for char in ('"', "\n", "\r", ";", " ")):
+            raise RuntimeError(f"CXX={compiler!r} is not a usable compiler path")
+        banner = subprocess.run([resolved, "--version"], stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT, text=True).stdout.lower()
+        name = "clang" if "clang" in banner else "gcc"
+        toolset = [f"toolset={name}"]
+        using_compiler = f'using {name} : : "{resolved}" ;\n'
+        print(f"Boost toolset: {name} ({resolved})", flush=True)
     run(["./bootstrap.sh", "--with-libraries=python", f"--with-python={python}",
-         "--with-python-version=3.12", f"--prefix={prefix}"], source, log)
+         "--with-python-version=3.12", f"--prefix={prefix}"]
+        + ([f"--with-toolset={toolset[0].split('=')[1]}"] if toolset else []), source, log)
     config = local_path(base / "boost-user-config.jam")
     # B2 otherwise guesses headers beneath sys.prefix (the venv), where the
     # development headers do not live. Homebrew's LIBDIR is inside the framework;
@@ -173,9 +191,10 @@ print(json.dumps({'executable':sys.executable,'prefix':sys.prefix,'base_prefix':
         if not value or any(char in value for char in ('"', '\n', '\r', ';')):
             raise RuntimeError("Unsupported Python header/library path")
     config.write_text(
-        f'using python : 3.12 : "{python}" : "{facts["include"]}" : "{facts["libdir"]}" ;\n',
+        using_compiler
+        + f'using python : 3.12 : "{python}" : "{facts["include"]}" : "{facts["libdir"]}" ;\n',
         encoding="utf-8")
-    run([source / "b2", f"--user-config={config}", f"-j{args.jobs}", "--with-python",
+    run([source / "b2", f"--user-config={config}", f"-j{args.jobs}", *toolset, "--with-python",
          "python=3.12", "cxxstd=17", "variant=release", "link=shared", "threading=multi",
          "local-visibility=hidden",
          "--layout=system", f"--prefix={prefix}", "install"], source, log)

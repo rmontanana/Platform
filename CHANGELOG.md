@@ -35,6 +35,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The migration maintains compatibility with existing make targets and workflow
 - All dependencies now managed through Conan package manager
 
+## [1.1.7] - 2026-11-28
+
+### Added
+
+- Self-sufficient build environment for the Python classifiers. `make env`
+  (run first by `debug`, `release`, `buildd`, `buildr`, `install`, `test` and
+  `init`) builds inside the repository whatever is missing: a uv-managed
+  CPython 3.12 with headers (`build_deps/python`, uv itself pinned and
+  checksummed in `build_deps/uv`), a `.venv` with the packages pinned in the
+  new `requirements.txt` and Boost.Python / Boost.NumPy 1.92.0
+  (`build_deps/boost`). Nothing is installed in the system and no conda
+  environment is needed.
+- `scripts/bootstrap_python.py` and `scripts/bootstrap_boost.py`, shared
+  verbatim with PyClassifiers.
+  When `CXX` is set (a conda or module toolchain), Boost is built with that
+  compiler instead of the first `gcc`/`clang` on `PATH`.
+- The build is not disturbed by an active conda environment (as on the
+  clusters, where the compiler comes from one): `scripts/python_conf.py` pins
+  `Python3_LIBRARY` and `Python3_INCLUDE_DIR` in the Conan toolchain, so CMake
+  does not link the environment's `libpython` found through
+  `CMAKE_PREFIX_PATH`, and on Linux the Boost and Python library directories
+  go ahead of any `-rpath` coming from `LDFLAGS`.
+- `buildd` and `buildr` configure the build folder if it does not exist yet.
+
+### Changed
+
+- Python and Boost are pinned (CPython 3.12, Boost 1.92.0) instead of detected
+  from the `PATH`, conda or the system, so every machine builds and runs with
+  the same versions. `PYCLASSIFIERS_PYTHON` together with `BOOST_ROOT` still
+  select an existing pair.
+- The executables carry the library path of that Boost.Python and libpython
+  and use by default the interpreter they were configured with: once copied to
+  `~/bin` they run without `PYCLASSIFIERS_PYTHON`, `LD_LIBRARY_PATH` or
+  `DYLD_LIBRARY_PATH`. `PYCLASSIFIERS_PYTHON` still overrides the interpreter.
+
 ## [1.1.6] - 2026-11-27
 
 ### Changed

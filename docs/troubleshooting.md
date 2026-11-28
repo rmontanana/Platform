@@ -89,8 +89,8 @@ You combined `--friedman` with `-m` or `-d` filters. Re-run with
 ### Python models fail to start
 
 `STree`, `Odte`, `SVC`, `RandomForest`, `XGBoost`, `AdaBoostPy` need
-Miniconda. Check the Python environment and the `libstdc++` shadowing
-problem on Linux (see [installation.md](installation.md#1-prerequisites)).
+the Python environment built by `make env` (`.venv` and `build_deps` in the
+repository). If it was moved or deleted, run `make release && make install` again (see [installation.md](installation.md#1-prerequisites)).
 
 ### Linux: `libstdc++.so.6: version 'GLIBCXX_3.4.32' not found`
 

@@ -1,0 +1,13 @@
+# Reproducible runtime baseline: CPython 3.12, NumPy 1.x.
+# Published Odte 1.0.1 requires STree 1.4.1, which pins NumPy/sklearn.
+# Use a Boost.Python/NumPy build for the exact selected Python minor ABI.
+numpy==1.26.4
+scikit-learn==1.5.2
+STree==1.4.1
+Odte==1.0.1
+xgboost==3.4.1
+scipy==1.17.1
+joblib==1.6.0
+threadpoolctl==3.8.0
+cloudpickle==3.1.2
+MUFS==0.1.3

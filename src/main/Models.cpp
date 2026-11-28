@@ -1,12 +1,28 @@
+#include <cstdlib>
+#include <filesystem>
+#include "config_platform.h"
 #include "Models.h"
 namespace platform {
     // Idea from: https://www.codeproject.com/Articles/567242/AplusC-2b-2bplusObjectplusFactory
     Models* Models::factory = nullptr;
+    // pyclassifiers embeds the interpreter named by PYCLASSIFIERS_PYTHON and, without it,
+    // CPython's default one, which does not have the Python classifiers installed.
+    // Unless the user selects another, use the interpreter Platform was built with,
+    // so that the installed executables need no environment to run.
+    static void selectPython()
+    {
+        const std::string python{ platform_python_executable };
+        std::error_code error;
+        if (!python.empty() && std::filesystem::exists(python, error))
+            setenv("PYCLASSIFIERS_PYTHON", python.c_str(), 0);
+    }
     Models* Models::instance()
     {
         //manages singleton
-        if (factory == nullptr)
+        if (factory == nullptr) {
+            selectPython();
             factory = new Models();
+        }
         return factory;
     }
     void Models::registerFactoryFunction(const std::string& name,

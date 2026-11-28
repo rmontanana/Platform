@@ -70,7 +70,7 @@ The following terminal images were rendered from actual command output using an 
 
 ## Installation
 
-Platform uses CMake and Make, with dependencies managed by Conan. You need a C++20 compiler, CMake, Make, Conan, MPI and Boost. Miniconda is also needed for Python-based classifiers.
+Platform uses CMake and Make, with dependencies managed by Conan. You need a C++20 compiler, CMake, Make, Conan and MPI. The Python 3.12 environment and the Boost.Python that the Python-based classifiers need are built by the Makefile itself (`make env`, run automatically).
 
 ```bash
 make init       # install dependencies for Debug and Release

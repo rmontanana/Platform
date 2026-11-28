@@ -134,10 +134,13 @@ def main():
         "UV_NO_CONFIG": "1",
         "UV_NO_PROGRESS": "1",
     })
-    env.pop("VIRTUAL_ENV", None)
+    # An active venv or conda environment (or a .venv in the directory) would be
+    # returned by "uv python find" instead of the managed interpreter.
+    for name in ("VIRTUAL_ENV", "CONDA_PREFIX", "CONDA_DEFAULT_ENV"):
+        env.pop(name, None)
     log("+ %s python install %s  (into %s)" % (uv, PYTHON_VERSION, base / "python"))
     subprocess.check_call([uv, "python", "install", PYTHON_VERSION], env=env, stdout=sys.stderr)
-    python = subprocess.check_output([uv, "python", "find", PYTHON_VERSION], env=env,
+    python = subprocess.check_output([uv, "python", "find", "--system", PYTHON_VERSION], env=env,
                                      universal_newlines=True).strip()
     if not python or base not in Path(python).resolve().parents:
         raise RuntimeError("uv did not return a workspace-local CPython %s: %r" % (PYTHON_VERSION, python))

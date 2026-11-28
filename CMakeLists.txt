@@ -59,8 +59,21 @@ include_directories(${Boost_INCLUDE_DIRS})
 # find the Boost.Python and the libpython they were built with on their own:
 # neither is a Conan package nor, usually, in a system library directory.
 get_filename_component(PLATFORM_BOOST_LIBRARY_DIR "${Boost_DIR}/../.." ABSOLUTE)
-list(APPEND CMAKE_BUILD_RPATH "${PLATFORM_BOOST_LIBRARY_DIR}" ${Python3_LIBRARY_DIRS})
-message("Runtime library path=${CMAKE_BUILD_RPATH}")
+# They go first on the link line, ahead of any -rpath that LDFLAGS brings: an
+# active conda environment adds its own lib directory, where a libpython of the
+# same minor version would otherwise be loaded instead of the one linked.
+set(PLATFORM_RUNTIME_DIRS "${PLATFORM_BOOST_LIBRARY_DIR}" ${Python3_LIBRARY_DIRS})
+list(REMOVE_DUPLICATES PLATFORM_RUNTIME_DIRS)
+if(APPLE)
+    list(APPEND CMAKE_BUILD_RPATH ${PLATFORM_RUNTIME_DIRS})
+else()
+    list(REVERSE PLATFORM_RUNTIME_DIRS)
+    foreach(dir ${PLATFORM_RUNTIME_DIRS})
+        string(PREPEND CMAKE_EXE_LINKER_FLAGS "-Wl,-rpath,${dir} ")
+    endforeach()
+    list(REVERSE PLATFORM_RUNTIME_DIRS)
+endif()
+message("Runtime library path=${PLATFORM_RUNTIME_DIRS}")
 
 # Subdirectories
 # --------------

@@ -51,6 +51,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   verbatim with PyClassifiers.
   When `CXX` is set (a conda or module toolchain), Boost is built with that
   compiler instead of the first `gcc`/`clang` on `PATH`.
+- The build is not disturbed by an active conda environment (as on the
+  clusters, where the compiler comes from one): `scripts/python_conf.py` pins
+  `Python3_LIBRARY` and `Python3_INCLUDE_DIR` in the Conan toolchain, so CMake
+  does not link the environment's `libpython` found through
+  `CMAKE_PREFIX_PATH`, and on Linux the Boost and Python library directories
+  go ahead of any `-rpath` coming from `LDFLAGS`.
 - `buildd` and `buildr` configure the build folder if it does not exist yet.
 
 ### Changed

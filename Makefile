@@ -68,7 +68,8 @@ define build_target
 	@echo ">>> Building the project for $(1)..."
 	@if [ -d $(2) ]; then rm -fr $(2); fi
 	@echo ">>> Python $(PYTHON) (ABI $(PY_ABI)), Boost $(BOOST_VERSION)"
-	@conan install . --build=missing -of $(2) -s build_type=$(1) $(pyclfs_options)
+	@conf=$$($(DEV_PYTHON) scripts/python_conf.py "$(PYTHON)") || exit 1; \
+	conan install . --build=missing -of $(2) -s build_type=$(1) $(pyclfs_options) $${conf:+-c "$$conf"}
 	@cmake -S . -B $(2) -DCMAKE_TOOLCHAIN_FILE=$(2)/build/$(1)/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$(1) -D$(3)
 	@echo ">>> Will build using $(JOBS) parallel jobs"
 	echo ">>> Done"

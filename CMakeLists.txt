@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(Platform
-  VERSION 1.1.6
+  VERSION 1.1.7
   DESCRIPTION "Platform to run Experiments with classifiers."
   HOMEPAGE_URL "https://github.com/rmontanana/platform"
   LANGUAGES CXX
@@ -55,6 +55,12 @@ message("Python3_VERSION=${Python3_VERSION}")
 message("Boost_VERSION=${Boost_VERSION}")
 message("Boost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}")
 include_directories(${Boost_INCLUDE_DIRS})
+# `make install` copies the executables out of the build tree, so they have to
+# find the Boost.Python and the libpython they were built with on their own:
+# neither is a Conan package nor, usually, in a system library directory.
+get_filename_component(PLATFORM_BOOST_LIBRARY_DIR "${Boost_DIR}/../.." ABSOLUTE)
+list(APPEND CMAKE_BUILD_RPATH "${PLATFORM_BOOST_LIBRARY_DIR}" ${Python3_LIBRARY_DIRS})
+message("Runtime library path=${CMAKE_BUILD_RPATH}")
 
 # Subdirectories
 # --------------

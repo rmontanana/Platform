@@ -45,3 +45,8 @@ diagrams/latex/**
 vcpkg_installed
 .claude/settings.local.json
 CMakeUserPresets.json
+
+# Python environment of the Python classifiers (make env)
+.venv/
+__pycache__/
+*.pyc

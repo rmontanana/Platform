@@ -50,12 +50,12 @@ Average-One-Dependent-Estimator and its boosted/cross variants:
 |-------|--------|
 | `DecisionTree` | Decision-tree classifier (experimental C++ implementation). |
 | `AdaBoost` | AdaBoost (C++). |
-| `AdaBoostPy` | AdaBoost (Python/Miniconda wrapper). |
+| `AdaBoostPy` | AdaBoost (Python wrapper). |
 
-### Python classifiers (require Miniconda)
+### Python classifiers
 
-These are wrappers around Python implementations and need a working
-Miniconda environment (see [installation.md](installation.md#1-prerequisites)):
+These are wrappers around Python implementations. They run in the Python 3.12
+environment that `make env` builds (see [installation.md](installation.md#1-prerequisites)):
 
 | Model | Notes |
 |-------|-------|
@@ -65,8 +65,8 @@ Miniconda environment (see [installation.md](installation.md#1-prerequisites)):
 | `RandomForest` | scikit-learn random forest. |
 | `XGBoost` | XGBoost gradient boosting. |
 
-> If you try to run one of the Python models without Miniconda configured,
-> the wrapper fails to launch — set it up first.
+> If `.venv` or `build_deps` are moved or deleted after installing, the
+> wrappers fail to launch: run `make release && make install` again.
 
 ## Hyperparameters
 

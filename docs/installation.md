@@ -12,22 +12,11 @@ Install these before building:
 | **Conan** (2.x) | Installs libtorch, nlohmann_json, Catch2, CLI11, libxlsxwriter, … | `pip install conan` |
 | **CMake / Make / C++20 compiler** | Build system | `g++` ≥ 11 or `Apple clang` ≥ 14 |
 | **MPI** (OpenMPI or MPICH) | Parallel grid search (`b_grid search/experiment`) | Linux: `openmpi` + `openmpi-devel`; macOS: `brew install mpich` |
-| **Boost** | Python integration and utilities | Linux: `dnf install boost-devel`; or set `BOOST_ROOT` |
-| **Miniconda** *(optional)* | Python-backed classifiers (`STree`, `Odte`, `SVC`, `RandomForest`, `XGBoost`, `AdaBoostPy`) | Only needed if you use those models |
+| **Python 3 and network access** | The first build downloads and builds the Python 3.12 environment and Boost.Python (see below) | Any `python3` ≥ 3.6 to run the bootstrap scripts |
 | **Graphviz `dot`** *(optional)* | Render the `.dot` model graphs to images | `brew install graphviz` / `apt install graphviz` |
 
-### Miniconda
-
-To run the Python classifiers (STree, ODTE, SVC, etc.) a Miniconda
-installation is required. Install it from
-[conda.io](https://docs.conda.io/en/latest/miniconda.html), preferably in
-your home folder.
-
-> **Linux note:** if the `b_xxxx` executables fail with
-> `libstdc++.so.6: version 'GLIBCXX_3.4.32' not found (required by b_xxxx)`,
-> the `libstdc++` shipped inside Miniconda is shadowing the system one.
-> Delete the `libstdc++` library from the Miniconda installation; no
-> recompilation is needed.
+Python 3.12, the Python classifiers and Boost are **not** prerequisites: the
+Makefile builds them inside the repository.
 
 ### MPI
 
@@ -41,35 +30,35 @@ your home folder.
 
 ### Python and Boost for the Python classifiers
 
-Since 1.1.6 Platform uses PyClassifiers 1.1, which is built for one CPython
-minor version and one exact Boost version; Platform is built with the same
-pair. `make debug`, `make release` and `make init` detect them and print a line
-such as `>>> Python /path/python3 (ABI 3.12), Boost 1.85.0`:
+Platform uses PyClassifiers 1.1, which is built for one CPython minor version
+and one exact Boost version; Platform has to be built and run with the same
+pair. Since 1.1.7 both are pinned (CPython 3.12, Boost 1.92.0) and the Makefile
+builds them itself the first time, inside the repository and without `sudo`:
 
-- Python: `python3` in the `PATH`, or the interpreter in `PYCLASSIFIERS_PYTHON`.
-  It must have NumPy, scikit-learn, STree, Odte and XGBoost installed.
-- Boost: the one in `BOOST_ROOT`, in the active conda environment
-  (`CONDA_PREFIX`) or in the system, in that order; `BOOST_VERSION=x.y.z`
-  overrides the detection. It must have Boost.Python and Boost.NumPy built for
-  that Python (`libboost_python312`, `libboost_numpy312`) and its CMake config
-  files.
+| What | Where | How |
+|------|-------|-----|
+| CPython 3.12 with headers | `build_deps/python` | Standalone build installed by a pinned, checksummed [uv](https://docs.astral.sh/uv/) downloaded to `build_deps/uv` |
+| Python environment | `.venv` | venv of that CPython with the packages pinned in `requirements.txt` (NumPy, scikit-learn, STree, Odte, XGBoost) |
+| Boost.Python / Boost.NumPy 1.92.0 | `build_deps/boost` | Built from the official sources (checksum verified); log in `build_deps/logs` |
 
-If the Boost libraries are not in a system path, add its `lib` folder to
-`LD_LIBRARY_PATH` (`DYLD_LIBRARY_PATH` on macOS) to run the programs.
+`make env` builds whatever is missing and every build target (`debug`,
+`release`, `buildd`, `buildr`, `install`, `test`) runs it first, so
+`make release && make install` is enough on a new machine. The first run takes
+a few minutes (most of it compiling Boost.Python); later runs find everything
+in place. The line `>>> Python .../.venv/bin/python (ABI 3.12), Boost 1.92.0`
+shows what is being used.
 
-### Boost
+The executables record where that Python and Boost are, so they run from
+`~/bin` with no environment variables. Consequently `.venv` and `build_deps`
+must stay where they were built: if you move or delete the repository, run
+`make release && make install` again.
 
-The easiest option is your distribution's package
-(`sudo dnf install boost-devel`). If you installed Boost from a compressed
-archive instead, point the build at it:
-
-```bash
-export BOOST_ROOT=/path/to/boost-library/
-```
-
-If you built Boost from source with `./bootstrap.sh --prefix=... && ./b2
-install`, set `BOOST_ROOT` to the `prefix` you chose. Add the `export`
-line to `~/.bashrc` (or equivalent) to make it permanent.
+To use an existing pair instead of the pinned one, give both
+`PYCLASSIFIERS_PYTHON` (an interpreter with the Python classifiers installed)
+and `BOOST_ROOT` (the prefix of a Boost.Python built for that interpreter, with
+its CMake config files); `BOOST_VERSION=x.y.z` if it cannot be read from
+`$BOOST_ROOT/include/boost/version.hpp`. At run time `PYCLASSIFIERS_PYTHON`
+still selects another interpreter of the same Python minor version.
 
 ## 2. Build
 
